@@ -19,12 +19,15 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Security
-    SECRET_KEY: str = Field(..., env="SECRET_KEY")
+    SECRET_KEY: str = Field(default="development-secret-key-not-for-production", env="SECRET_KEY")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
     
-    # Database
-    DATABASE_URL: str = Field(..., env="DATABASE_URL")
+    # Database configuration
+    DATABASE_URL: str = Field(
+        default="sqlite:///./ldc_construction_tools.db",
+        description="Database connection URL"
+    )
     
     # CORS
     ALLOWED_ORIGINS: List[str] = Field(

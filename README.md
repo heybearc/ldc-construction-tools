@@ -1,199 +1,130 @@
 # LDC Construction Tools
 
-Tools and utilities to assist Personnel Contacts in supporting the Construction Group for Local Design/Construction (LDC) projects.
+A comprehensive personnel contact and project management system designed for LDC Construction Group 01.12 coordination.
 
-## Overview
+## Purpose
 
-This repository contains applications and tools designed to streamline coordination between Personnel Contacts and the Construction Group, helping manage volunteers, resources, and project logistics for Kingdom Hall and other theocratic construction projects.
+This application serves as a **tracker system** for Construction Group personnel management, supporting the Personnel Contact (PC) role in coordinating trade teams, managing contact information, and tracking project assignments. It maintains existing Construction Group workflows while providing modern digital tools.
 
-## Project Goals
+## Key Features
 
-### Primary Objectives
-- **Volunteer Coordination**: Tools for managing volunteer assignments and availability
-- **Resource Management**: Track materials, equipment, and logistics
-- **Communication**: Streamline communication between Personnel Contacts and Construction Group
-- **Project Tracking**: Monitor construction project progress and milestones
-- **Documentation**: Maintain records and generate reports for RBC/LDC oversight
+### **Trade Team Management**
+- Construction Group 01.12 organizational structure
+- 8 trade teams with specialized crews
+- Trade Crew Overseer, Assistant, and Support role tracking
+- Interactive crew member details with contact information
 
-### Target Users
-- **Personnel Contacts**: Primary users managing volunteer coordination
-- **Construction Group Overseers**: Project leadership and oversight
-- **Volunteer Coordinators**: Managing specific skill groups and assignments
-- **Administrative Personnel**: Documentation and reporting support
+### **Personnel Contact System**
+- Comprehensive contact directory with search and filtering
+- Role-based organization (Trade Crew Overseers, Assistants, Support)
+- Congregation assignments and contact information
+- Statistics dashboard for member counts and roles
 
-## Planned Features
+### **Admin Interface**
+- **Bulk CSV Import**: Upload personnel data from spreadsheets
+- **Data Export**: Download contact lists for Construction Group use
+- **Template Downloads**: Properly formatted CSV templates
+- **Database Management**: Reset and manage personnel data
 
-### Phase 1: Core Volunteer Management
-- [ ] Volunteer database with skills and availability tracking
-- [ ] Assignment scheduling and notification system
-- [ ] Contact information management
-- [ ] Basic reporting capabilities
+### **Project Coordination**
+- Project overview with status and phase tracking
+- Trade crew assignment interface
+- Contact information for Trade Crew Overseers on assignments
+- Construction phase integration
 
-### Phase 2: Project Coordination
-- [ ] Project timeline and milestone tracking
-- [ ] Resource allocation and inventory management
-- [ ] Communication hub for announcements and updates
-- [ ] Integration with existing JW tools and workflows
-
-### Phase 3: Advanced Features
-- [ ] Mobile-responsive interface for field use
-- [ ] Automated scheduling based on availability and skills
-- [ ] Advanced reporting and analytics
-- [ ] Integration with congregation management systems
-
-## Technology Stack
-
-### Backend
-- **Python 3.11+**: Core application logic
-- **FastAPI**: REST API framework
-- **SQLAlchemy**: Database ORM
-- **PostgreSQL**: Primary database
-- **Pydantic**: Data validation and serialization
-
+### **Excel Integration**
+- Import/export functionality maintaining Construction Group workflows
+- Multiple export formats (Trade Teams, Projects, Contacts)
+- Standardized filenames with timestamps
 ### Frontend
-- **React**: User interface framework
-- **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **React Query**: Data fetching and state management
+- **Next.js 14** with TypeScript
+- **Tailwind CSS** for responsive design
+- **Modern, secure, responsive** web application
 
-### Development Tools
-- **Poetry**: Dependency management
-- **Black**: Code formatting
-- **Flake8**: Linting
-- **Pytest**: Testing framework
-- **Docker**: Containerization
+## Quick Start
 
-## Project Structure
+### Backend Setup
 
-```
-ldc-construction-tools/
-├── backend/                 # FastAPI backend application
-│   ├── app/
-│   │   ├── api/            # API routes and endpoints
-│   │   ├── core/           # Core configuration and utilities
-│   │   ├── models/         # Database models
-│   │   ├── schemas/        # Pydantic schemas
-│   │   └── services/       # Business logic
-│   ├── tests/              # Backend tests
-│   └── requirements.txt    # Python dependencies
-├── frontend/               # React frontend application
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Application pages
-│   │   ├── services/       # API client and utilities
-│   │   └── types/          # TypeScript type definitions
-│   └── package.json        # Node.js dependencies
-├── docs/                   # Project documentation
-├── scripts/                # Deployment and utility scripts
-└── docker-compose.yml      # Development environment
-```
-
-## Getting Started
-
-### Prerequisites
-- Python 3.11+
-- Node.js 18+
-- PostgreSQL 14+
-- Docker (optional, for development)
-
-### Development Setup
-
-1. **Clone and navigate to project**
-   ```bash
-   cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
-   ```
-
-2. **Backend setup**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-3. **Frontend setup**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-4. **Database setup**
-   ```bash
-   # Create PostgreSQL database
-   createdb ldc_construction_tools
-   
-   # Run migrations
-   cd backend
-   alembic upgrade head
-   ```
-
-5. **Start development servers**
-   ```bash
-   # Backend (from backend/ directory)
-   uvicorn app.main:app --reload --port 8000
-   
-   # Frontend (from frontend/ directory)
-   npm run dev
-   ```
-
-## Contributing
-
-### Development Workflow
-1. Create feature branch from `develop`
-2. Implement feature with comprehensive tests
-3. Update documentation as needed
-4. Submit pull request for review
-
-### Code Standards
-- Follow PEP 8 for Python code
-- Use TypeScript for all frontend code
-- Maintain test coverage above 80%
-- Document all public APIs and components
-
-### Testing
+1. Navigate to the backend directory:
 ```bash
-# Backend tests
 cd backend
-pytest
-
-# Frontend tests
-cd frontend
-npm test
 ```
 
-## Security Considerations
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-- **Data Privacy**: All personal information is handled according to JW privacy guidelines
-- **Access Control**: Role-based permissions for different user types
-- **Data Encryption**: Sensitive data encrypted at rest and in transit
-- **Audit Logging**: All data modifications are logged for accountability
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## Deployment
+4. Copy and configure environment:
+```bash
+cp .env.example .env
+# Update .env with your database credentials and secret key
+```
 
-### Production Environment
-- Containerized deployment using Docker
-- PostgreSQL database with regular backups
-- SSL/TLS encryption for all communications
-- Monitoring and logging for system health
+5. Run the development server (includes database initialization):
+```bash
+python run_dev.py
+```
 
-### Staging Environment
-- Mirror of production for testing
-- Automated deployment from `develop` branch
-- Integration testing and user acceptance testing
+The API will be available at `http://localhost:8000` with documentation at `http://localhost:8000/docs`.
 
-## License
+### Frontend Setup
 
-This project is developed for use within the Jehovah's Witnesses organization for theocratic construction activities. All code is proprietary and intended for internal use only.
+1. Navigate to the frontend directory:
+```bash
+cd frontend
+```
 
-## Contact
+2. Install dependencies:
+```bash
+npm install
+```
 
-For questions, suggestions, or support:
-- **Project Lead**: Cory Allen
-- **Email**: cory@personal.dev
-- **Repository**: Personal GitHub - Cloudy-Work
+3. Start the development server:
+```bash
+npm run dev
+```
 
-## Changelog
+The frontend will be available at `http://localhost:3000`.
 
+## Database Structure
+
+The application includes seed data for Construction Group 01.12 organizational structure:
+
+### Trade Teams
+- **Site/Civil**: Site preparation, excavation, and civil work
+- **Structural**: Concrete, masonry, and structural steel work  
+- **Electrical**: Electrical systems and installations
+- **Plumbing**: Plumbing and water systems
+- **Mechanical**: HVAC and mechanical systems
+- **Interiors**: Interior finishing and specialties
+- **Exteriors**: Exterior finishing and roofing
+- **Site Support**: Equipment, logistics, and site support
+
+Each trade team contains multiple crews with specific specializations and capacity tracking.
+
+## Key API Endpoints
+
+### Trade Team Management
+- `GET /api/v1/trade-teams/` - List all trade teams with summary
+- `GET /api/v1/trade-teams/{team_id}/crews` - List crews for a team
+- `GET /api/v1/trade-teams/crews/{crew_id}/members` - List crew members
+
+### Project Management
+- `GET /api/v1/projects/` - List all projects
+- `POST /api/v1/projects/{project_id}/assignments` - Assign trade crew to project
+- `GET /api/v1/projects/{project_id}/assignments` - View project assignments
+
+### Excel Export
+- `GET /api/v1/export/trade-teams` - Export complete organizational structure
+- `GET /api/v1/export/projects/{project_id}` - Export project data with assignments
+- `GET /api/v1/export/contacts` - Export contact list for Construction Group reference
 ### [Unreleased]
 #### Added
 - Initial project structure and documentation

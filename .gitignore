@@ -52,11 +52,11 @@ yarn-error.log*
 # Next.js
 .next/
 out/
-build/
 
 # Production builds
 /build
 /dist
+!frontend/src/
 
 # Environment variables
 .env
