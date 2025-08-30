@@ -79,7 +79,7 @@ class ProjectAssignment(Base, TimestampMixin, AuditMixin):
     
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="assignments")
-    trade_crew: Mapped["TradeCrew"] = relationship("TradeCrew", back_populates="project_assignments")
+    trade_crew: Mapped["TradeCrew"] = relationship("TradeCrew")
     
     def __repr__(self) -> str:
         return f"<ProjectAssignment(id={self.id}, project='{self.project.name if self.project else 'N/A'}', crew='{self.trade_crew.name if self.trade_crew else 'N/A'}')>"
