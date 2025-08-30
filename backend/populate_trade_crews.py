@@ -11,9 +11,17 @@ from pathlib import Path
 # Add the app directory to Python path
 sys.path.append(str(Path(__file__).parent / "app"))
 
-from app.db.session import get_db
+from app.core.database import SessionLocal
 from app.models.trade_teams import TradeTeam, TradeCrew, RoleAssignment, RoleLevel, AssignmentCategory
 from sqlalchemy.orm import Session
+
+def get_db():
+    """Get database session"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Complete trade team and crew structure from user input
 TRADE_TEAMS_DATA = {
@@ -116,7 +124,7 @@ def create_role_assignments_for_crew(db: Session, trade_crew: TradeCrew):
 
 def populate_database():
     """Populate database with complete trade team and crew structure"""
-    db = next(get_db())
+    db = SessionLocal()
     
     try:
         print("🏗️ Populating LDC Construction Tools database...")
