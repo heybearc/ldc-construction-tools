@@ -1,13 +1,134 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, UserCheck, UserX, AlertCircle, CheckCircle } from 'lucide-react';
+
+// Simple UI components to avoid dependency issues
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-lg border shadow-sm ${className}`}>{children}</div>
+);
+
+const CardHeader = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`p-6 pb-3 ${className}`}>{children}</div>
+);
+
+const CardTitle = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <h3 className={`text-lg font-semibold ${className}`}>{children}</h3>
+);
+
+const CardContent = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`p-6 pt-0 ${className}`}>{children}</div>
+);
+
+const Button = ({ children, onClick, variant = "default", size = "default", className = "", type = "button" }: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: string;
+  size?: string;
+  className?: string;
+  type?: "button" | "submit";
+}) => (
+  <button
+    type={type}
+    onClick={onClick}
+    className={`px-4 py-2 rounded-md font-medium transition-colors ${
+      variant === "outline" ? "border border-gray-300 bg-white hover:bg-gray-50" : "bg-blue-600 text-white hover:bg-blue-700"
+    } ${size === "sm" ? "px-2 py-1 text-sm" : ""} ${className}`}
+  >
+    {children}
+  </button>
+);
+
+const Badge = ({ children, className = "", variant = "default" }: { children: React.ReactNode; className?: string; variant?: string }) => (
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
+    {children}
+  </span>
+);
+
+const Input = ({ id, value, onChange, placeholder, type = "text", className = "" }: {
+  id?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  type?: string;
+  className?: string;
+}) => (
+  <input
+    id={id}
+    type={type}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+  />
+);
+
+const Label = ({ children, htmlFor, className = "" }: { children: React.ReactNode; htmlFor?: string; className?: string }) => (
+  <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-700 ${className}`}>
+    {children}
+  </label>
+);
+
+const Select = ({ value, onValueChange, children }: { value: string; onValueChange: (value: string) => void; children: React.ReactNode }) => (
+  <select
+    value={value}
+    onChange={(e) => onValueChange(e.target.value)}
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >
+    {children}
+  </select>
+);
+
+const SelectTrigger = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const SelectValue = () => null;
+const SelectContent = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const SelectItem = ({ value, children }: { value: string; children: React.ReactNode }) => (
+  <option value={value}>{children}</option>
+);
+
+const Dialog = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+const DialogTrigger = ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => <>{children}</>;
+const DialogContent = ({ children }: { children: React.ReactNode }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-96 overflow-y-auto">
+      {children}
+    </div>
+  </div>
+);
+const DialogHeader = ({ children }: { children: React.ReactNode }) => <div className="mb-4">{children}</div>;
+const DialogTitle = ({ children }: { children: React.ReactNode }) => <h2 className="text-xl font-semibold">{children}</h2>;
+
+const Tabs = ({ defaultValue, children, className = "" }: { defaultValue: string; children: React.ReactNode; className?: string }) => {
+  const [activeTab, setActiveTab] = useState(defaultValue);
+  return (
+    <div className={className}>
+      {React.Children.map(children, child => 
+        React.isValidElement(child) ? React.cloneElement(child, { activeTab, setActiveTab } as any) : child
+      )}
+    </div>
+  );
+};
+
+const TabsList = ({ children, activeTab, setActiveTab }: { children: React.ReactNode; activeTab?: string; setActiveTab?: (tab: string) => void }) => (
+  <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4">
+    {React.Children.map(children, child => 
+      React.isValidElement(child) ? React.cloneElement(child, { activeTab, setActiveTab } as any) : child
+    )}
+  </div>
+);
+
+const TabsTrigger = ({ value, children, activeTab, setActiveTab }: { value: string; children: React.ReactNode; activeTab?: string; setActiveTab?: (tab: string) => void }) => (
+  <button
+    onClick={() => setActiveTab?.(value)}
+    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+      activeTab === value ? "bg-white shadow-sm" : "hover:bg-gray-200"
+    }`}
+  >
+    {children}
+  </button>
+);
+
+const TabsContent = ({ value, children, activeTab }: { value: string; children: React.ReactNode; activeTab?: string }) => (
+  activeTab === value ? <div>{children}</div> : null
+);
 
 interface TradeTeam {
   id: number;
