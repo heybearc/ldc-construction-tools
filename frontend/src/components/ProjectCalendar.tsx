@@ -2,7 +2,39 @@
 
 import React, { useState, useEffect } from 'react'
 import { Calendar, ChevronLeft, ChevronRight, Plus, Users, MapPin, Clock, Filter } from 'lucide-react'
-import { apiClient, type ProjectSummary, type ProjectAssignmentSummary } from '@/lib/api'
+import { apiClient } from '@/lib/api'
+
+// Define types locally to avoid import issues
+interface ProjectSummary {
+  id: number;
+  name: string;
+  project_number?: string;
+  location?: string;
+  project_type?: string;
+  status: string;
+  current_phase?: string;
+  start_date?: string;
+  end_date?: string;
+  assignment_count: number;
+  active_assignments: number;
+  jw_sharepoint_url?: string;
+  builder_assistant_url?: string;
+  is_active: boolean;
+}
+
+interface ProjectAssignmentSummary {
+  id: number;
+  trade_crew_name: string;
+  trade_team_name: string;
+  role_description?: string;
+  phase?: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  overseer_name?: string;
+  overseer_phone?: string;
+  overseer_email?: string;
+}
 
 interface CalendarEvent {
   id: string
