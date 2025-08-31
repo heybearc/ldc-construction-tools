@@ -5,26 +5,26 @@ import { apiClient, TradeTeamSummary } from '@/lib/api'
 
 // Trade team icons mapping
 const tradeTeamIcons: Record<string, string> = {
-  'Site Work': '🚜',
-  'Structural': '🏗️',
-  'Roofing': '🏠',
   'Electrical': '⚡',
+  'Exteriors': '🏢',
+  'Interiors': '🏠',
+  'Mechanical': '⚙️',
   'Plumbing': '🔧',
-  'Drywall & Paint': '🎨',
-  'Flooring & Tile': '🏛️',
-  'Finish Carpentry': '🪚'
+  'Site Support': '🚧',
+  'Sitework/Civil': '🚜',
+  'Structural': '🏗️'
 }
 
 // Trade team color schemes
 const tradeTeamColors: Record<string, { bg: string; border: string; text: string; accent: string }> = {
-  'Site Work': { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-900', accent: 'bg-amber-500' },
-  'Structural': { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-900', accent: 'bg-gray-500' },
-  'Roofing': { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900', accent: 'bg-red-500' },
   'Electrical': { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-900', accent: 'bg-yellow-500' },
-  'Plumbing': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900', accent: 'bg-blue-500' },
-  'Drywall & Paint': { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-900', accent: 'bg-purple-500' },
-  'Flooring & Tile': { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900', accent: 'bg-green-500' },
-  'Finish Carpentry': { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-900', accent: 'bg-orange-500' }
+  'Exteriors': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900', accent: 'bg-blue-500' },
+  'Interiors': { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900', accent: 'bg-green-500' },
+  'Mechanical': { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900', accent: 'bg-red-500' },
+  'Plumbing': { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-900', accent: 'bg-cyan-500' },
+  'Site Support': { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-900', accent: 'bg-orange-500' },
+  'Sitework/Civil': { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-900', accent: 'bg-amber-500' },
+  'Structural': { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-900', accent: 'bg-gray-500' }
 }
 
 interface TradeTeamCardProps {
