@@ -5,12 +5,12 @@ import { apiClient, TradeTeamSummary } from '@/lib/api'
 
 // Trade team icons mapping
 const tradeTeamIcons: Record<string, string> = {
-  'Electrical': '⚡',
-  'Exteriors': '🏢',
-  'Interiors': '🏠',
-  'Mechanical': '⚙️',
-  'Plumbing': '🔧',
-  'Site Support': '🚧',
+  'Electrical': '💡',
+  'Exteriors': '🏠',
+  'Interiors': '🛋️',
+  'Mechanical': '🔩',
+  'Plumbing': '🚰',
+  'Site Support': '📋',
   'Sitework/Civil': '🚜',
   'Structural': '🏗️'
 }
