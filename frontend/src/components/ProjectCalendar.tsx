@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Calendar, ChevronLeft, ChevronRight, Plus, Users, MapPin, Clock, Filter } from 'lucide-react'
-import { apiClient, ProjectSummary, ProjectAssignmentSummary } from '@/lib/api'
+import { apiClient, type ProjectSummary, type ProjectAssignmentSummary } from '@/lib/api'
 
 interface CalendarEvent {
   id: string

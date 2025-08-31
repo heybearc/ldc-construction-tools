@@ -4,7 +4,7 @@ API v1 router for LDC Construction Tools
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import trade_teams, projects, admin, export, volunteers
+from app.api.v1.endpoints import volunteers, projects, trade_teams, admin, export, role_assignments
 
 api_router = APIRouter()
 
@@ -36,4 +36,10 @@ api_router.include_router(
     volunteers.router,
     prefix="/volunteers",
     tags=["volunteers"]
+)
+
+api_router.include_router(
+    role_assignments.router,
+    prefix="/role-assignments",
+    tags=["role-assignments"]
 )
