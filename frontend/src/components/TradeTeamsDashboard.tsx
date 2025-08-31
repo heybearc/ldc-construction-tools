@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { apiClient, TradeTeamSummary } from '@/lib/api'
+import TradeTeamDetails from './TradeTeamDetails'
 
 // Trade team icons mapping
 const tradeTeamIcons: Record<string, string> = {
@@ -100,6 +101,7 @@ export default function TradeTeamsDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedTeam, setSelectedTeam] = useState<TradeTeamSummary | null>(null)
+  const [showDetails, setShowDetails] = useState<number | null>(null)
 
   useEffect(() => {
     loadTradeTeams()
@@ -246,14 +248,170 @@ export default function TradeTeamsDashboard() {
               </button>
               <button
                 onClick={() => {
-                  // Navigate to detailed view - this would be implemented with routing
-                  console.log('Navigate to detailed view for team:', selectedTeam.id)
+                  setShowDetails(selectedTeam.id)
                   setSelectedTeam(null)
                 }}
                 className="btn-primary flex-1"
               >
                 View Details
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  // Show details view if requested
+  if (showDetails !== null) {
+    return (
+      <TradeTeamDetails 
+        teamId={showDetails} 
+        onBack={() => setShowDetails(null)} 
+      />
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Trade Teams Dashboard</h1>
+          <p className="text-gray-600 mt-1">Overview of all trade teams and their current status</p>
+        </div>
+        <button
+          onClick={loadTradeTeams}
+          disabled={loading}
+          className="btn-secondary flex items-center"
+        >
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error loading trade teams</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={loadTradeTeams}
+                  className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Teams Grid */}
+      {!loading && !error && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {teams.map((team) => (
+              <TradeTeamCard
+                key={team.id}
+                team={team}
+                onClick={() => setSelectedTeam(team)}
+              />
+            ))}
+          </div>
+
+          {teams.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.196-2.121M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.121M7 20v-2c0-.656.126-1.283.356-1.857M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Trade Teams Found</h3>
+              <p className="text-gray-600">There are no trade teams configured yet.</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Team Details Modal */}
+      {selectedTeam && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="text-4xl mr-4">{tradeTeamIcons[selectedTeam.name] || '🔨'}</div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedTeam.name}</h2>
+                    <p className="text-gray-600">Trade Team Details</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedTeam(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-gray-900">{selectedTeam.active_crews}</div>
+                  <div className="text-gray-600">Active Crews</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-gray-900">{selectedTeam.total_members}</div>
+                  <div className="text-gray-600">Total Members</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-gray-900">{selectedTeam.crew_count}</div>
+                  <div className="text-gray-600">Total Crews</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-600">Active</div>
+                  <div className="text-gray-600">Status</div>
+                </div>
+              </div>
+
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setSelectedTeam(null)}
+                  className="btn-secondary flex-1"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDetails(selectedTeam.id)
+                    setSelectedTeam(null)
+                  }}
+                  className="btn-primary flex-1"
+                >
+                  View Details
+                </button>
+              </div>
             </div>
           </div>
         </div>

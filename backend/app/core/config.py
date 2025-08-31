@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     
     # Database configuration
     DATABASE_URL: str = Field(
-        default="sqlite:///./ldc_construction_tools.db",
+        default="postgresql://ldc_user:ldc_password@10.92.3.21:5432/ldc_construction_tools_production",
         description="Database connection URL"
     )
     

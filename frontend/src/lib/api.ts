@@ -89,7 +89,7 @@ class ApiClient {
 
   // Trade Teams
   async getTradeTeams(): Promise<TradeTeamSummary[]> {
-    return this.request<TradeTeamSummary[]>('/trade-teams/');
+    return this.request<TradeTeamSummary[]>('/trade-teams');
   }
 
   async getTradeCrews(teamId: number): Promise<TradeCrewSummary[]> {
@@ -102,7 +102,7 @@ class ApiClient {
 
   // Projects
   async getProjects(): Promise<ProjectSummary[]> {
-    return this.request<ProjectSummary[]>('/projects/');
+    return this.request<ProjectSummary[]>('/projects');
   }
 
   async getProject(projectId: number): Promise<ProjectSummary> {
@@ -174,7 +174,7 @@ class ApiClient {
 
   // Role Assignments
   async getRoleAssignments(): Promise<any[]> {
-    return this.request<any[]>('/role-assignments/');
+    return this.request<any[]>('/role-assignments');
   }
 
   async updateRoleAssignment(roleId: number, data: any) {
