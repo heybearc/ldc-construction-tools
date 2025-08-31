@@ -4,17 +4,18 @@ from datetime import datetime
 from enum import Enum
 
 class RoleLevel(str, Enum):
-    overseer = "overseer"
-    assistant_overseer = "assistant_overseer"
-    group_overseer = "group_overseer"
-    assistant_group_overseer = "assistant_group_overseer"
-    servant = "servant"
-    ministerial_servant = "ministerial_servant"
-    brother = "brother"
+    TRADE_TEAM_OVERSEER = "trade_team_overseer"
+    TRADE_TEAM_ASSISTANT_OVERSEER = "trade_team_assistant_overseer"
+    TRADE_TEAM_SUPPORT = "trade_team_support"
+    TRADE_CREW_OVERSEER = "trade_crew_overseer"
+    TRADE_CREW_ASSISTANT_OVERSEER = "trade_crew_assistant_overseer"
+    TRADE_CREW_SUPPORT = "trade_crew_support"
+    TRADE_CREW_VOLUNTEER = "trade_crew_volunteer"
 
 class AssignmentCategory(str, Enum):
-    trade_team_leadership = "trade_team_leadership"
-    trade_crew_leadership = "trade_crew_leadership"
+    BRANCH_APPOINTED = "branch_appointed"
+    FIELD_ASSIGNED_CONTINUOUS = "field_assigned_continuous"
+    FIELD_ASSIGNED_TEMPORARY = "field_assigned_temporary"
 
 class RoleStatus(str, Enum):
     no_adjustment_needed = "no_adjustment_needed"
