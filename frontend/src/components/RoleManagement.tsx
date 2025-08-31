@@ -368,7 +368,7 @@ export default function RoleManagement() {
           <TabsTrigger value="attention">Need Attention</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="teams" className="space-y-4">
+        <TabsContent value="teams">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {tradeTeams.map(team => (
               <Card key={team.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -388,7 +388,7 @@ export default function RoleManagement() {
                             {role.is_vacant ? 'Vacant' : 'Assigned'}
                           </Badge>
                           <Dialog>
-                            <DialogTrigger asChild>
+                            <DialogTrigger>
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -418,7 +418,7 @@ export default function RoleManagement() {
           </div>
         </TabsContent>
 
-        <TabsContent value="crews" className="space-y-4">
+        <TabsContent value="crews">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {tradeTeams.map(team => 
               team.trade_crews.map(crew => (
@@ -441,7 +441,7 @@ export default function RoleManagement() {
                               {role.is_vacant ? 'Vacant' : 'Assigned'}
                             </Badge>
                             <Dialog>
-                              <DialogTrigger asChild>
+                              <DialogTrigger>
                                 <Button variant="outline" size="sm">Edit</Button>
                               </DialogTrigger>
                               <DialogContent>
@@ -482,7 +482,7 @@ export default function RoleManagement() {
                       </div>
                     </div>
                     <Dialog>
-                      <DialogTrigger asChild>
+                      <DialogTrigger>
                         <Button variant="outline">Assign</Button>
                       </DialogTrigger>
                       <DialogContent>
@@ -519,7 +519,7 @@ export default function RoleManagement() {
                       </Badge>
                     </div>
                     <Dialog>
-                      <DialogTrigger asChild>
+                      <DialogTrigger>
                         <Button variant="outline">Update</Button>
                       </DialogTrigger>
                       <DialogContent>
