@@ -30,7 +30,7 @@ ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/frontend && n
 
 # Database migrations (if needed)
 echo "🗄️ Running database migrations..."
-ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/backend && python -c \"from app.core.database import engine; from app.models import *; Base.metadata.create_all(bind=engine)\"'"
+ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/backend && python3 -c \"from app.core.database import engine; from app.models import *; Base.metadata.create_all(bind=engine)\"'"
 
 # Restart backend service
 echo "🔄 Restarting backend service..."
