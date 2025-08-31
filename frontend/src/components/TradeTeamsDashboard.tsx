@@ -8,7 +8,7 @@ const tradeTeamIcons: Record<string, string> = {
   'Electrical': '💡',
   'Exteriors': '🏠',
   'Interiors': '🛋️',
-  'Mechanical': '🔩',
+  'Mechanical': '🌡️',
   'Plumbing': '🚰',
   'Site Support': '📋',
   'Sitework/Civil': '🚜',
