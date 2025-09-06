@@ -1,20 +1,32 @@
 'use client'
 
 import React, { useState } from 'react'
+import OrganizationalDashboard from '@/components/OrganizationalDashboard'
 import TradeTeamsDashboard from '@/components/TradeTeamsDashboard'
 import TradeTeamsOverview from '@/components/TradeTeamsOverview'
+import RoleManagement from '@/components/RoleManagement'
 
-type ViewMode = 'dashboard' | 'detailed'
+type ViewMode = 'organizational' | 'dashboard' | 'detailed' | 'roles'
 
 export default function HomePage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('dashboard')
+  const [viewMode, setViewMode] = useState<ViewMode>('organizational')
+
+  const getTitle = () => {
+    switch (viewMode) {
+      case 'organizational': return 'Organizational Dashboard'
+      case 'dashboard': return 'Trade Teams Dashboard'
+      case 'detailed': return 'Trade Teams Overview'
+      case 'roles': return 'Role Management'
+      default: return 'LDC Construction Tools'
+    }
+  }
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {viewMode === 'dashboard' ? 'Organizational Dashboard' : 'Trade Teams Overview'}
+            {getTitle()}
           </h1>
           <p className="mt-2 text-gray-600">
             Construction Group 01.12 organizational structure and crew management
@@ -24,8 +36,18 @@ export default function HomePage() {
         {/* View Toggle */}
         <div className="flex bg-gray-100 rounded-lg p-1">
           <button
+            onClick={() => setViewMode('organizational')}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'organizational'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🏢 Org Chart
+          </button>
+          <button
             onClick={() => setViewMode('dashboard')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'dashboard'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -35,18 +57,31 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setViewMode('detailed')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'detailed'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            📋 Detailed View
+            📋 Detailed
+          </button>
+          <button
+            onClick={() => setViewMode('roles')}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'roles'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            👥 Roles
           </button>
         </div>
       </div>
       
-      {viewMode === 'dashboard' ? <TradeTeamsDashboard /> : <TradeTeamsOverview />}
+      {viewMode === 'organizational' && <OrganizationalDashboard />}
+      {viewMode === 'dashboard' && <TradeTeamsDashboard />}
+      {viewMode === 'detailed' && <TradeTeamsOverview />}
+      {viewMode === 'roles' && <RoleManagement />}
     </div>
   )
 }

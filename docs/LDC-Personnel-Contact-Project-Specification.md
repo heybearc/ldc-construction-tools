@@ -1,10 +1,10 @@
 # LDC Personnel Contact Tools - Project Specification
 
 **Project**: LDC Construction Tools for Personnel Contact Support  
-**Region**: LDC Region 01.12  
+**Region**: LDC Zone 1 Region 12 (01.12)  
 **Construction Group**: Construction Group 01.12  
-**Document Version**: 1.0  
-**Date**: 2025-08-26
+**Document Version**: 1.1  
+**Date**: 2025-09-01
 
 ## Executive Summary
 
@@ -42,7 +42,76 @@ This specification defines the requirements for a comprehensive digital tool sui
 - **Emergency Communication**: Rapid notification system for urgent project needs or safety issues
 - **Elder Coordination**: Facilitate communication with elders for spiritual oversight requirements
 
-### 4. Project Documentation & Compliance
+#### 4. Enhanced Calendar & Work Assignment Management
+- **Work Assignment Calendar**: Interactive calendar for scheduling trade crew work assignments
+  - **Trade Crew Selection**: Choose from 42 crews across 8 standard trade teams
+  - **Work Item Specification**: Define general work items (rough-in, finish work, demolition, etc.)
+  - **Multi-Day Spanning**: Calendar items can span multiple days with visual representation
+  - **Volunteer Requirements**: Specify required volunteer count per trade crew for task completion
+  - **Resource Planning**: Visual indicators showing volunteer capacity vs. requirements
+  - **Color Coding**: Trade team/crew color coding for easy visual identification
+  - **Conflict Detection**: Identify overlapping assignments and resource conflicts
+  - **Integration**: Seamless integration with existing project calendar and trade crew structure
+
+#### 5. Trade Crew Overseer Selection & Assignment Workflow
+- **Project-Based TCO Selection System**: Streamlined workflow for Trade Team Overseers to select Trade Crew Overseers for specific projects
+  - **Role-Based Request Distribution**: Automated requests sent to Trade Team Overseers (TTO), Trade Team Overseer Assistants (TTOA), and Trade Team Supervisors (TTS)
+  - **TCO Selection Interface**: Dropdown selection of qualified and available Trade Crew Overseers for each trade crew assignment
+  - **Availability Integration**: Real-time TCO availability checking with conflict detection across multiple projects
+  - **Qualification Verification**: Automated verification of TCO training status, oversight assessments, and project-specific requirements
+  - **Workload Balancing**: Visual indicators showing current TCO workload to support balanced assignment decisions
+  - **Historical Performance Metrics**: TCO performance data and project history to guide selection decisions
+  - **Submission Workflow**: Streamlined submission process for immediate TCO assignment confirmation
+  - **Notification System**: Configurable notifications to Personnel Contact, Construction Group Overseer, and other designated roles upon TCO selection completion
+  - **Emergency Replacement Protocol**: Rapid TCO replacement workflow for urgent project needs or availability changes
+  - **Integration with Calendar**: Seamless integration with work assignment calendar for comprehensive project planning
+
+#### 6. Regional & Project-Specific Roles Configuration
+- **Regional Role Management**: Comprehensive system for managing region-wide construction roles
+  - **Construction Field Representatives**: CFR, CFR-RA Support with regional oversight responsibilities
+  - **Field Representatives**: FR, FR (Wife), FRAA, FRAA (Wife) for field coordination
+  - **Design & Technical Roles**: Design Contact (DC), Design Lead (DL), trade-specific technical roles
+  - **Specialty Roles**: Purchasing Field Rep (PFR), Local Cost Controllers (LCC), Project Technical Coordinators (PTC)
+  - **Leadership Roles**: Construction Group Overseer (CCGO), Assistant Construction Group Overseer (ACGO)
+  - **Support Roles**: CG Support, Zone Safety/Housing Contacts
+
+- **Project-Specific Role Assignment**: Dynamic role assignment system for individual construction projects
+  - **Project Staffing**: Project Staffing Contact (PSC), PSC Assistant for volunteer coordination
+  - **Regulatory & Compliance**: Local Project Regulatory Contact (LPRC) for permit and compliance management
+  - **Project Coordination**: Project Construction Coordinator (PCC), PCC Assistants for on-site management
+  - **Safety Management**: Safety Coordinator (SC), SC Assistants for project-specific safety oversight
+  - **Training & Maintenance**: Maintenance Trainer (MT), Maintenance Trainer Assistant (MTA)
+
+- **Local Contact Network**: Community-based volunteer coordination system
+  - **Local Food Contact**: KHOCC coordination with Assistant Food support
+  - **Local Rooming Contact**: Housing coordination with Assistant Rooming support
+  - **Local Volunteers Contact**: Community volunteer coordination with Assistant Volunteers support
+  - **Local Security Contact**: Site security coordination with Assistant Security support
+
+#### 7. Local Volunteer Registration System
+- **Public Registration Form**: Non-authenticated volunteer registration interface
+  - **Open Access**: Public form accessible without system login for community volunteers
+  - **Comprehensive Data Collection**: Contact information, skills, availability, experience levels
+  - **Trade Skill Assessment**: Self-assessment of construction trade skills and certifications
+  - **Availability Calendar**: Volunteer availability input for project scheduling
+  - **Emergency Contact Information**: Safety and emergency contact data collection
+  - **Background Check Consent**: Automated consent forms for required background screening
+
+- **Local Volunteer Contact Workflow**: Integration with regional volunteer coordination
+  - **Registration Review**: Local Volunteer Contact review and validation of submitted applications
+  - **Skill Verification**: Process for verifying claimed skills and experience levels
+  - **Invitation System**: Streamlined invitation process for approved local volunteers
+  - **Project Matching**: Automated matching of volunteer skills with project needs
+  - **Communication Integration**: Direct integration with notification system for volunteer outreach
+  - **Compliance Tracking**: Automated tracking of required training and certifications
+
+#### 8. Advanced Notification & Communication Configuration
+- **Role-Based Notification Matrix**: Configurable notification recipients based on action type, project phase, and organizational hierarchy
+- **Multi-Channel Delivery**: Email, SMS, in-app notifications with user preference management
+- **Template Management**: Customizable notification templates for different workflow stages
+- **Audit Trail**: Complete notification history and delivery confirmation tracking
+
+#### 9. Project Documentation & Compliance
 - **Digital Forms Management**: Electronic versions of all LDC forms with automated routing and approval
 - **Safety Training Verification**: Track and verify required safety training for all project volunteers
 - **Required Trade Crew Overseers (formerly PTO's)**: 
@@ -441,11 +510,43 @@ This system is designed as **standalone tools** that complement existing JW syst
 - **Workflow Disruption**: Minimized through phased implementation
 - **Compliance Issues**: Prevented through built-in compliance tracking
 
+## Future Scalability: Zone.Region Multi-Tenancy
+
+### Organizational Structure Overview
+The LDC Construction Tools system is currently designed for Zone 1 Region 12 (01.12) but must scale to support the full US LDC organizational structure:
+
+**US LDC Structure**:
+- **5 Zones** across the United States
+- **12 Regions per Zone** (60 total regions)
+- **Per Region**: 1 Construction Group, 1 Personnel Contact, 1 Field Rep
+- **Each role** has associated teams (to be defined in future phases)
+
+### Multi-Tenancy Architecture Requirements
+
+**Phase 3: Zone.Region Multi-Tenancy** (Post-Role Management)
+- **Database Schema**: Add `zone_id` and `region_id` fields to all core entities
+- **User Authentication**: Region-scoped user access and permissions
+- **Data Isolation**: Complete separation of data between regions
+- **Regional Administration**: Self-service admin capabilities per region
+- **Zone-Level Oversight**: Aggregated reporting and oversight across regions
+- **Scalable Infrastructure**: Support for 60 concurrent regional deployments
+
+**Implementation Strategy**:
+1. **Phase 1-2**: Develop and perfect single-region functionality (Zone 1 Region 12)
+2. **Phase 3**: Implement multi-tenancy architecture before full production
+3. **Phase 4**: Gradual rollout to additional regions with zone-level coordination
+
+**Benefits**:
+- **Standardization**: Consistent tools and processes across all US LDC regions
+- **Efficiency**: Centralized development with regional customization
+- **Oversight**: Zone-level visibility and coordination capabilities
+- **Scalability**: Architecture designed for 60-region deployment from inception
+
 ## Conclusion
 
-This specification provides a comprehensive framework for developing digital tools to support Personnel Contacts in LDC Region 01.12. The system will significantly improve volunteer coordination efficiency, enhance communication workflows, and provide valuable insights for Construction Group 01.12 operations.
+This specification provides a comprehensive framework for developing digital tools to support Personnel Contacts in LDC Zone 1 Region 12, with built-in scalability for nationwide deployment. The system will significantly improve volunteer coordination efficiency, enhance communication workflows, and provide valuable insights for Construction Group operations.
 
-The phased implementation approach ensures manageable development cycles while delivering immediate value to Personnel Contacts and the broader construction organization. Success will be measured through operational efficiency gains, user satisfaction improvements, and enhanced project delivery capabilities.
+The phased implementation approach ensures manageable development cycles while delivering immediate value to Personnel Contacts and the broader construction organization. The zone.region multi-tenancy architecture ensures the system can scale to support all 60 US LDC regions without major architectural refactoring.
 
 ---
 
