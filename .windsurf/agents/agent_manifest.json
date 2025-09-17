@@ -1,0 +1,232 @@
+{
+  "wmacs_agent_framework": {
+    "project": "ldc-construction-tools",
+    "framework_version": "1.0.0",
+    "wmacs_integration": true,
+    "guardian_protected": true,
+    "credit_budget_aware": true,
+    "last_updated": "2025-09-17T19:00:24Z",
+    "agents": {
+      "WMACS_LEAD_ARCHITECT_AGENT": {
+        "role": "Lead Architect",
+        "authority": "technical_decisions",
+        "scope": "full_stack_architecture",
+        "wmacs_integration": true,
+        "guardian_coordination": true,
+        "credit_budget_management": true,
+        "sdd_module_oversight": true,
+        "agent_team_leadership": true,
+        "file": "WMACS_LEAD_ARCHITECT_AGENT.md"
+      },
+      "WMACS_QOS_AGENT": {
+        "role": "Quality of Service Coordinator",
+        "authority": "error_handling_decisions",
+        "scope": "system_reliability",
+        "wmacs_integration": true,
+        "guardian_monitoring": true,
+        "agent_oversight": true,
+        "error_recovery": true,
+        "testing_coordination": true,
+        "file": "WMACS_QOS_AGENT.md"
+      },
+      "BACKEND_AGENT": {
+        "role": "Backend Development",
+        "authority": "api_implementation",
+        "scope": "fastapi_backend",
+        "wmacs_integration": true,
+        "guardian_protected": true,
+        "sdd_modules": [
+          "role-management",
+          "trade-teams", 
+          "volunteer-management",
+          "assignment-workflow",
+          "calendar-scheduling",
+          "communication-hub",
+          "project-coordination",
+          "compliance-tracking",
+          "reporting-analytics",
+          "local-volunteer-registration"
+        ],
+        "database_integration": true,
+        "api_versioning": true,
+        "file": "BACKEND_AGENT.md"
+      },
+      "FRONTEND_AGENT": {
+        "role": "Frontend Development",
+        "authority": "ui_implementation",
+        "scope": "nextjs_frontend",
+        "wmacs_integration": true,
+        "guardian_protected": true,
+        "component_architecture": true,
+        "typescript_first": true,
+        "tailwind_css": true,
+        "sdd_module_components": true,
+        "file": "FRONTEND_AGENT.md"
+      },
+      "QA_AGENT": {
+        "role": "Quality Assurance",
+        "authority": "testing_standards",
+        "scope": "test_coverage",
+        "wmacs_integration": true,
+        "guardian_protected": true,
+        "coverage_requirement": 90,
+        "integration_testing": true,
+        "api_testing": true,
+        "e2e_testing": true,
+        "trade_team_validation": {
+          "teams": 8,
+          "crews": 42,
+          "roles": 192
+        },
+        "file": "QA_AGENT.md"
+      },
+      "PERFORMANCE_AGENT": {
+        "role": "Performance Optimization",
+        "authority": "performance_standards",
+        "scope": "system_performance",
+        "wmacs_integration": true,
+        "guardian_protected": true,
+        "performance_budgets": {
+          "api_p95_ms": 200,
+          "bundle_size_kb": 200,
+          "memory_mb": 256
+        },
+        "monitoring": true,
+        "optimization": true,
+        "file": "PERFORMANCE_AGENT.md"
+      },
+      "SECURITY_AGENT": {
+        "role": "Security Compliance",
+        "authority": "security_standards",
+        "scope": "application_security",
+        "wmacs_integration": true,
+        "guardian_protected": true,
+        "vulnerability_scanning": true,
+        "compliance_tracking": true,
+        "authentication": true,
+        "authorization": true,
+        "data_protection": true,
+        "file": "SECURITY_AGENT.md"
+      },
+      "TESTING_AGENT": {
+        "role": "Automated Testing",
+        "authority": "test_execution",
+        "scope": "test_automation",
+        "wmacs_integration": true,
+        "guardian_protected": true,
+        "test_frameworks": ["pytest", "jest", "playwright"],
+        "ci_cd_integration": true,
+        "regression_testing": true,
+        "file": "TESTING_AGENT.md"
+      }
+    },
+    "coordination_matrix": {
+      "WMACS_LEAD_ARCHITECT_AGENT": {
+        "coordinates_with": ["all"],
+        "authority_over": ["technical_decisions", "architecture", "deployment_strategy"],
+        "reports_to": "user"
+      },
+      "WMACS_QOS_AGENT": {
+        "coordinates_with": ["all"],
+        "authority_over": ["error_handling", "recovery_procedures", "agent_intervention"],
+        "monitors": ["all_agents", "guardian_operations", "wmacs_pipeline"],
+        "reports_to": "WMACS_LEAD_ARCHITECT_AGENT"
+      },
+      "development_agents": {
+        "BACKEND_AGENT": {
+          "coordinates_with": ["FRONTEND_AGENT", "QA_AGENT", "SECURITY_AGENT"],
+          "reports_to": "WMACS_LEAD_ARCHITECT_AGENT",
+          "monitored_by": "WMACS_QOS_AGENT"
+        },
+        "FRONTEND_AGENT": {
+          "coordinates_with": ["BACKEND_AGENT", "QA_AGENT", "PERFORMANCE_AGENT"],
+          "reports_to": "WMACS_LEAD_ARCHITECT_AGENT",
+          "monitored_by": "WMACS_QOS_AGENT"
+        },
+        "QA_AGENT": {
+          "coordinates_with": ["BACKEND_AGENT", "FRONTEND_AGENT", "TESTING_AGENT"],
+          "reports_to": "WMACS_LEAD_ARCHITECT_AGENT",
+          "monitored_by": "WMACS_QOS_AGENT"
+        }
+      }
+    },
+    "wmacs_integration": {
+      "ci_cd_pipeline": ".github/workflows/wmacs-ci-cd.yml",
+      "guardian_protection": "wmacs-guardian-ldc.js",
+      "mcp_server_ops": "mcp-server-ops-ldc/",
+      "credit_budget": ".wmacs/credit-budget.json",
+      "deployment_workflows": [
+        ".windsurf/workflows/wmacs-ldc-deploy.md",
+        ".windsurf/workflows/wmacs-ldc-rollback.md"
+      ]
+    },
+    "infrastructure": {
+      "staging": {
+        "container": "135",
+        "host": "10.92.3.25",
+        "ports": {
+          "frontend": 3001,
+          "backend": 8000
+        }
+      },
+      "production": {
+        "container": "133", 
+        "host": "10.92.3.23",
+        "ports": {
+          "frontend": 3001,
+          "backend": 8000
+        }
+      },
+      "database": {
+        "container": "131",
+        "host": "10.92.3.21",
+        "port": 5432,
+        "staging_db": "ldc_construction_tools_staging",
+        "production_db": "ldc_construction_tools"
+      }
+    },
+    "sdd_modules": {
+      "completed": {
+        "phase1": [
+          "role-management",
+          "trade-teams", 
+          "volunteer-management"
+        ]
+      },
+      "in_development": {
+        "phase2": [
+          "assignment-workflow",
+          "calendar-scheduling"
+        ]
+      },
+      "planned": {
+        "phase3": [
+          "communication-hub",
+          "project-coordination"
+        ],
+        "phase4": [
+          "compliance-tracking",
+          "reporting-analytics"
+        ],
+        "phase5": [
+          "local-volunteer-registration",
+          "multi-tenancy"
+        ]
+      }
+    },
+    "quality_gates": {
+      "test_coverage": ">90%",
+      "api_response_time": "<200ms P95",
+      "bundle_size": "<200KB",
+      "memory_usage": "<256MB",
+      "security_scan": "pass",
+      "credit_budget": "6.5 credits/cycle"
+    },
+    "organizational_support": {
+      "trade_teams": 8,
+      "trade_crews": 42,
+      "role_positions": 192,
+      "builder_assistant_format": "TRADE TEAM NAME – TRADE CREW NAME"
+    }
+  }
+}
