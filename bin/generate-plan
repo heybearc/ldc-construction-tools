@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# Generate implementation plan for a feature
+set -euo pipefail
+
+FEATURE_NAME="${1:-}"
+if [[ -z "$FEATURE_NAME" ]]; then
+  echo "Usage: $0 <feature-name>"
+  echo "Example: $0 role-management"
+  exit 1
+fi
+
+FEATURE_DIR="lib/$FEATURE_NAME"
+if [[ ! -d "$FEATURE_DIR" ]]; then
+  echo "Error: Feature directory $FEATURE_DIR does not exist"
+  echo "Run: bin/new-feature $FEATURE_NAME"
+  exit 1
+fi
+
+# Generate implementation plan
+cat > "$FEATURE_DIR/IMPLEMENTATION_PLAN.md" <<MD
+# Implementation Plan: $FEATURE_NAME
+
+## Phase 1: Core Infrastructure
+- [ ] Set up TypeScript configuration
+- [ ] Configure build system
+- [ ] Set up testing framework
+- [ ] Create basic API structure
+
+## Phase 2: Business Logic
+- [ ] Implement core domain models
+- [ ] Create service layer
+- [ ] Add data access layer
+- [ ] Implement business rules
+
+## Phase 3: API Layer
+- [ ] Create REST endpoints
+- [ ] Add request/response validation
+- [ ] Implement error handling
+- [ ] Add authentication/authorization
+
+## Phase 4: Frontend Components
+- [ ] Create React components
+- [ ] Add state management
+- [ ] Implement UI interactions
+- [ ] Add responsive design
+
+## Phase 5: Integration
+- [ ] Integrate with main application
+- [ ] Add navigation routes
+- [ ] Connect to backend APIs
+- [ ] Test end-to-end functionality
+
+## Phase 6: Testing & Quality
+- [ ] Unit tests (>90% coverage)
+- [ ] Integration tests
+- [ ] E2E tests
+- [ ] Performance testing
+- [ ] Security testing
+
+## Phase 7: Documentation
+- [ ] API documentation
+- [ ] Component documentation
+- [ ] User guide
+- [ ] Developer guide
+
+## Phase 8: Deployment
+- [ ] CI/CD pipeline
+- [ ] Staging deployment
+- [ ] Production deployment
+- [ ] Monitoring setup
+
+## Dependencies
+- Main application framework
+- Database schema
+- Authentication system
+- UI component library
+
+## Risks & Mitigation
+- **Risk**: Integration complexity
+  - **Mitigation**: Incremental integration with feature flags
+- **Risk**: Performance impact
+  - **Mitigation**: Load testing and optimization
+- **Risk**: Security vulnerabilities
+  - **Mitigation**: Security review and penetration testing
+
+## Timeline Estimate
+- Phase 1-2: 1-2 weeks
+- Phase 3-4: 2-3 weeks
+- Phase 5-6: 1-2 weeks
+- Phase 7-8: 1 week
+- **Total**: 5-8 weeks
+
+## Success Criteria
+- [ ] All functional requirements implemented
+- [ ] Performance benchmarks met
+- [ ] Security requirements satisfied
+- [ ] Documentation complete
+- [ ] Tests passing (>90% coverage)
+MD
+
+echo "✅ Generated implementation plan: $FEATURE_DIR/IMPLEMENTATION_PLAN.md"
+echo "📋 Review and customize the plan as needed"

@@ -47,7 +47,7 @@ class TradeCrewCreate(TradeCrewBase):
 
 
 class CrewMemberCreate(CrewMemberBase):
-    trade_crew_id: int
+    trade_crew_id: Optional[int] = None
 
 
 # Update schemas
@@ -81,7 +81,7 @@ class CrewMemberUpdate(BaseModel):
 # Response schemas
 class CrewMember(CrewMemberBase):
     id: int
-    trade_crew_id: int
+    trade_crew_id: Optional[int] = None
     full_name: str
     trade_crew_name: Optional[str] = None
     trade_team_name: Optional[str] = None

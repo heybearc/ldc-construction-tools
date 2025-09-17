@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ES6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@role-management/*": ["./lib/role-management/src/*"],
+      "@trade-teams/*": ["./lib/trade-teams/src/*"],
+      "@volunteer-management/*": ["./lib/volunteer-management/src/*"],
+      "@assignment-workflow/*": ["./lib/assignment-workflow/src/*"],
+      "@calendar-scheduling/*": ["./lib/calendar-scheduling/src/*"]
+    }
+  },
+  "include": [
+    "lib/*/src/**/*",
+    "frontend/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "lib/*/tests/**/*",
+    "backend/**/*"
+  ]
+}

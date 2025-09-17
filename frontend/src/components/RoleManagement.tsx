@@ -211,10 +211,11 @@ export default function RoleManagement() {
     try {
       const response = await fetch('/api/role-assignments');
       const data = await response.json();
-      setRoleAssignments(data);
+      setRoleAssignments(Array.isArray(data) ? data : []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching role assignments:', error);
+      setRoleAssignments([]);
       setLoading(false);
     }
   };
@@ -251,25 +252,25 @@ export default function RoleManagement() {
   };
 
   const getTeamRoles = (teamId: number) => {
-    return roleAssignments.filter(role => 
+    return Array.isArray(roleAssignments) ? roleAssignments.filter(role => 
       role.trade_team_id === teamId && role.assignment_category === 'trade_team_leadership'
-    );
+    ) : [];
   };
 
   const getCrewRoles = (crewId: number) => {
-    return roleAssignments.filter(role => 
+    return Array.isArray(roleAssignments) ? roleAssignments.filter(role => 
       role.trade_crew_id === crewId && role.assignment_category === 'trade_crew_leadership'
-    );
+    ) : [];
   };
 
   const getVacantRoles = () => {
-    return roleAssignments.filter(role => role.is_vacant);
+    return Array.isArray(roleAssignments) ? roleAssignments.filter(role => role.is_vacant) : [];
   };
 
   const getRolesNeedingAttention = () => {
-    return roleAssignments.filter(role => 
+    return Array.isArray(roleAssignments) ? roleAssignments.filter(role => 
       role.status !== 'no_adjustment_needed' && role.status !== 'change_implemented'
-    );
+    ) : [];
   };
 
   if (loading) {
@@ -295,7 +296,7 @@ export default function RoleManagement() {
           </Badge>
           <Badge variant="outline" className="text-sm">
             <UserCheck className="w-4 h-4 mr-1" />
-            {roleAssignments.filter(r => !r.is_vacant).length} Assigned
+            {Array.isArray(roleAssignments) ? roleAssignments.filter(r => !r.is_vacant).length : 0} Assigned
           </Badge>
           <Badge variant="outline" className="text-sm">
             <UserX className="w-4 h-4 mr-1" />

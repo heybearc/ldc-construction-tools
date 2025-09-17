@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+# Create a new feature module with SDD structure
+set -euo pipefail
+
+FEATURE_NAME="${1:-}"
+if [[ -z "$FEATURE_NAME" ]]; then
+  echo "Usage: $0 <feature-name>"
+  echo "Example: $0 role-management"
+  exit 1
+fi
+
+# Create feature directory structure
+mkdir -p "lib/$FEATURE_NAME"/{src,tests,contracts,specs}
+
+# Create package.json for the feature
+cat > "lib/$FEATURE_NAME/package.json" <<JSON
+{
+  "name": "@ldc-construction-tools/$FEATURE_NAME",
+  "version": "0.1.0",
+  "description": "LDC Construction Tools - $FEATURE_NAME module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}
+JSON
+
+# Create TypeScript config
+cat > "lib/$FEATURE_NAME/tsconfig.json" <<JSON
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["tests/**/*", "dist/**/*"]
+}
+JSON
+
+# Create main index file
+cat > "lib/$FEATURE_NAME/src/index.ts" <<TS
+// $FEATURE_NAME module
+export * from './types';
+export * from './api';
+export * from './components';
+TS
+
+# Create types file
+FEATURE_NAME_CAPITALIZED="$(echo ${FEATURE_NAME} | sed 's/-/ /g' | sed 's/\b\w/\U&/g' | sed 's/ //g')"
+cat > "lib/$FEATURE_NAME/src/types.ts" <<TS
+// Type definitions for $FEATURE_NAME
+export interface ${FEATURE_NAME_CAPITALIZED}Config {
+  apiBaseUrl: string;
+  version: string;
+}
+
+export interface ${FEATURE_NAME_CAPITALIZED}Module {
+  initialize(config: ${FEATURE_NAME_CAPITALIZED}Config): Promise<void>;
+  getVersion(): string;
+}
+TS
+
+# Create API file
+cat > "lib/$FEATURE_NAME/src/api.ts" <<TS
+// API layer for $FEATURE_NAME
+import { ${FEATURE_NAME^}Config } from './types';
+
+export class ${FEATURE_NAME^}API {
+  private config: ${FEATURE_NAME^}Config;
+
+  constructor(config: ${FEATURE_NAME^}Config) {
+    this.config = config;
+  }
+
+  async healthCheck(): Promise<boolean> {
+    // Implement health check
+    return true;
+  }
+}
+TS
+
+# Create components file
+cat > "lib/$FEATURE_NAME/src/components.ts" <<TS
+// React components for $FEATURE_NAME
+import React from 'react';
+
+export interface ${FEATURE_NAME^}Props {
+  className?: string;
+}
+
+export const ${FEATURE_NAME^}Component: React.FC<${FEATURE_NAME^}Props> = ({ className }) => {
+  return (
+    <div className={className}>
+      <h2>${FEATURE_NAME^} Module</h2>
+      <p>Feature implementation goes here</p>
+    </div>
+  );
+};
+TS
+
+# Create test file
+cat > "lib/$FEATURE_NAME/tests/${FEATURE_NAME}.test.ts" <<TS
+// Tests for $FEATURE_NAME module
+import { ${FEATURE_NAME^}API } from '../src/api';
+
+describe('${FEATURE_NAME^}API', () => {
+  it('should initialize correctly', () => {
+    const api = new ${FEATURE_NAME^}API({
+      apiBaseUrl: 'http://localhost:8000',
+      version: '1.0.0'
+    });
+    expect(api).toBeDefined();
+  });
+
+  it('should pass health check', async () => {
+    const api = new ${FEATURE_NAME^}API({
+      apiBaseUrl: 'http://localhost:8000',
+      version: '1.0.0'
+    });
+    const result = await api.healthCheck();
+    expect(result).toBe(true);
+  });
+});
+TS
+
+# Create OpenAPI contract
+cat > "lib/$FEATURE_NAME/contracts/openapi.yaml" <<YAML
+openapi: 3.0.3
+info:
+  title: $FEATURE_NAME API
+  version: 1.0.0
+  description: API for $FEATURE_NAME module in LDC Construction Tools
+paths:
+  /api/v1/$FEATURE_NAME/health:
+    get:
+      summary: Health check for $FEATURE_NAME module
+      responses:
+        '200':
+          description: Module is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+components:
+  schemas: {}
+YAML
+
+# Create feature specification
+cat > "lib/$FEATURE_NAME/specs/feature.md" <<MD
+# $FEATURE_NAME Feature Specification
+
+## Overview
+This document describes the $FEATURE_NAME feature for LDC Construction Tools.
+
+## Requirements
+- [ ] Requirement 1
+- [ ] Requirement 2
+- [ ] Requirement 3
+
+## API Endpoints
+- GET /api/v1/$FEATURE_NAME/health - Health check
+
+## Components
+- ${FEATURE_NAME^}Component - Main React component
+
+## Dependencies
+- None
+
+## Testing Strategy
+- Unit tests for API layer
+- Component tests for React components
+- Integration tests for full feature
+
+## Deployment
+- Module is deployed as part of the main application
+- Can be independently versioned and updated
+MD
+
+echo "✅ Created new feature module: lib/$FEATURE_NAME"
+echo "📁 Structure:"
+echo "   lib/$FEATURE_NAME/src/        - Source code"
+echo "   lib/$FEATURE_NAME/tests/      - Test files"
+echo "   lib/$FEATURE_NAME/contracts/  - OpenAPI contracts"
+echo "   lib/$FEATURE_NAME/specs/      - Feature specifications"
+echo ""
+echo "Next steps:"
+echo "1. Implement the feature in lib/$FEATURE_NAME/src/"
+echo "2. Add tests in lib/$FEATURE_NAME/tests/"
+echo "3. Update the OpenAPI contract"
+echo "4. Complete the feature specification"

@@ -139,8 +139,8 @@ class RoleAssignment(Base, TimestampMixin, AuditMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     
     # Role definition
-    role_level: Mapped[RoleLevel] = mapped_column(Enum(RoleLevel), nullable=False)
-    assignment_category: Mapped[AssignmentCategory] = mapped_column(Enum(AssignmentCategory), nullable=False)
+    role_level: Mapped[str] = mapped_column(String(50), nullable=False)
+    assignment_category: Mapped[str] = mapped_column(String(50), nullable=False)
     
     # Assignment location
     trade_team_id: Mapped[Optional[int]] = mapped_column(

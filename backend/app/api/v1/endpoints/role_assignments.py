@@ -1,9 +1,9 @@
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
-from datetime import datetime
+from sqlalchemy import text
 
-from app.core.database import get_db
+from app.database import get_db
 from app.models.trade_teams import RoleAssignment, TradeTeam, TradeCrew
 from app.schemas.role_assignments import (
     RoleAssignmentCreate,
@@ -14,7 +14,27 @@ from app.schemas.role_assignments import (
 
 router = APIRouter()
 
-@router.get("/", response_model=List[RoleAssignmentWithRelations])
+@router.get("/test")
+def test_role_assignments(db: Session = Depends(get_db)):
+    """Test endpoint to check database connection"""
+    try:
+        # Test raw SQL query first
+        result = db.execute(text("SELECT COUNT(*) as count FROM role_assignments")).fetchone()
+        count = result[0] if result else 0
+        
+        # Test simple query
+        assignments = db.execute(text("SELECT id, role_level, assignment_category FROM role_assignments LIMIT 3")).fetchall()
+        
+        return {
+            "status": "success", 
+            "count": count,
+            "sample_data": [{"id": row[0], "role_level": row[1], "assignment_category": row[2]} for row in assignments]
+        }
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
+
+@router.get("/")
 def get_role_assignments(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -26,23 +46,53 @@ def get_role_assignments(
     db: Session = Depends(get_db)
 ):
     """Get role assignments with optional filtering"""
-    query = db.query(RoleAssignment).options(
-        joinedload(RoleAssignment.trade_team),
-        joinedload(RoleAssignment.trade_crew)
-    )
-    
-    if trade_team_id:
-        query = query.filter(RoleAssignment.trade_team_id == trade_team_id)
-    if trade_crew_id:
-        query = query.filter(RoleAssignment.trade_crew_id == trade_crew_id)
-    if assignment_category:
-        query = query.filter(RoleAssignment.assignment_category == assignment_category)
-    if is_vacant is not None:
-        query = query.filter(RoleAssignment.is_vacant == is_vacant)
-    if status:
-        query = query.filter(RoleAssignment.status == status)
-    
-    return query.offset(skip).limit(limit).all()
+    try:
+        # Build SQL query with filters
+        sql = "SELECT * FROM role_assignments WHERE 1=1"
+        params = {}
+        
+        if trade_team_id:
+            sql += " AND trade_team_id = :trade_team_id"
+            params["trade_team_id"] = trade_team_id
+        if trade_crew_id:
+            sql += " AND trade_crew_id = :trade_crew_id"
+            params["trade_crew_id"] = trade_crew_id
+        if assignment_category:
+            sql += " AND assignment_category = :assignment_category"
+            params["assignment_category"] = assignment_category
+        if is_vacant is not None:
+            sql += " AND is_vacant = :is_vacant"
+            params["is_vacant"] = is_vacant
+        if status:
+            sql += " AND status = :status"
+            params["status"] = status
+            
+        sql += f" LIMIT {limit} OFFSET {skip}"
+        
+        result = db.execute(text(sql), params).fetchall()
+        
+        assignments = []
+        for row in result:
+            assignments.append({
+                "id": row[0],
+                "role_level": row[1],
+                "assignment_category": row[2],
+                "trade_team_id": row[3],
+                "trade_crew_id": row[4],
+                "assigned_member_id": row[5],
+                "is_vacant": bool(row[6]),
+                "status": row[7],
+                "consultation_completed": bool(row[8]),
+                "impact_assessment": row[9],
+                "change_reason": row[10],
+                "effective_date": row[11],
+                "created_at": row[12],
+                "updated_at": row[13]
+            })
+        
+        return assignments
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{role_id}", response_model=RoleAssignmentWithRelations)
 def get_role_assignment(role_id: int, db: Session = Depends(get_db)):

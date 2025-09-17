@@ -10,7 +10,7 @@ from sqlalchemy import func, or_
 from typing import List, Optional
 from app.core.database import get_db
 from app.models.trade_teams import CrewMember as CrewMemberModel, TradeTeam as TradeTeamModel, TradeCrew as TradeCrewModel
-from app.schemas.trade_teams import CrewMember
+from app.schemas.trade_teams import CrewMember, CrewMemberCreate
 from pydantic import BaseModel
 
 class RoleCreate(BaseModel):
@@ -221,6 +221,62 @@ async def update_volunteer(
                 setattr(db_volunteer, 'trade_team_name', team.name)
     
     # Parse serving_as JSON string to list
+    if db_volunteer.serving_as:
+        try:
+            setattr(db_volunteer, 'serving_as', json.loads(db_volunteer.serving_as))
+        except (json.JSONDecodeError, TypeError):
+            setattr(db_volunteer, 'serving_as', [])
+    else:
+        setattr(db_volunteer, 'serving_as', [])
+    
+    return db_volunteer
+
+
+@router.post("/", response_model=CrewMember)
+async def create_volunteer(volunteer_data: CrewMemberCreate, db: Session = Depends(get_db)):
+    """Create a new volunteer"""
+    # Convert serving_as list to JSON string for storage
+    serving_as_json = None
+    if volunteer_data.serving_as:
+        serving_as_json = json.dumps(volunteer_data.serving_as)
+    
+    # Create new volunteer record
+    db_volunteer = CrewMemberModel(
+        first_name=volunteer_data.first_name,
+        last_name=volunteer_data.last_name,
+        email_personal=volunteer_data.email_personal,
+        email_jw=volunteer_data.email_jw,
+        phone=volunteer_data.phone,
+        role=volunteer_data.role,
+        congregation=volunteer_data.congregation,
+        trade_crew_id=volunteer_data.trade_crew_id if volunteer_data.trade_crew_id else None,
+        serving_as=serving_as_json,
+        is_overseer=volunteer_data.is_overseer if volunteer_data.is_overseer else False,
+        is_assistant=volunteer_data.is_assistant if volunteer_data.is_assistant else False,
+        ba_id=volunteer_data.ba_id,
+        availability_notes=volunteer_data.availability_notes,
+        is_active=True
+    )
+    
+    db.add(db_volunteer)
+    db.commit()
+    db.refresh(db_volunteer)
+    
+    # Add trade team and crew information and parse serving_as for response
+    if db_volunteer.trade_crew_id:
+        try:
+            crew = db.query(TradeCrewModel).filter(TradeCrewModel.id == db_volunteer.trade_crew_id).first()
+            if crew:
+                setattr(db_volunteer, 'trade_crew_name', crew.name)
+                team = db.query(TradeTeamModel).filter(TradeTeamModel.id == crew.trade_team_id).first()
+                if team:
+                    setattr(db_volunteer, 'trade_team_name', team.name)
+        except Exception:
+            # Skip crew/team lookup if there are schema issues
+            setattr(db_volunteer, 'trade_crew_name', None)
+            setattr(db_volunteer, 'trade_team_name', None)
+    
+    # Parse serving_as JSON string to list for response
     if db_volunteer.serving_as:
         try:
             setattr(db_volunteer, 'serving_as', json.loads(db_volunteer.serving_as))

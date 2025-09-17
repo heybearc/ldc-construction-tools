@@ -1,0 +1,970 @@
+openapi: 3.0.3
+info:
+  title: Assignment Workflow API
+  description: USLDC-2829-E compliant assignment workflow management
+  version: 0.1.0
+  contact:
+    name: LDC Construction Tools
+    email: support@ldc-construction-tools.org
+
+servers:
+  - url: /api/v1/assignment-workflow
+    description: Assignment Workflow API
+
+paths:
+  /assignments:
+    get:
+      summary: Get assignments
+      description: Retrieve assignments with optional filtering
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssignmentStatus'
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssignmentCategory'
+        - name: priority
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssignmentPriority'
+        - name: assigneeId
+          in: query
+          schema:
+            type: string
+        - name: regionId
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+    post:
+      summary: Create assignment
+      description: Create a new assignment with automatic workflow generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssignmentRequest'
+      responses:
+        '201':
+          description: Assignment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+
+  /assignments/{id}:
+    get:
+      summary: Get assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Assignment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+    patch:
+      summary: Update assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAssignmentRequest'
+      responses:
+        '200':
+          description: Assignment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+    delete:
+      summary: Delete assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Assignment deleted
+
+  /assignments/{id}/workflow:
+    get:
+      summary: Get assignment workflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Assignment workflow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentWorkflow'
+    post:
+      summary: Create workflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Workflow created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentWorkflow'
+
+  /assignments/{id}/workflow/advance:
+    post:
+      summary: Advance workflow step
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stepId:
+                  type: string
+                data:
+                  type: object
+              required:
+                - stepId
+      responses:
+        '200':
+          description: Workflow advanced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentWorkflow'
+
+  /assignments/{id}/approve:
+    post:
+      summary: Approve assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approverId:
+                  type: string
+                comments:
+                  type: string
+              required:
+                - approverId
+      responses:
+        '200':
+          description: Assignment approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentWorkflow'
+
+  /assignments/{id}/reject:
+    post:
+      summary: Reject assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approverId:
+                  type: string
+                reason:
+                  type: string
+              required:
+                - approverId
+                - reason
+      responses:
+        '200':
+          description: Assignment rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentWorkflow'
+
+  /consultations:
+    post:
+      summary: Create pre-consultation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConsultationRequest'
+      responses:
+        '201':
+          description: Consultation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreConsultation'
+
+  /assignments/{id}/consultations:
+    get:
+      summary: Get assignment consultations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of consultations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreConsultation'
+
+  /impact-assessments:
+    post:
+      summary: Create impact assessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateImpactAssessmentRequest'
+      responses:
+        '201':
+          description: Impact assessment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAssessment'
+
+  /assignments/{id}/impact-assessment:
+    get:
+      summary: Get assignment impact assessment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Impact assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAssessment'
+
+  /templates:
+    get:
+      summary: Get assignment templates
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssignmentCategory'
+      responses:
+        '200':
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssignmentTemplate'
+    post:
+      summary: Create assignment template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentTemplate'
+
+  /stats:
+    get:
+      summary: Get assignment statistics
+      parameters:
+        - name: regionId
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Assignment statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentStats'
+
+  /pending-approvals/{approverId}:
+    get:
+      summary: Get pending approvals for approver
+      parameters:
+        - name: approverId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of assignments pending approval
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+
+  /users/{userId}/assignments:
+    get:
+      summary: Get user assignments
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssignmentStatus'
+      responses:
+        '200':
+          description: List of user assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+
+  /assignments/{id}/ldc-tech-support:
+    post:
+      summary: Submit to LDC Tech Support
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                issueType:
+                  type: string
+                description:
+                  type: string
+                priority:
+                  type: string
+                attachments:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - issueType
+                - description
+                - priority
+      responses:
+        '200':
+          description: Support ticket created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticketId:
+                    type: string
+                  status:
+                    type: string
+
+  /assignments/export:
+    get:
+      summary: Export assignments
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [csv, xlsx]
+            default: csv
+      responses:
+        '200':
+          description: Exported assignments
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  version:
+                    type: string
+                  timestamp:
+                    type: string
+
+components:
+  schemas:
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+        category:
+          $ref: '#/components/schemas/AssignmentCategory'
+        title:
+          type: string
+        description:
+          type: string
+        assigneeId:
+          type: string
+        assignerId:
+          type: string
+        projectId:
+          type: string
+        regionId:
+          type: string
+        status:
+          $ref: '#/components/schemas/AssignmentStatus'
+        priority:
+          $ref: '#/components/schemas/AssignmentPriority'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        estimatedHours:
+          type: number
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        impactedRoles:
+          type: array
+          items:
+            type: string
+        approvalRequired:
+          type: boolean
+        approvalLevel:
+          $ref: '#/components/schemas/ApprovalLevel'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - category
+        - title
+        - assigneeId
+        - assignerId
+        - regionId
+        - status
+        - priority
+
+    AssignmentCategory:
+      type: string
+      enum:
+        - branch_appointed
+        - field_assigned
+        - temporary
+        - emergency
+        - training
+        - special_project
+
+    AssignmentStatus:
+      type: string
+      enum:
+        - draft
+        - pending_consultation
+        - pending_approval
+        - approved
+        - active
+        - completed
+        - cancelled
+        - rejected
+
+    AssignmentPriority:
+      type: string
+      enum:
+        - low
+        - medium
+        - high
+        - urgent
+
+    ApprovalLevel:
+      type: string
+      enum:
+        - none
+        - overseer
+        - branch
+        - zone
+
+    AssignmentWorkflow:
+      type: object
+      properties:
+        id:
+          type: string
+        assignmentId:
+          type: string
+        currentStep:
+          $ref: '#/components/schemas/WorkflowStep'
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        approvers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowApprover'
+        consultations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreConsultation'
+        impactAssessment:
+          $ref: '#/components/schemas/ImpactAssessment'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    WorkflowStep:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, completed, skipped, failed]
+        assignedTo:
+          type: string
+        completedBy:
+          type: string
+        completedAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        requiredDocuments:
+          type: array
+          items:
+            type: string
+        order:
+          type: integer
+
+    WorkflowApprover:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        role:
+          type: string
+        level:
+          $ref: '#/components/schemas/ApprovalLevel'
+        status:
+          type: string
+          enum: [pending, approved, rejected, delegated]
+        comments:
+          type: string
+        approvedAt:
+          type: string
+          format: date-time
+        order:
+          type: integer
+
+    PreConsultation:
+      type: object
+      properties:
+        id:
+          type: string
+        assignmentId:
+          type: string
+        consultedPersonId:
+          type: string
+        consultedRole:
+          type: string
+        topic:
+          type: string
+        notes:
+          type: string
+        impactLevel:
+          type: string
+          enum: [none, low, medium, high, critical]
+        recommendations:
+          type: array
+          items:
+            type: string
+        consultedAt:
+          type: string
+          format: date-time
+        consultedBy:
+          type: string
+
+    ImpactAssessment:
+      type: object
+      properties:
+        id:
+          type: string
+        assignmentId:
+          type: string
+        impactedRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleImpact'
+        impactedProjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectImpact'
+        overallImpact:
+          type: string
+          enum: [none, low, medium, high, critical]
+        mitigationPlan:
+          type: string
+        assessedBy:
+          type: string
+        assessedAt:
+          type: string
+          format: date-time
+
+    RoleImpact:
+      type: object
+      properties:
+        roleId:
+          type: string
+        roleName:
+          type: string
+        personId:
+          type: string
+        impactType:
+          type: string
+          enum: [workload_increase, workload_decrease, skill_gap, schedule_conflict, resource_conflict, oversight_change]
+        impactLevel:
+          type: string
+          enum: [none, low, medium, high, critical]
+        description:
+          type: string
+        mitigationRequired:
+          type: boolean
+
+    ProjectImpact:
+      type: object
+      properties:
+        projectId:
+          type: string
+        projectName:
+          type: string
+        impactType:
+          type: string
+          enum: [workload_increase, workload_decrease, skill_gap, schedule_conflict, resource_conflict, oversight_change]
+        impactLevel:
+          type: string
+          enum: [none, low, medium, high, critical]
+        description:
+          type: string
+        delayEstimate:
+          type: number
+
+    AssignmentTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/AssignmentCategory'
+        description:
+          type: string
+        defaultSteps:
+          type: array
+          items:
+            type: object
+        requiredApprovals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalLevel'
+        estimatedDuration:
+          type: number
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+
+    AssignmentStats:
+      type: object
+      properties:
+        totalAssignments:
+          type: integer
+        activeAssignments:
+          type: integer
+        pendingApprovals:
+          type: integer
+        completedThisMonth:
+          type: integer
+        averageCompletionTime:
+          type: number
+        byCategory:
+          type: object
+        byStatus:
+          type: object
+        byPriority:
+          type: object
+
+    CreateAssignmentRequest:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/AssignmentCategory'
+        title:
+          type: string
+        description:
+          type: string
+        assigneeId:
+          type: string
+        assignerId:
+          type: string
+        projectId:
+          type: string
+        regionId:
+          type: string
+        priority:
+          $ref: '#/components/schemas/AssignmentPriority'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        estimatedHours:
+          type: number
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        impactedRoles:
+          type: array
+          items:
+            type: string
+      required:
+        - category
+        - title
+        - description
+        - assigneeId
+        - assignerId
+        - regionId
+        - priority
+        - startDate
+
+    UpdateAssignmentRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          $ref: '#/components/schemas/AssignmentPriority'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        estimatedHours:
+          type: number
+        requiredSkills:
+          type: array
+          items:
+            type: string
+
+    CreateConsultationRequest:
+      type: object
+      properties:
+        assignmentId:
+          type: string
+        consultedPersonId:
+          type: string
+        consultedRole:
+          type: string
+        topic:
+          type: string
+        notes:
+          type: string
+        impactLevel:
+          type: string
+          enum: [none, low, medium, high, critical]
+        recommendations:
+          type: array
+          items:
+            type: string
+        consultedBy:
+          type: string
+      required:
+        - assignmentId
+        - consultedPersonId
+        - consultedRole
+        - topic
+        - notes
+        - impactLevel
+        - consultedBy
+
+    CreateImpactAssessmentRequest:
+      type: object
+      properties:
+        assignmentId:
+          type: string
+        impactedRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleImpact'
+        impactedProjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectImpact'
+        overallImpact:
+          type: string
+          enum: [none, low, medium, high, critical]
+        mitigationPlan:
+          type: string
+        assessedBy:
+          type: string
+      required:
+        - assignmentId
+        - overallImpact
+        - assessedBy
+
+    CreateTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/AssignmentCategory'
+        description:
+          type: string
+        defaultSteps:
+          type: array
+          items:
+            type: object
+        requiredApprovals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalLevel'
+        estimatedDuration:
+          type: number
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        createdBy:
+          type: string
+      required:
+        - name
+        - category
+        - description
+        - createdBy

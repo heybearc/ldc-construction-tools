@@ -58,6 +58,15 @@ export default function ProjectCalendar() {
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month')
   const [filterType, setFilterType] = useState<'all' | 'project' | 'assignment' | 'milestone'>('all')
+  const [showCreateEvent, setShowCreateEvent] = useState(false)
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    date: '',
+    type: 'milestone' as 'project' | 'assignment' | 'milestone',
+    description: '',
+    location: '',
+    phase: ''
+  })
 
   useEffect(() => {
     loadCalendarData()
@@ -244,6 +253,32 @@ export default function ProjectCalendar() {
     return days
   }
 
+  const handleCreateEvent = async () => {
+    if (!newEvent.title || !newEvent.date) return
+
+    const event: CalendarEvent = {
+      id: `custom-${Date.now()}`,
+      title: newEvent.title,
+      date: new Date(newEvent.date),
+      type: newEvent.type,
+      description: newEvent.description,
+      location: newEvent.location,
+      phase: newEvent.phase,
+      status: 'active'
+    }
+
+    setEvents(prev => [...prev, event])
+    setShowCreateEvent(false)
+    setNewEvent({
+      title: '',
+      date: '',
+      type: 'milestone',
+      description: '',
+      location: '',
+      phase: ''
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -298,6 +333,15 @@ export default function ProjectCalendar() {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Create Event Button */}
+          <button
+            onClick={() => setShowCreateEvent(true)}
+            className="flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            New Event
+          </button>
+          
           {/* Filter */}
           <select
             value={filterType}
@@ -454,6 +498,111 @@ export default function ProjectCalendar() {
           </div>
         </div>
       </div>
+
+      {/* Create Event Modal */}
+      {showCreateEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Create New Event</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Event Title
+                </label>
+                <input
+                  type="text"
+                  value={newEvent.title}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter event title"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={newEvent.date}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Event Type
+                </label>
+                <select
+                  value={newEvent.type}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, type: e.target.value as any }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="milestone">Milestone</option>
+                  <option value="project">Project Event</option>
+                  <option value="assignment">Assignment</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="Event description (optional)"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={newEvent.location}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Event location (optional)"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phase
+                </label>
+                <input
+                  type="text"
+                  value={newEvent.phase}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, phase: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Project phase (optional)"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowCreateEvent(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateEvent}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Create Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

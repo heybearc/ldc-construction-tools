@@ -12,7 +12,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ - Commented out to allow SDD modular libraries in /lib directory
 lib64/
 parts/
 sdist/

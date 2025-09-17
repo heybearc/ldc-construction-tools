@@ -1,0 +1,279 @@
+openapi: 3.0.3
+info:
+  title: Trade Teams API
+  version: 1.0.0
+  description: |
+    API for trade-teams module in LDC Construction Tools.
+    This module provides functionality for managing trade teams and crews.
+  contact:
+    name: LDC Construction Tools Team
+    email: support@ldc-construction-tools.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://staging.ldc-construction-tools.com/api/v1
+    description: Staging server
+  - url: https://ldc-construction-tools.com/api/v1
+    description: Production server
+
+paths:
+  /trade-teams:
+    get:
+      summary: List all trade teams
+      description: Retrieve a list of all trade teams with crew counts
+      tags:
+        - Trade Teams
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TradeTeam'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trade-teams/{id}:
+    get:
+      summary: Get a specific trade team
+      description: Retrieve a specific trade team by ID
+      tags:
+        - Trade Teams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier for the trade team
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeTeam'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trade-teams/{id}/crews:
+    get:
+      summary: Get crews for a trade team
+      description: Retrieve all crews belonging to a specific trade team
+      tags:
+        - Trade Teams
+        - Trade Crews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Trade team ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TradeCrew'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trade-teams/stats:
+    get:
+      summary: Get trade teams statistics
+      description: Retrieve statistics about trade teams and crews
+      tags:
+        - Trade Teams
+        - Statistics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeTeamsStats'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trade-teams/health:
+    get:
+      summary: Health check
+      description: Check the health status of the trade teams module
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Module is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+components:
+  schemas:
+    TradeTeam:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - icon
+        - crew_count
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier
+        name:
+          type: string
+          description: Name of the trade team
+          maxLength: 255
+        description:
+          type: string
+          description: Description of the trade team
+          maxLength: 1000
+        icon:
+          type: string
+          description: Emoji icon for the trade team
+          maxLength: 10
+        crew_count:
+          type: integer
+          description: Number of crews in this trade team
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    TradeCrew:
+      type: object
+      required:
+        - id
+        - name
+        - trade_team_id
+        - trade_team_name
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier
+        name:
+          type: string
+          description: Name of the trade crew
+          maxLength: 255
+        description:
+          type: string
+          description: Description of the trade crew
+          maxLength: 1000
+        trade_team_id:
+          type: integer
+          format: int64
+          description: ID of the parent trade team
+        trade_team_name:
+          type: string
+          description: Name of the parent trade team
+        status:
+          type: string
+          enum: [active, inactive, pending]
+          description: Current status of the crew
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    TradeTeamsStats:
+      type: object
+      required:
+        - total_teams
+        - total_crews
+        - active_crews
+        - inactive_crews
+      properties:
+        total_teams:
+          type: integer
+          description: Total number of trade teams
+        total_crews:
+          type: integer
+          description: Total number of trade crews
+        active_crews:
+          type: integer
+          description: Number of active trade crews
+        inactive_crews:
+          type: integer
+          description: Number of inactive trade crews
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Trade Teams
+    description: Operations related to trade team management
+  - name: Trade Crews
+    description: Operations related to trade crew management
+  - name: Statistics
+    description: Statistical information about trade teams and crews
+  - name: Health
+    description: Health check operations
