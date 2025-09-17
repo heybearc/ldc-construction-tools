@@ -1,0 +1,13 @@
+Host ldc-staging
+    HostName 10.92.3.25
+    User root
+    IdentityFile .wmacs/ssh-keys/id_rsa
+    ConnectTimeout 10
+    StrictHostKeyChecking no
+
+Host ldc-production
+    HostName 10.92.3.23
+    User root
+    IdentityFile .wmacs/ssh-keys/id_rsa
+    ConnectTimeout 10
+    StrictHostKeyChecking no

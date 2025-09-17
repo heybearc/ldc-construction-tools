@@ -111,3 +111,9 @@ tmp/
 temp/
 *.tmp
 *.temp
+
+# WMACS Guardian
+.wmacs/logs/
+.wmacs/state/
+ssh_config_*
+*.wmacs.tmp

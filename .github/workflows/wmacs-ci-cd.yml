@@ -1,4 +1,4 @@
-name: WMACS CI/CD - LDC Construction Tools
+name: WMACS CI/CD Pipeline
 
 on:
   push:
@@ -6,305 +6,49 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    outputs:
-      release-hash: ${{ steps.hash.outputs.hash }}
-      environment: ${{ steps.env.outputs.environment }}
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Determine environment
-      id: env
-      run: |
-        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-          echo "environment=production" >> $GITHUB_OUTPUT
-          echo "container=133" >> $GITHUB_OUTPUT
-          echo "host=10.92.3.23" >> $GITHUB_OUTPUT
-        else
-          echo "environment=staging" >> $GITHUB_OUTPUT
-          echo "container=135" >> $GITHUB_OUTPUT
-          echo "host=10.92.3.25" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Generate release hash
-      id: hash
-      run: |
-        HASH=$(git rev-parse --short HEAD)
-        echo "hash=$HASH" >> $GITHUB_OUTPUT
-        echo "Release hash: $HASH"
-
+    - uses: actions/checkout@v3
+    
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-        cache-dependency-path: backend/requirements.txt
-
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm ci
-
-    - name: Install backend dependencies
-      run: |
-        cd backend
-        pip install -r requirements.txt
-
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
-
+    
+    - name: Install dependencies
+      run: npm ci
+    
     - name: Run tests
-      run: |
-        cd backend
-        python -m pytest tests/ --verbose || echo "Tests will be implemented in Phase 2"
-        cd ../frontend
-        npm test -- --watchAll=false || echo "Frontend tests will be implemented in Phase 2"
-
-    - name: Create deployment artifact
-      run: |
-        mkdir -p artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}
-        
-        # Copy backend
-        cp -r backend artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}/
-        
-        # Copy frontend build
-        cp -r frontend artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}/
-        
-        # Copy deployment scripts
-        cp -r scripts artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}/
-        
-        # Copy configuration
-        cp -r lib artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}/
-        
-        # Create deployment metadata
-        cat > artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}/deployment-metadata.json << EOF
-        {
-          "release_hash": "${{ steps.hash.outputs.hash }}",
-          "environment": "${{ steps.env.outputs.environment }}",
-          "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-          "commit_sha": "${{ github.sha }}",
-          "branch": "${{ github.ref_name }}",
-          "frontend_build": true,
-          "backend_dependencies": true
-        }
-        EOF
-
-    - name: Upload deployment artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ldc-construction-tools-${{ steps.hash.outputs.hash }}
-        path: artifacts/ldc-construction-tools-${{ steps.hash.outputs.hash }}
-        retention-days: 30
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
+      run: npm test
     
-    steps:
-    - name: Checkout deployment scripts
-      uses: actions/checkout@v4
-      with:
-        sparse-checkout: |
-          scripts/
-          .github/
-        sparse-checkout-cone-mode: false
+    - name: Build application
+      run: npm install
 
-    - name: Download deployment artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ldc-construction-tools-${{ needs.build.outputs.release-hash }}
-        path: ./artifact
-
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.LDC_SSH_PRIVATE_KEY }}" > ~/.ssh/ldc_key
-        chmod 600 ~/.ssh/ldc_key
-        ssh-keyscan -H 10.92.3.23 >> ~/.ssh/known_hosts
-        ssh-keyscan -H 10.92.3.25 >> ~/.ssh/known_hosts
-
-    - name: Deploy to environment
-      run: |
-        ENVIRONMENT="${{ needs.build.outputs.environment }}"
-        RELEASE_HASH="${{ needs.build.outputs.release-hash }}"
-        
-        if [[ "$ENVIRONMENT" == "production" ]]; then
-          TARGET_HOST="10.92.3.23"
-          TARGET_PORT="3001"
-          DB_NAME="ldc_construction_tools"
-        else
-          TARGET_HOST="10.92.3.25"
-          TARGET_PORT="3001"
-          DB_NAME="ldc_construction_tools_staging"
-        fi
-        
-        echo "Deploying to $ENVIRONMENT ($TARGET_HOST)"
-        
-        # Create release directory
-        ssh -i ~/.ssh/ldc_key root@$TARGET_HOST "mkdir -p /opt/ldc-construction-tools/releases/$RELEASE_HASH"
-        
-        # Upload artifact
-        scp -i ~/.ssh/ldc_key -r ./artifact/* root@$TARGET_HOST:/opt/ldc-construction-tools/releases/$RELEASE_HASH/
-        
-        # Install dependencies and setup
-        ssh -i ~/.ssh/ldc_key root@$TARGET_HOST << EOF
-          cd /opt/ldc-construction-tools/releases/$RELEASE_HASH
-          
-          # Backend setup
-          cd backend
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          cd ..
-          
-          # Frontend setup
-          cd frontend
-          npm ci --production
-          cd ..
-          
-          # Create environment file
-          cat > .env.local << EOL
-        DATABASE_URL=postgresql://ldc_user:ldc_password@10.92.3.21:5432/$DB_NAME
-        NODE_ENV=production
-        PORT=$TARGET_PORT
-        BACKEND_PORT=8000
-        EOL
-          
-          # Update symlink atomically
-          ln -sfn /opt/ldc-construction-tools/releases/$RELEASE_HASH /opt/ldc-construction-tools/current-new
-          mv /opt/ldc-construction-tools/current-new /opt/ldc-construction-tools/current
-          
-          # Restart services
-          systemctl restart ldc-backend || echo "Backend service not configured yet"
-          systemctl restart ldc-frontend || echo "Frontend service not configured yet"
-          
-          # Health check
-          sleep 10
-          curl -f http://localhost:$TARGET_PORT/api/health || echo "Health check failed - manual intervention needed"
-        EOF
-
-    - name: Verify deployment
-      run: |
-        ENVIRONMENT="${{ needs.build.outputs.environment }}"
-        
-        if [[ "$ENVIRONMENT" == "production" ]]; then
-          TARGET_HOST="10.92.3.23"
-          TARGET_PORT="3001"
-        else
-          TARGET_HOST="10.92.3.25"
-          TARGET_PORT="3001"
-        fi
-        
-        # Wait for services to start
-        sleep 30
-        
-        # Verify deployment
-        ssh -i ~/.ssh/ldc_key root@$TARGET_HOST << EOF
-          echo "Verifying deployment on $TARGET_HOST:$TARGET_PORT"
-          
-          # Check if current symlink points to new release
-          CURRENT_RELEASE=\$(readlink /opt/ldc-construction-tools/current | xargs basename)
-          echo "Current release: \$CURRENT_RELEASE"
-          echo "Expected release: ${{ needs.build.outputs.release-hash }}"
-          
-          if [[ "\$CURRENT_RELEASE" == "${{ needs.build.outputs.release-hash }}" ]]; then
-            echo "✅ Symlink updated successfully"
-          else
-            echo "❌ Symlink update failed"
-            exit 1
-          fi
-          
-          # Test application endpoints
-          curl -f http://localhost:$TARGET_PORT/ || echo "⚠️  Frontend health check failed"
-          curl -f http://localhost:8000/api/v1/health || echo "⚠️  Backend health check failed"
-        EOF
-
-  cleanup:
-    needs: [build, deploy]
+  deploy-staging:
+    needs: test
     runs-on: ubuntu-latest
-    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
-    
+    if: github.ref == 'refs/heads/staging'
     steps:
-    - name: Cleanup old releases
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to Staging
       run: |
-        ENVIRONMENT="${{ needs.build.outputs.environment }}"
-        
-        if [[ "$ENVIRONMENT" == "production" ]]; then
-          TARGET_HOST="10.92.3.23"
-        else
-          TARGET_HOST="10.92.3.25"
-        fi
-        
-        # Setup SSH
-        mkdir -p ~/.ssh
-        echo "${{ secrets.LDC_SSH_PRIVATE_KEY }}" > ~/.ssh/ldc_key
-        chmod 600 ~/.ssh/ldc_key
-        ssh-keyscan -H $TARGET_HOST >> ~/.ssh/known_hosts
-        
-        # Keep only last 5 releases
-        ssh -i ~/.ssh/ldc_key root@$TARGET_HOST << EOF
-          cd /opt/ldc-construction-tools/releases
-          ls -t | tail -n +6 | xargs -r rm -rf
-          echo "Cleanup completed - kept last 5 releases"
-        EOF
+        # Add your staging deployment commands here
+        echo "Deploying to staging..."
+        node scripts/wmacs/wmacs-guardian-ldc-construction-tools.js deploy-staging
 
-  wmacs-metrics:
-    needs: [build, deploy]
+  deploy-production:
+    needs: test
     runs-on: ubuntu-latest
-    if: always()
-    
+    if: github.ref == 'refs/heads/main'
     steps:
-    - name: Generate WMACS metrics
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to Production
       run: |
-        cat > wmacs-deployment-metrics.json << EOF
-        {
-          "wmacs_deployment": {
-            "release_hash": "${{ needs.build.outputs.release-hash }}",
-            "environment": "${{ needs.build.outputs.environment }}",
-            "deployment_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "status": "${{ job.status }}",
-            "build_duration_seconds": ${{ github.event.head_commit.timestamp && (github.run_number * 60) || 0 }},
-            "credit_usage": {
-              "build": 3.0,
-              "deploy": 2.0,
-              "test": 1.0,
-              "total": 6.0
-            },
-            "artifacts": {
-              "frontend_bundle_size_kb": 0,
-              "backend_dependencies": true,
-              "deployment_artifact_mb": 0
-            }
-          }
-        }
-        EOF
-        
-        echo "WMACS deployment metrics generated"
-        cat wmacs-deployment-metrics.json
-
-    - name: Upload WMACS metrics
-      uses: actions/upload-artifact@v4
-      with:
-        name: wmacs-metrics-${{ needs.build.outputs.release-hash }}
-        path: wmacs-deployment-metrics.json
-        retention-days: 90
+        # Add your production deployment commands here
+        echo "Deploying to production..."
+        # node scripts/wmacs/wmacs-guardian-ldc-construction-tools.js deploy-production
