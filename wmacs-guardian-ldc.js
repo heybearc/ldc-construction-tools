@@ -10,6 +10,8 @@ const execAsync = promisify(exec);
 class WMACSGuardianLDC {
   constructor(config = {}) {
     this.config = {
+      projectId: 'ldc-construction-tools',
+      operationNamespace: 'ldc-tools',
       maxRetries: 3,
       timeoutMs: 30000,
       healthCheckInterval: 5000,

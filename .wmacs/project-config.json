@@ -1,0 +1,36 @@
+{
+  "project_wmacs_config": {
+    "project_name": "ldc-construction-tools",
+    "project_id": "ldc-tools",
+    "isolated_mode": true,
+    "containers": {
+      "staging": {
+        "id": "135",
+        "ip": "10.92.3.25",
+        "ports": [3001, 8000],
+        "services": ["ldc-tools-frontend", "ldc-tools-backend"]
+      },
+      "production": {
+        "id": "133", 
+        "ip": "10.92.3.23",
+        "ports": [3001, 8000],
+        "services": ["ldc-tools-frontend", "ldc-tools-backend"]
+      }
+    },
+    "guardian_config": {
+      "project_prefix": "ldc",
+      "log_file": "/var/log/wmacs-ldc-guardian.log",
+      "operation_namespace": "ldc-tools"
+    },
+    "mcp_config": {
+      "server_port": 8001,
+      "project_namespace": "ldc-tools",
+      "operation_log": "/var/log/wmacs-ldc-mcp-ops.log"
+    },
+    "credit_budget": {
+      "isolated_tracking": true,
+      "project_allocation": 500,
+      "budget_file": ".wmacs/credit-budget.json"
+    }
+  }
+}
