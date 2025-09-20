@@ -1,0 +1,171 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js Models (Required for Prisma Adapter)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  
+  // LDC Construction Tools specific fields
+  firstName     String?
+  lastName      String?
+  role          UserRole  @default(READ_ONLY)
+  status        UserStatus @default(INVITED)
+  regionId      String    @default("01.12")
+  zoneId        String    @default("01")
+  passwordHash  String?
+  
+  // Authentication tracking
+  lastLogin     DateTime?
+  loginCount    Int       @default(0)
+  
+  // Invitation tracking
+  invitedBy     String?
+  invitedAt     DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  sentInvitations UserInvitation[] @relation("InvitedBy")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// LDC Construction Tools Models
+model UserInvitation {
+  id              String     @id @default(cuid())
+  email           String
+  firstName       String
+  lastName        String
+  role            UserRole
+  regionId        String
+  zoneId          String
+  
+  // Invitation details
+  invitedBy       String
+  invitedByUser   User       @relation("InvitedBy", fields: [invitedBy], references: [id])
+  invitationToken String     @unique
+  expiresAt       DateTime
+  
+  // Status tracking
+  status          InvitationStatus @default(PENDING)
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  
+  // Reminder tracking
+  remindersSent   Int        @default(0)
+  lastReminderAt  DateTime?
+  
+  // Timestamps
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model EmailConfiguration {
+  id                    String   @id @default(cuid())
+  
+  // Provider details
+  provider              String   @default("gmail")
+  displayName           String
+  
+  // SMTP Configuration
+  smtpHost              String
+  smtpPort              Int      @default(587)
+  username              String
+  appPasswordEncrypted  String
+  
+  // Email settings
+  fromEmail             String
+  fromName              String
+  encryption            String   @default("tls")
+  
+  // Status
+  isDefault             Boolean  @default(false)
+  isActive              Boolean  @default(true)
+  testStatus            String   @default("untested")
+  lastTested            DateTime?
+  
+  // Regional assignment
+  regionId              String?
+  
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN
+  ZONE_OVERSEER
+  PERSONNEL_CONTACT
+  CONSTRUCTION_GROUP_OVERSEER
+  TRADE_TEAM_OVERSEER
+  FIELD_REP
+  READ_ONLY
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum InvitationStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}

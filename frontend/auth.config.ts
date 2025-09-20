@@ -1,6 +1,9 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import type { NextAuthOptions } from 'next-auth';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+
+const prisma = new PrismaClient();
 
 // User type for authentication
 interface AuthUser {
@@ -29,45 +32,49 @@ export const authConfig: NextAuthOptions = {
         try {
           console.log('NextAuth: Attempting to authenticate user:', credentials.email);
           
-          // Call our backend API to authenticate user
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/auth/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password
-            }),
+          // Find user in Prisma database
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
           });
 
-          if (!response.ok) {
-            console.log('NextAuth: Authentication failed - invalid credentials');
+          if (!user) {
+            console.log('NextAuth: User not found:', credentials.email);
             return null;
           }
 
-          const userData = await response.json();
-          
-          if (!userData || !userData.user) {
-            console.log('NextAuth: No user data returned from backend');
+          if (user.status !== 'ACTIVE') {
+            console.log('NextAuth: User account is not active:', user.status);
             return null;
           }
 
-          const user = userData.user;
-          
+          // Verify password
+          if (!user.passwordHash || !bcrypt.compareSync(credentials.password, user.passwordHash)) {
+            console.log('NextAuth: Invalid password');
+            return null;
+          }
+
+          // Update last login
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { 
+              lastLogin: new Date(),
+              loginCount: { increment: 1 }
+            }
+          });
+
           console.log('NextAuth: Authentication successful for:', user.email);
           
           return {
             id: user.id,
             email: user.email,
-            name: `${user.first_name} ${user.last_name}`,
+            name: user.name || `${user.firstName} ${user.lastName}`,
             role: user.role,
-            regionId: user.region_id,
-            zoneId: user.zone_id
+            regionId: user.regionId,
+            zoneId: user.zoneId
           };
 
         } catch (error) {
-          console.error('NextAuth: Authentication error:', error);
+          console.error('NextAuth: Database authentication error:', error);
           
           // Fallback for development - remove in production
           if (process.env.NODE_ENV === 'development' && 
@@ -78,7 +85,7 @@ export const authConfig: NextAuthOptions = {
               id: 'dev-admin-id',
               email: 'admin@ldc-construction.local',
               name: 'Development Admin',
-              role: 'super_admin',
+              role: 'SUPER_ADMIN',
               regionId: '01.12',
               zoneId: '01'
             };
