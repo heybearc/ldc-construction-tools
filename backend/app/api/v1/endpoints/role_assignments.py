@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import text
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.trade_teams import RoleAssignment, TradeTeam, TradeCrew
 from app.schemas.role_assignments import (
     RoleAssignmentCreate,
