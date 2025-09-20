@@ -11,6 +11,9 @@ module.exports = {
     staging: {
       container: '135',
       ip: '10.92.3.25',
+      sshHost: 'ldc-construction-tools',
+      sshKey: '~/.ssh/ldc_construction_key',
+      sshConfig: '/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant',
       ports: {
         frontend: 3001,
         backend: 8000,
@@ -18,8 +21,10 @@ module.exports = {
       }
     },
     production: {
-      container: '133',
+      container: '133', 
       ip: '10.92.3.23',
+      sshHost: 'ldc-construction-tools-prod',
+      sshKey: '~/.ssh/ldc_construction_key',
       ports: {
         frontend: 3001,
         backend: 8000,
@@ -31,6 +36,7 @@ module.exports = {
   // Container management
   containers: ['133', '135'], // Production, Staging
   proxmoxHost: '10.92.0.5',
+  sshConfig: '/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant',
   
   // Process management
   processes: {
@@ -54,14 +60,30 @@ module.exports = {
     
     // Custom recovery functions
     customStrategies: {
-      // Example: Custom database connection recovery
-      databaseRecovery: async function(container) {
-        // Custom implementation
+      // LDC Construction Tools specific recovery
+      containerRestart: async function(container) {
+        const sshCmd = `ssh -F ${this.sshConfig} proxmox "pct restart ${container}"`;
+        return await this.executeCommand(sshCmd);
       },
       
-      // Example: Custom cache clearing
-      cacheRecovery: async function(container) {
-        // Custom implementation
+      // Service restart on container
+      serviceRestart: async function(environment) {
+        const env = this.environments[environment];
+        const sshCmd = `ssh -F ${this.sshConfig} ${env.sshHost} "systemctl restart ldc-backend ldc-frontend"`;
+        return await this.executeCommand(sshCmd);
+      },
+      
+      // Database connection recovery
+      databaseRecovery: async function(container) {
+        const sshCmd = `ssh -F ${this.sshConfig} jw-postgres "systemctl restart postgresql"`;
+        return await this.executeCommand(sshCmd);
+      },
+      
+      // Next.js build cache clearing
+      cacheRecovery: async function(environment) {
+        const env = this.environments[environment];
+        const sshCmd = `ssh -F ${this.sshConfig} ${env.sshHost} "cd /opt/ldc-construction-tools && rm -rf .next && npm run build"`;
+        return await this.executeCommand(sshCmd);
       }
     }
   },
@@ -102,5 +124,16 @@ module.exports = {
     standards: ['USLDC-2829-E', 'USLDC-2275-E'],
     requiredTests: ['role-management', 'trade-teams', 'volunteer-management'],
     documentationRequirements: ['Personnel Contact responsibilities', 'Trade Crew Overseer assignments']
+  },
+  
+  // CI/CD Integration
+  cicd: {
+    githubActions: true,
+    artifactDeployment: true,
+    stagingBranch: 'staging',
+    productionBranch: 'main',
+    deploymentTimeout: 300000, // 5 minutes
+    healthCheckRetries: 3,
+    rollbackOnFailure: true
   }
 };
