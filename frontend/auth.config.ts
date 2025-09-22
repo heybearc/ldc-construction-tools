@@ -101,6 +101,13 @@ export const authConfig: NextAuthOptions = {
     error: '/auth/error'
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         console.log('NextAuth JWT: Adding user to token:', user);
