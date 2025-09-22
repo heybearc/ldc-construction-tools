@@ -1,16 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
   const [email, setEmail] = useState('admin@ldc-construction.local');
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [callbackUrl, setCallbackUrl] = useState('/');
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+
+  // Get callback URL from URL params after hydration
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callback = params.get('callbackUrl') || '/';
+    setCallbackUrl(callback);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
