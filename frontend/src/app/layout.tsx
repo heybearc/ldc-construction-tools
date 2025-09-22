@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import AuthProvider from '../components/AuthProvider'
+import SignOutButton from '../components/SignOutButton'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -33,23 +34,28 @@ export default function RootLayout({
                       Region 01.12
                     </span>
                   </div>
-                  <nav className="flex space-x-8">
-                    <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium">
-                      Trade Teams
-                    </Link>
-                    <Link href="/projects" className="text-gray-700 hover:text-blue-600 font-medium">
-                      Projects
-                    </Link>
-                    <Link href="/calendar" className="text-gray-700 hover:text-blue-600 font-medium">
-                      Calendar
-                    </Link>
-                    <Link href="/volunteers" className="text-gray-700 hover:text-blue-600 font-medium">
-                      Volunteers
-                    </Link>
-                    <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
-                      Admin
-                    </Link>
-                  </nav>
+                  <div className="flex items-center space-x-8">
+                    <nav className="flex space-x-8">
+                      <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium">
+                        Trade Teams
+                      </Link>
+                      <Link href="/projects" className="text-gray-700 hover:text-blue-600 font-medium">
+                        Projects
+                      </Link>
+                      <Link href="/calendar" className="text-gray-700 hover:text-blue-600 font-medium">
+                        Calendar
+                      </Link>
+                      <Link href="/volunteers" className="text-gray-700 hover:text-blue-600 font-medium">
+                        Volunteers
+                      </Link>
+                      <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
+                        Admin
+                      </Link>
+                    </nav>
+                    <div className="border-l border-gray-300 pl-8">
+                      <SignOutButton />
+                    </div>
+                  </div>
                 </div>
               </div>
             </header>
