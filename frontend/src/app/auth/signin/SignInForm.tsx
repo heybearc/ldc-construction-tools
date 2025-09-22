@@ -10,7 +10,7 @@ export default function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const callbackUrl = searchParams?.get('callbackUrl') || '/'
 
   async function handleSubmit(formData: FormData) {
     setError('')
