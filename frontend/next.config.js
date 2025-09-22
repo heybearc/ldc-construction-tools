@@ -11,6 +11,10 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: [],
   },
+  // Disable React strict mode to prevent hydration issues
+  reactStrictMode: false,
+  // Disable SWC minification which can cause hydration issues
+  swcMinify: false,
 }
 
 module.exports = nextConfig
