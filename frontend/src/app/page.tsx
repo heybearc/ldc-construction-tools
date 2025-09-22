@@ -1,15 +1,49 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import OrganizationalDashboard from '@/components/OrganizationalDashboard'
 import TradeTeamsDashboard from '@/components/TradeTeamsDashboard'
 import TradeTeamsOverview from '@/components/TradeTeamsOverview'
 import RoleManagement from '@/components/RoleManagement'
+import { Loader2 } from 'lucide-react'
 
 type ViewMode = 'organizational' | 'dashboard' | 'detailed' | 'roles'
 
 export default function HomePage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [viewMode, setViewMode] = useState<ViewMode>('organizational')
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (status === 'loading') return // Still loading
+    
+    if (status === 'unauthenticated') {
+      console.log('User not authenticated, redirecting to login')
+      router.push('/auth/signin')
+      return
+    }
+  }, [status, router])
+
+  // Show loading spinner while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-2 text-sm text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If not authenticated, don't render content (will redirect)
+  if (status === 'unauthenticated') {
+    return null
+  }
 
   const getTitle = () => {
     switch (viewMode) {

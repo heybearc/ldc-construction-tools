@@ -321,6 +321,137 @@ class WMACSGuardian {
       return { login: 'success', dashboard: dashboardResult.stdout.includes('200') ? 'accessible' : 'redirect' };
     });
   }
+
+  async guardedHealthCheck(target, port = 3001) {
+    return this.executeWithGuardian('health-check', target, async () => {
+      const isLocal = target === 'local' || target === 'localhost';
+      const targetHost = isLocal ? 'localhost' : this.getContainerIP(target);
+      
+      console.log(`🔍 WMACS Guardian: Performing health check on ${targetHost}:${port}`);
+      
+      // Check if process is running on port
+      if (isLocal) {
+        try {
+          const processCheck = await execAsync(`lsof -ti:${port}`);
+          const pid = processCheck.stdout.trim();
+          
+          if (!pid) {
+            throw new Error(`No process found on port ${port}`);
+          }
+          
+          console.log(`📊 Process ${pid} found on port ${port}`);
+          
+          // Check process details
+          const processDetails = await execAsync(`ps aux | grep ${pid} | grep -v grep`);
+          console.log(`📋 Process details: ${processDetails.stdout.trim()}`);
+          
+        } catch (error) {
+          throw new Error(`Port check failed: ${error.message}`);
+        }
+      }
+      
+      // Test basic connectivity with timeout
+      try {
+        const connectTest = await execAsync(`curl -I http://${targetHost}:${port}/ -m 10 -s`);
+        
+        if (connectTest.stdout.includes('200 OK')) {
+          console.log(`✅ Server responding normally`);
+          return { status: 'healthy', response: 'ok' };
+        } else if (connectTest.stdout.includes('HTTP/')) {
+          console.log(`⚠️ Server responding but not 200 OK: ${connectTest.stdout.split('\\n')[0]}`);
+          return { status: 'degraded', response: connectTest.stdout.split('\\n')[0] };
+        } else {
+          throw new Error(`No HTTP response received`);
+        }
+      } catch (error) {
+        // Research Advisor analysis
+        if (this.researchAdvisor) {
+          this.researchAdvisor.recordMistake(
+            `Server unresponsive on ${targetHost}:${port}`,
+            'high',
+            'Server may be hung, needs restart or investigation'
+          );
+        }
+        
+        throw new Error(`Health check failed: ${error.message}`);
+      }
+    });
+  }
+
+  async guardedRedirectTest(target, port = 3001) {
+    return this.executeWithGuardian('redirect-test', target, async () => {
+      const isLocal = target === 'local' || target === 'localhost';
+      const targetHost = isLocal ? 'localhost' : this.getContainerIP(target);
+      
+      console.log(`🔍 WMACS Guardian: Testing authentication redirect on ${targetHost}:${port}`);
+      
+      // Test root page redirect behavior
+      try {
+        // Test with curl following redirects
+        const redirectTest = await execAsync(`curl -L -I http://${targetHost}:${port}/ -m 10 -s`);
+        console.log(`📋 Redirect response headers:\\n${redirectTest.stdout}`);
+        
+        // Test without following redirects to see if redirect is issued
+        const noRedirectTest = await execAsync(`curl -I http://${targetHost}:${port}/ -m 10 -s`);
+        console.log(`📋 Direct response (no follow):\\n${noRedirectTest.stdout}`);
+        
+        // Check if NextAuth session endpoint exists
+        const sessionTest = await execAsync(`curl -I http://${targetHost}:${port}/api/auth/session -m 10 -s`);
+        console.log(`📋 NextAuth session endpoint:\\n${sessionTest.stdout}`);
+        
+        // Check if signin page exists
+        const signinTest = await execAsync(`curl -I http://${targetHost}:${port}/auth/signin -m 10 -s`);
+        console.log(`📋 Signin page response:\\n${signinTest.stdout}`);
+        
+        // Research Advisor analysis
+        if (this.researchAdvisor) {
+          let analysis = 'Authentication redirect analysis:\\n';
+          
+          if (noRedirectTest.stdout.includes('302') || noRedirectTest.stdout.includes('301')) {
+            analysis += '✅ Server issuing redirect (302/301 found)\\n';
+          } else if (noRedirectTest.stdout.includes('200 OK')) {
+            analysis += '❌ No redirect issued - page serving content directly\\n';
+            this.researchAdvisor.recordMistake(
+              'Authentication redirect not working',
+              'medium',
+              'Root page should redirect unauthenticated users to /auth/signin but is serving content directly'
+            );
+          }
+          
+          if (signinTest.stdout.includes('200 OK')) {
+            analysis += '✅ Signin page accessible\\n';
+          } else {
+            analysis += '❌ Signin page not accessible\\n';
+          }
+          
+          if (sessionTest.stdout.includes('400') || sessionTest.stdout.includes('200')) {
+            analysis += '✅ NextAuth API responding\\n';
+          } else {
+            analysis += '❌ NextAuth API not responding\\n';
+          }
+          
+          console.log(`🧠 Research Advisor Analysis:\\n${analysis}`);
+        }
+        
+        return {
+          rootPage: noRedirectTest.stdout.includes('302') ? 'redirecting' : 'serving_content',
+          signinPage: signinTest.stdout.includes('200') ? 'accessible' : 'not_found',
+          nextAuthApi: sessionTest.stdout.includes('400') || sessionTest.stdout.includes('200') ? 'responding' : 'not_found'
+        };
+        
+      } catch (error) {
+        if (this.researchAdvisor) {
+          this.researchAdvisor.recordMistake(
+            `Redirect test failed on ${targetHost}:${port}`,
+            'high',
+            `Could not test authentication redirect: ${error.message}`
+          );
+        }
+        
+        throw new Error(`Redirect test failed: ${error.message}`);
+      }
+    });
+  }
 }
 
 // Export for use in other WMACS scripts
@@ -345,7 +476,19 @@ if (require.main === module) {
         .catch(error => console.error('❌ Guardian test failed:', error.message));
       break;
       
+    case 'health':
+      guardian.guardedHealthCheck(container || 'local')
+        .then(result => console.log('✅ Guardian health check completed:', result))
+        .catch(error => console.error('❌ Guardian health check failed:', error.message));
+      break;
+      
+    case 'redirect':
+      guardian.guardedRedirectTest(container || 'local')
+        .then(result => console.log('✅ Guardian redirect test completed:', result))
+        .catch(error => console.error('❌ Guardian redirect test failed:', error.message));
+      break;
+      
     default:
-      console.log('Usage: node wmacs-guardian.js [start|test] [container]');
+      console.log('Usage: node wmacs-guardian.js [start|test|health|redirect] [container|local]');
   }
 }

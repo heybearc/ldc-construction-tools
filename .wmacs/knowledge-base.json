@@ -19,7 +19,22 @@
       "staging_first_development"
     ]
   },
-  "mistakes": [],
+  "mistakes": [
+    {
+      "timestamp": "2025-09-22T18:19:05.693Z",
+      "mistake": "Authentication redirect not working",
+      "impact": "medium",
+      "lesson": "Root page should redirect unauthenticated users to /auth/signin but is serving content directly",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-22T18:19:55.916Z",
+      "mistake": "Authentication redirect not working",
+      "impact": "medium",
+      "lesson": "Root page should redirect unauthenticated users to /auth/signin but is serving content directly",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    }
+  ],
   "learnings": [
     {
       "timestamp": "2025-09-20T14:28:48.581Z",
