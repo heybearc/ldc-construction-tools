@@ -9,14 +9,32 @@ export default function SignIn() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [callbackUrl, setCallbackUrl] = useState('/');
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  // Get callback URL from URL params after hydration
+  // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
+    setMounted(true);
     const params = new URLSearchParams(window.location.search);
     const callback = params.get('callbackUrl') || '/';
     setCallbackUrl(callback);
   }, []);
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-sm">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Sign in to LDC Construction Tools
+            </h2>
+            <p className="text-gray-600">Region 01.12</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,34 +66,20 @@ export default function SignIn() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      backgroundColor: '#f3f4f6',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <div style={{ 
-        maxWidth: '400px', 
-        width: '100%', 
-        padding: '2rem',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#1f2937', margin: '0 0 0.5rem 0' }}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
+      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-sm">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Sign in to LDC Construction Tools
           </h2>
-          <p style={{ color: '#6b7280', margin: 0 }}>
+          <p className="text-gray-600">
             Region 01.12
           </p>
         </div>
         
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', color: '#374151' }}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email address
             </label>
             <input
@@ -83,21 +87,14 @@ export default function SignIn() {
               name="email"
               type="email"
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
-              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           
-          <div style={{ marginBottom: '1rem' }}>
-            <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', color: '#374151' }}>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <input
@@ -105,21 +102,14 @@ export default function SignIn() {
               name="password"
               type="password"
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
-              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           {error && (
-            <div style={{ color: '#dc2626', fontSize: '0.875rem', textAlign: 'center', marginBottom: '1rem' }}>
+            <div className="text-red-600 text-sm text-center">
               {error}
             </div>
           )}
@@ -127,17 +117,11 @@ export default function SignIn() {
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: loading ? '#9ca3af' : '#4f46e5',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              fontWeight: '500',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
+            className={`w-full py-2 px-4 rounded-md text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-indigo-600 hover:bg-indigo-700 cursor-pointer'
+            }`}
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
