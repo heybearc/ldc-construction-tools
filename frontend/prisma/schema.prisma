@@ -72,6 +72,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   sentInvitations UserInvitation[] @relation("InvitedBy")
+  roleAssignments RoleAssignment[]
 }
 
 model VerificationToken {
@@ -114,34 +115,85 @@ model UserInvitation {
 
 model EmailConfiguration {
   id                    String   @id @default(cuid())
-  
-  // Provider details
-  provider              String   @default("gmail")
+  provider              String   // 'gmail', 'smtp', etc.
   displayName           String
-  
-  // SMTP Configuration
-  smtpHost              String
-  smtpPort              Int      @default(587)
-  username              String
-  appPasswordEncrypted  String
-  
-  // Email settings
+  smtpHost              String?
+  smtpPort              Int?
+  username              String?
+  appPasswordEncrypted  String?  // Encrypted app password
   fromEmail             String
   fromName              String
-  encryption            String   @default("tls")
-  
-  // Status
+  encryption            String?  // 'tls', 'ssl', 'none'
   isDefault             Boolean  @default(false)
   isActive              Boolean  @default(true)
-  testStatus            String   @default("untested")
+  testStatus            String   @default("untested") // 'untested', 'success', 'failed'
   lastTested            DateTime?
-  
-  // Regional assignment
   regionId              String?
-  
-  // Timestamps
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+
+  @@map("email_configurations")
+}
+
+// Role Management Models
+model Role {
+  id                    String   @id @default(cuid())
+  name                  String   @unique
+  displayName           String
+  description           String?
+  type                  RoleType
+  scope                 RoleScope
+  level                 Int      @default(0) // For hierarchy (higher = more permissions)
+  permissions           String[] // JSON array of permission strings
+  isActive              Boolean  @default(true)
+  regionId              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  assignments           RoleAssignment[]
+  
+  @@map("roles")
+}
+
+model RoleAssignment {
+  id                    String   @id @default(cuid())
+  userId                String
+  roleId                String
+  assignmentType        AssignmentType
+  scope                 String?  // Project ID, Team ID, or Region ID
+  startDate             DateTime @default(now())
+  endDate               DateTime?
+  isActive              Boolean  @default(true)
+  assignedBy            String   // User ID who made the assignment
+  consultationRequired  Boolean  @default(false)
+  consultationStatus    String?  // 'pending', 'approved', 'rejected'
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role                  Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId, scope])
+  @@map("role_assignments")
+}
+
+model RoleChangeLog {
+  id                    String   @id @default(cuid())
+  roleAssignmentId      String?
+  userId                String
+  roleId                String
+  action                String   // 'assigned', 'removed', 'modified'
+  previousData          String?  // JSON of previous state
+  newData               String?  // JSON of new state
+  reason                String?
+  performedBy           String   // User ID who performed the action
+  impactAssessment      String?
+  createdAt             DateTime @default(now())
+
+  @@map("role_change_logs")
 }
 
 // Enums
@@ -168,4 +220,31 @@ enum InvitationStatus {
   ACCEPTED
   EXPIRED
   CANCELLED
+}
+
+// Role Management Enums
+enum RoleType {
+  TRADE_TEAM_OVERSEER
+  TRADE_TEAM_ASSISTANT
+  TRADE_TEAM_SUPPORT
+  CREW_OVERSEER
+  CREW_ASSISTANT
+  CREW_SUPPORT
+  CREW_VOLUNTEER
+  ZONE_OVERSEER
+  PERSONNEL_CONTACT
+  SUPER_ADMIN
+}
+
+enum RoleScope {
+  GLOBAL      // System-wide permissions
+  REGIONAL    // Region-specific permissions
+  PROJECT     // Project-specific permissions
+  TEAM        // Team-specific permissions
+}
+
+enum AssignmentType {
+  BRANCH_APPOINTED      // Appointed by branch
+  FIELD_CONTINUOUS      // Field-assigned continuous
+  FIELD_TEMPORARY       // Field-assigned temporary
 }

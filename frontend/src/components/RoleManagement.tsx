@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserCheck, UserX, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, UserCheck, UserX, AlertCircle, CheckCircle, Plus, Edit, Trash2, Shield, Award, Clock } from 'lucide-react';
 
 // Simple UI components to avoid dependency issues
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -48,6 +48,313 @@ const Input = ({ id, value, onChange, placeholder, type = "text", className = ""
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  type?: string;
+  className?: string;
+}) => (
+  <input
+    id={id}
+    type={type}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+  />
+);
+
+const Select = ({ id, value, onChange, children, className = "" }: {
+  id?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <select
+    id={id}
+    value={value}
+    onChange={onChange}
+    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+  >
+    {children}
+  </select>
+);
+
+// Types for Role Management (defensive programming)
+interface RoleAssignment {
+  id: string;
+  userId: string;
+  roleId: string;
+  assignmentType: string;
+  scope?: string;
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+  consultationRequired: boolean;
+  consultationStatus?: string;
+  notes?: string;
+  user?: {
+    id: string;
+    name?: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    regionId?: string;
+    zoneId?: string;
+  };
+  role?: {
+    id: string;
+    name: string;
+    displayName: string;
+    type: string;
+    scope: string;
+    level: number;
+    permissions: string[];
+  };
+}
+
+interface Role {
+  id: string;
+  name: string;
+  displayName: string;
+  description?: string;
+  type: string;
+  scope: string;
+  level: number;
+  permissions: string[];
+  isActive: boolean;
+  regionId?: string;
+}
+
+interface RoleStats {
+  summary: {
+    totalAssignments: number;
+    recentAssignments: number;
+    consultationPending: number;
+    vacantRolesCount: number;
+    usersWithMultipleRoles: number;
+  };
+  roleTypeStats: Array<{
+    roleId: string;
+    roleName: string;
+    roleDisplayName: string;
+    roleType: string;
+    roleScope: string;
+    count: number;
+  }>;
+  assignmentsByType: Array<{
+    type: string;
+    count: number;
+  }>;
+  vacantRoles: Array<{
+    id: string;
+    name: string;
+    displayName: string;
+    type: string;
+  }>;
+}
+
+// Main Role Management Component with Defensive Programming
+export default function RoleManagement() {
+  // State management with defensive defaults
+  const [activeTab, setActiveTab] = useState<'assignments' | 'roles' | 'stats'>('assignments');
+  const [roleAssignments, setRoleAssignments] = useState<RoleAssignment[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [stats, setStats] = useState<RoleStats | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
+  // Form state for creating assignments
+  const [formData, setFormData] = useState({
+    userId: '',
+    roleId: '',
+    assignmentType: 'FIELD_CONTINUOUS',
+    scope: '',
+    consultationRequired: false,
+    notes: ''
+  });
+
+  // Defensive data fetching
+  const fetchRoleAssignments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/v1/role-assignments');
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.data)) {
+        setRoleAssignments(data.data);
+      } else {
+        console.warn('Invalid role assignments data:', data);
+        setRoleAssignments([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch role assignments:', err);
+      setError('Failed to load role assignments');
+      setRoleAssignments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch('/api/v1/roles');
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.data)) {
+        setRoles(data.data);
+      } else {
+        console.warn('Invalid roles data:', data);
+        setRoles([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
+      setRoles([]);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/v1/role-assignments/stats');
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        setStats(data.data);
+      } else {
+        console.warn('Invalid stats data:', data);
+        setStats(null);
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+      setStats(null);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchRoleAssignments();
+    fetchRoles();
+    fetchStats();
+  }, []);
+
+  // Handle form submission with defensive programming
+  const handleCreateAssignment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.userId || !formData.roleId) {
+      setError('Please select both user and role');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/v1/role-assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShowCreateForm(false);
+        setFormData({
+          userId: '',
+          roleId: '',
+          assignmentType: 'FIELD_CONTINUOUS',
+          scope: '',
+          consultationRequired: false,
+          notes: ''
+        });
+        await fetchRoleAssignments();
+        await fetchStats();
+      } else {
+        setError(data.error || 'Failed to create assignment');
+      }
+    } catch (err) {
+      console.error('Failed to create assignment:', err);
+      setError('Failed to create assignment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Render role assignment badge with defensive checks
+  const renderAssignmentBadge = (assignment: RoleAssignment) => {
+    const type = assignment?.assignmentType || 'UNKNOWN';
+    const colors = {
+      'BRANCH_APPOINTED': 'bg-purple-100 text-purple-800',
+      'FIELD_CONTINUOUS': 'bg-blue-100 text-blue-800',
+      'FIELD_TEMPORARY': 'bg-yellow-100 text-yellow-800',
+    };
+    
+    return (
+      <Badge className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+        {type.replace('_', ' ')}
+      </Badge>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+            <Shield className="mr-3 h-8 w-8 text-blue-600" />
+            Role Management
+          </h2>
+          <p className="text-gray-600 mt-1">
+            Manage organizational roles, permissions, and user assignments
+          </p>
+        </div>
+        
+        <Button onClick={() => setShowCreateForm(true)} className="flex items-center">
+          <Plus className="mr-2 h-4 w-4" />
+          New Assignment
+        </Button>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="flex">
+            <AlertCircle className="h-5 w-5 text-red-400" />
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {[
+            { id: 'assignments', label: 'Role Assignments', icon: Users },
+            { id: 'roles', label: 'Roles', icon: Award },
+            { id: 'stats', label: 'Statistics', icon: CheckCircle }
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id as any)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
+                activeTab === id
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Icon className="mr-2 h-4 w-4" />
+              {label}
+            </button>
+          ))}
+        </nav>
+      </div>
   type?: string;
   className?: string;
 }) => (
