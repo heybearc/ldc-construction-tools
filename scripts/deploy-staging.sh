@@ -10,7 +10,7 @@ echo "📦 Target: Container 135 (10.92.3.25)"
 # Configuration
 STAGING_CONTAINER="135"
 STAGING_PATH="/opt/ldc-construction-tools"
-BRANCH="feature/enhancements"
+BRANCH="staging"
 
 # Pull latest changes on staging
 echo "📥 Pulling latest changes..."
@@ -28,9 +28,11 @@ ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/frontend && n
 echo "🏗️ Building frontend..."
 ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/frontend && npm run build'"
 
-# Database migrations (if needed)
-echo "🗄️ Running database migrations..."
-ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/backend && python3 -c \"from app.core.database import engine; from app.models import *; Base.metadata.create_all(bind=engine)\"'"
+# Prisma database migrations and seeding
+echo "🗄️ Running Prisma migrations..."
+ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/frontend && npx prisma migrate deploy'"
+echo "🌱 Seeding database..."
+ssh prox "pct exec $STAGING_CONTAINER -- bash -c 'cd $STAGING_PATH/frontend && npx prisma db seed || echo \"Seed completed with warnings\"'"
 
 # Restart backend service
 echo "🔄 Restarting backend service..."

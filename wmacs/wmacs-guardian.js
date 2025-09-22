@@ -229,13 +229,15 @@ class WMACSGuardian {
     throw new Error(`Container ${target} did not become ready within ${maxWait/1000}s`);
   }
 
-  // Container IP mapping
+  // Container IP mapping for LDC Construction Tools
   getContainerIP(container) {
     const mapping = {
-      '134': '10.92.3.24', // staging
-      '135': '10.92.3.25', // if needed
-      '133': '10.92.3.22', // production
-      '132': '10.92.3.23'  // LDC tools
+      'staging': '10.92.3.25', // LDC staging
+      'production': '10.92.3.23', // LDC production
+      '134': '10.92.3.24', // JW staging (legacy)
+      '135': '10.92.3.25', // LDC staging
+      '133': '10.92.3.23', // LDC production
+      '132': '10.92.3.22'  // JW production (legacy)
     };
     return mapping[container] || `10.92.3.${container}`;
   }
@@ -298,8 +300,8 @@ class WMACSGuardian {
     return this.executeWithGuardian('login-test', container, async () => {
       const containerIP = this.getContainerIP(container);
       
-      // Test login flow
-      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/login -H "Content-Type: application/json" -d '{"email": "admin@jwscheduler.local", "password": "AdminPass123!"}' -s`);
+      // Test login flow for LDC Construction Tools
+      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/signin -H "Content-Type: application/json" -d '{"email": "admin@ldc-construction.local", "password": "AdminPass123!"}' -s`);
       
       const loginData = JSON.parse(loginResult.stdout);
       if (!loginData.success) {
