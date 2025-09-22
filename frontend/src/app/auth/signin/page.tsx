@@ -1,23 +1,24 @@
-import { Suspense } from 'react';
-import SignInForm from './SignInForm';
+import dynamic from 'next/dynamic';
 
-export default function SignIn() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
+// Completely disable SSR for the entire signin page
+const SignInPage = dynamic(() => import('./SignInClient'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-sm">
-        <div className="text-center mb-8">
+        <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Sign in to LDC Construction Tools
+            Loading Sign In...
           </h2>
-          <p className="text-gray-600">
-            Region 01.12
-          </p>
+          <div className="mt-4">
+            <div className="animate-pulse bg-gray-200 h-4 w-32 mx-auto rounded"></div>
+          </div>
         </div>
-        
-        <Suspense fallback={<div className="animate-pulse bg-gray-200 h-32 rounded"></div>}>
-          <SignInForm />
-        </Suspense>
       </div>
     </div>
-  );
+  ),
+});
+
+export default function SignIn() {
+  return <SignInPage />;
 }
