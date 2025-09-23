@@ -57,13 +57,12 @@ export async function POST(request: Request) {
         }), {
           status: 200,
           headers: { 
-            'Content-Type': 'application/json',
-            'Set-Cookie': [
-              `isAuthenticated=true; Path=/; HttpOnly; Max-Age=86400`,
-              `userEmail=${email}; Path=/; HttpOnly; Max-Age=86400`
-            ].join(', ')
+            'Content-Type': 'application/json'
           }
         });
+        
+        // Set cookies properly using Headers
+        response.headers.set('Set-Cookie', `isAuthenticated=true; Path=/; Max-Age=86400; SameSite=Lax`);
         
         return response;
       }
