@@ -16,13 +16,13 @@
           "ip": "10.92.3.25"
         },
         "production": {
-          "container": "133", 
-          "ip": "10.92.3.22"
+          "container": "134", 
+          "ip": "10.92.3.24"
         }
       },
       "guardrails": {
         "maxOperationsPerHour": 10,
-        "allowedHosts": ["10.92.3.22", "10.92.3.25"],
+        "allowedHosts": ["10.92.3.24", "10.92.3.25"],
         "allowedPaths": ["/opt/ldc-construction-tools"],
         "operationLog": "/var/log/wmacs-ldc-mcp-ops.log"
       }
