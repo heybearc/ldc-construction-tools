@@ -20,21 +20,36 @@ export default function HomePage() {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        // Add a small delay to ensure localStorage is available
-        setTimeout(() => {
-          const authStatus = localStorage.getItem('isAuthenticated')
-          const email = localStorage.getItem('userEmail')
-          
-          console.log('Auth check - authStatus:', authStatus, 'email:', email)
-          
-          setIsAuthenticated(authStatus === 'true')
-          setUserEmail(email)
-          
-          if (authStatus !== 'true') {
-            console.log('User not authenticated, redirecting to login')
-            router.push('/auth/signin')
-          }
-        }, 100) // Small delay to ensure localStorage is ready
+        // Check multiple storage methods
+        const localAuth = localStorage.getItem('isAuthenticated')
+        const sessionAuth = sessionStorage.getItem('isAuthenticated')
+        const localEmail = localStorage.getItem('userEmail')
+        const sessionEmail = sessionStorage.getItem('userEmail')
+        
+        // Check cookies as backup
+        const cookieAuth = document.cookie.includes('isAuthenticated=true')
+        
+        console.log('Auth check - multiple sources:', {
+          localStorage: localAuth,
+          sessionStorage: sessionAuth,
+          cookies: cookieAuth,
+          localEmail,
+          sessionEmail
+        })
+        
+        // Consider authenticated if ANY storage method shows true
+        const isAuth = localAuth === 'true' || sessionAuth === 'true' || cookieAuth
+        const email = localEmail || sessionEmail
+        
+        setIsAuthenticated(isAuth)
+        setUserEmail(email)
+        
+        if (!isAuth) {
+          console.log('User not authenticated, redirecting to login')
+          router.push('/auth/signin')
+        } else {
+          console.log('User authenticated successfully')
+        }
       } catch (error) {
         console.error('Auth check error:', error)
         setIsAuthenticated(false)
@@ -42,7 +57,8 @@ export default function HomePage() {
       }
     }
 
-    checkAuth()
+    // Small delay to ensure all storage is ready
+    setTimeout(checkAuth, 100)
   }, [router])
 
   // Show loading spinner while checking authentication

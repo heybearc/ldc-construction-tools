@@ -34,22 +34,27 @@ export default function SignInForm() {
       if (result?.error || !result?.ok) {
         setError('Invalid email or password');
       } else if (result?.ok) {
-        // Set authentication status in localStorage
+        // Set authentication status in both localStorage and sessionStorage
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userRole', 'SUPER_ADMIN');
         localStorage.setItem('userEmail', email);
         
-        console.log('Login successful, localStorage set:', {
-          isAuthenticated: localStorage.getItem('isAuthenticated'),
-          userRole: localStorage.getItem('userRole'),
-          userEmail: localStorage.getItem('userEmail')
+        sessionStorage.setItem('isAuthenticated', 'true');
+        sessionStorage.setItem('userRole', 'SUPER_ADMIN');
+        sessionStorage.setItem('userEmail', email);
+        
+        // Also set a cookie as backup
+        document.cookie = `isAuthenticated=true; path=/; max-age=86400`;
+        document.cookie = `userEmail=${email}; path=/; max-age=86400`;
+        
+        console.log('Login successful, storage set:', {
+          localStorage: localStorage.getItem('isAuthenticated'),
+          sessionStorage: sessionStorage.getItem('isAuthenticated'),
+          userEmail: email
         });
         
-        // Add a small delay to ensure localStorage is persisted
-        setTimeout(() => {
-          router.push(callbackUrl);
-          router.refresh();
-        }, 200);
+        // Use window.location instead of router for more reliable redirect
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       setError('An error occurred during sign in');
