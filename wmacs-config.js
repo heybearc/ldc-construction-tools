@@ -21,8 +21,8 @@ module.exports = {
       }
     },
     production: {
-      container: '133', 
-      ip: '10.92.3.23',
+      container: '134', 
+      ip: '10.92.3.24',
       sshHost: 'ldc-construction-tools-prod',
       sshKey: '~/.ssh/ldc_construction_key',
       ports: {
@@ -34,7 +34,7 @@ module.exports = {
   },
   
   // Container management
-  containers: ['133', '135'], // Production, Staging
+  containers: ['134', '135'], // Production, Staging
   proxmoxHost: '10.92.0.5',
   sshConfig: '/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant',
   
