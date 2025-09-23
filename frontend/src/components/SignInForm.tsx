@@ -39,8 +39,17 @@ export default function SignInForm() {
         localStorage.setItem('userRole', 'SUPER_ADMIN');
         localStorage.setItem('userEmail', email);
         
-        router.push(callbackUrl);
-        router.refresh();
+        console.log('Login successful, localStorage set:', {
+          isAuthenticated: localStorage.getItem('isAuthenticated'),
+          userRole: localStorage.getItem('userRole'),
+          userEmail: localStorage.getItem('userEmail')
+        });
+        
+        // Add a small delay to ensure localStorage is persisted
+        setTimeout(() => {
+          router.push(callbackUrl);
+          router.refresh();
+        }, 200);
       }
     } catch (error) {
       setError('An error occurred during sign in');

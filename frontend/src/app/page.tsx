@@ -20,16 +20,21 @@ export default function HomePage() {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        const authStatus = localStorage.getItem('isAuthenticated')
-        const email = localStorage.getItem('userEmail')
-        
-        setIsAuthenticated(authStatus === 'true')
-        setUserEmail(email)
-        
-        if (authStatus !== 'true') {
-          console.log('User not authenticated, redirecting to login')
-          router.push('/auth/signin')
-        }
+        // Add a small delay to ensure localStorage is available
+        setTimeout(() => {
+          const authStatus = localStorage.getItem('isAuthenticated')
+          const email = localStorage.getItem('userEmail')
+          
+          console.log('Auth check - authStatus:', authStatus, 'email:', email)
+          
+          setIsAuthenticated(authStatus === 'true')
+          setUserEmail(email)
+          
+          if (authStatus !== 'true') {
+            console.log('User not authenticated, redirecting to login')
+            router.push('/auth/signin')
+          }
+        }, 100) // Small delay to ensure localStorage is ready
       } catch (error) {
         console.error('Auth check error:', error)
         setIsAuthenticated(false)
