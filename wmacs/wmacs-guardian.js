@@ -66,17 +66,12 @@ class WMACSGuardian {
     };
   }
 
-  async executeCommand(host, command, reason = '') {
+  async executeCommand(command, reason = '') {
     console.log(`🔧 WMACS: ${reason || 'Executing command'}`);
-    console.log(`   Host: ${host}`);
     console.log(`   Command: ${command}`);
     
     try {
-      const result = await execAsync(`ssh root@${host} "${command}"`);
-      console.log(`✅ Command successful`);
-      if (result.stdout.trim()) {
-        console.log(`   Output: ${result.stdout.trim()}`);
-      }
+      const result = await execAsync(command);
       return result.stdout;
     } catch (error) {
       console.log(`❌ Command failed: ${error.message}`);
@@ -232,10 +227,10 @@ class WMACSGuardian {
   // Container IP mapping
   getContainerIP(container) {
     const mapping = {
-      '134': '10.92.3.24', // staging
-      '135': '10.92.3.25', // if needed
-      '133': '10.92.3.22', // production
-      '132': '10.92.3.23'  // LDC tools
+      '135': '10.92.3.25', // staging - current working
+      '133': '10.92.3.23', // production - CORRECTED IP
+      '131': '10.92.3.21', // database server
+      '132': '10.92.3.22'  // alternative
     };
     return mapping[container] || `10.92.3.${container}`;
   }
@@ -246,20 +241,20 @@ class WMACSGuardian {
     
     return this.executeWithGuardian('app-start', container, async () => {
       // Stop any existing processes
-      await this.executeCommand(`ssh root@10.92.3.${container} "pkill -f 'npm start' || true"`);
+      await this.executeCommand(`ssh root@10.92.3.${container} "pkill -f 'npm start' || true"`, 'Stopping existing processes');
       
       // Wait for clean shutdown
       await this.timeout(2000);
       
       // Start application
       const startCommand = `cd /opt/jw-attendant-scheduler/current && nohup npm start -- -p ${port} > /var/log/jw-attendant-scheduler.log 2>&1 &`;
-      await this.executeCommand(`ssh root@10.92.3.${container} "${startCommand}"`);
+      await this.executeCommand(`ssh root@10.92.3.${container} "${startCommand}"`, 'Starting application');
       
       // Wait for startup
       await this.timeout(5000);
       
       // Verify it's running
-      const healthCheck = await this.executeCommand(`curl -f http://10.92.3.${container}:${port}/api/health || echo "HEALTH_CHECK_FAILED"`);
+      const healthCheck = await this.executeCommand(`curl -f http://10.92.3.${container}:${port}/api/health || echo "HEALTH_CHECK_FAILED"`, 'Health check');
       
       if (healthCheck.includes('HEALTH_CHECK_FAILED')) {
         throw new Error('Application failed to start properly');
@@ -298,8 +293,8 @@ class WMACSGuardian {
     return this.executeWithGuardian('login-test', container, async () => {
       const containerIP = this.getContainerIP(container);
       
-      // Test login flow
-      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/login -H "Content-Type: application/json" -d '{"email": "admin@jwscheduler.local", "password": "AdminPass123!"}' -s`);
+      // Test login flow - LDC Construction Tools authentication
+      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/signin -F "email=admin@ldc-construction.local" -F "password=AdminPass123!" -s`);
       
       const loginData = JSON.parse(loginResult.stdout);
       if (!loginData.success) {
@@ -313,6 +308,42 @@ class WMACSGuardian {
       return { login: 'success', dashboard: dashboardResult.stdout.includes('200') ? 'accessible' : 'redirect' };
     });
   }
+
+  async guardedNetworkDiagnosis(container, port = 3001) {
+    console.log(`🛡️ WMACS Guardian: Diagnosing network issues on container ${container}:${port}`);
+    
+    return this.executeWithGuardian('network-diagnosis', container, async () => {
+      const containerIP = this.getContainerIP(container);
+      
+      // Test 1: Check if server is running
+      const processCheck = await this.executeCommand(`ssh root@${containerIP} "ps aux | grep 'next dev' | grep -v grep"`, 'Checking Next.js process');
+      console.log(`📊 Process status: ${processCheck ? 'Running' : 'Not running'}`);
+      
+      // Test 2: Check port accessibility
+      const portCheck = await this.executeCommand(`ssh root@${containerIP} "ss -tlnp | grep :${port} || lsof -i :${port} || echo 'PORT_CHECK_FAILED'"`, 'Checking port binding');
+      console.log(`📊 Port ${port} status: ${portCheck ? 'Bound' : 'Not bound'}`);
+      
+      // Test 3: Test API endpoint directly
+      const apiTest = await this.executeCommand(`ssh root@${containerIP} "curl -s http://localhost:${port}/api/auth/signin"`, 'Testing API endpoint');
+      console.log(`📊 API endpoint response: ${apiTest || 'No response'}`);
+      
+      // Test 4: Check for compilation errors
+      const compileCheck = await this.executeCommand(`ssh root@${containerIP} "cd /opt/ldc-construction-tools/frontend && npm run build --dry-run 2>&1 | head -10"`, 'Checking compilation');
+      console.log(`📊 Compilation status: ${compileCheck ? 'Has output' : 'Clean'}`);
+      
+      // Test 5: Test external accessibility
+      const externalTest = await this.executeCommand(`curl -s -m 5 http://${containerIP}:${port}/api/auth/signin || echo "EXTERNAL_FAILED"`, 'Testing external access');
+      console.log(`📊 External access: ${externalTest.includes('EXTERNAL_FAILED') ? 'Failed' : 'Success'}`);
+      
+      return {
+        process: !!processCheck,
+        port: !!portCheck,
+        api: !!apiTest && !apiTest.includes('error'),
+        external: !externalTest.includes('EXTERNAL_FAILED'),
+        compilation: !compileCheck.includes('error')
+      };
+    });
+  }
 }
 
 // Export for use in other WMACS scripts
@@ -324,20 +355,19 @@ if (require.main === module) {
   
   const [,, action, container] = process.argv;
   
-  switch (action) {
-    case 'start':
-      guardian.guardedApplicationStart(container || '134')
-        .then(result => console.log('✅ Guardian operation completed:', result))
-        .catch(error => console.error('❌ Guardian operation failed:', error.message));
-      break;
-      
-    case 'test':
-      guardian.guardedLoginTest(container || '134')
-        .then(result => console.log('✅ Guardian test completed:', result))
-        .catch(error => console.error('❌ Guardian test failed:', error.message));
-      break;
-      
-    default:
-      console.log('Usage: node wmacs-guardian.js [start|test] [container]');
+  if (action === 'start' && container) {
+    guardian.guardedApplicationStart(container)
+      .then(() => console.log('✅ Guardian operation completed'))
+      .catch(error => console.error('❌ Guardian operation failed:', error.message));
+  } else if (action === 'test' && container) {
+    guardian.guardedLoginTest(container)
+      .then(result => console.log('✅ Guardian test completed:', result))
+      .catch(error => console.error('❌ Guardian test failed:', error.message));
+  } else if (action === 'diagnose' && container) {
+    guardian.guardedNetworkDiagnosis(container)
+      .then(result => console.log('✅ Guardian diagnosis completed:', result))
+      .catch(error => console.error('❌ Guardian diagnosis failed:', error.message));
+  } else {
+    console.log('Usage: node wmacs-guardian.js [start|test|diagnose] [container]');
   }
 }
