@@ -1,9 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import OrganizationalDashboard from '@/components/OrganizationalDashboard'
 import TradeTeamsDashboard from '@/components/TradeTeamsDashboard'
 import TradeTeamsOverview from '@/components/TradeTeamsOverview'
@@ -13,23 +11,37 @@ import { Loader2 } from 'lucide-react'
 type ViewMode = 'organizational' | 'dashboard' | 'detailed' | 'roles'
 
 export default function HomePage() {
-  const { data: session, status } = useSession()
   const router = useRouter()
   const [viewMode, setViewMode] = useState<ViewMode>('organizational')
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
-  // Redirect to login if not authenticated
+  // Check authentication status
   useEffect(() => {
-    if (status === 'loading') return // Still loading
-    
-    if (status === 'unauthenticated') {
-      console.log('User not authenticated, redirecting to login')
-      router.push('/auth/signin')
-      return
+    const checkAuth = () => {
+      try {
+        const authStatus = localStorage.getItem('isAuthenticated')
+        const email = localStorage.getItem('userEmail')
+        
+        setIsAuthenticated(authStatus === 'true')
+        setUserEmail(email)
+        
+        if (authStatus !== 'true') {
+          console.log('User not authenticated, redirecting to login')
+          router.push('/auth/signin')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setIsAuthenticated(false)
+        router.push('/auth/signin')
+      }
     }
-  }, [status, router])
+
+    checkAuth()
+  }, [router])
 
   // Show loading spinner while checking authentication
-  if (status === 'loading') {
+  if (isAuthenticated === null) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -41,7 +53,7 @@ export default function HomePage() {
   }
 
   // If not authenticated, don't render content (will redirect)
-  if (status === 'unauthenticated') {
+  if (!isAuthenticated) {
     return null
   }
 
