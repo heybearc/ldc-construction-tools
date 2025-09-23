@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Upload, Users, FileSpreadsheet, Download, Trash2, Edit, Plus } from 'lucide-react';
-import AuthGuard from '../../components/AuthGuard';
+import AuthGuard from '@/components/AuthGuard';
 
 interface ContactImportData {
   firstName: string;

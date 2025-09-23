@@ -20,20 +20,33 @@ export default function AuthGuard({
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    // For now, since we have a custom auth system, we'll simulate authentication
-    // In a real implementation, you'd check localStorage, cookies, or make an API call
+    // Check WMACS authentication via session cookie
     const checkAuth = async () => {
       try {
-        // Simulate checking authentication status
-        // You can replace this with actual auth logic
-        const authStatus = localStorage.getItem('isAuthenticated');
-        const role = localStorage.getItem('userRole');
+        const cookies = document.cookie.split(';')
+        const sessionCookie = cookies.find(c => c.trim().startsWith('ldc-auth-session='))
         
-        setIsAuthenticated(authStatus === 'true');
-        setUserRole(role);
-      } catch (error) {
-        console.error('Auth check error:', error);
+        if (sessionCookie) {
+          const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
+          // Check if session is not expired
+          if (new Date(sessionData.expires) > new Date()) {
+            setIsAuthenticated(true);
+            setUserRole(sessionData.user?.role || null);
+            console.log('WMACS AuthGuard: Valid session found:', sessionData);
+            return;
+          } else {
+            console.log('WMACS AuthGuard: Session expired');
+            // Clear expired session
+            document.cookie = 'ldc-auth-session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+          }
+        }
+        
         setIsAuthenticated(false);
+        setUserRole(null);
+      } catch (error) {
+        console.error('WMACS AuthGuard: Auth check error:', error);
+        setIsAuthenticated(false);
+        setUserRole(null);
       }
     };
 
