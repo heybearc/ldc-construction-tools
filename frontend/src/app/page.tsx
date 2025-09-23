@@ -1,5 +1,6 @@
 'use client'
 
+// WMACS GUARDIAN: Clean Homepage
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import OrganizationalDashboard from '@/components/OrganizationalDashboard'
@@ -17,7 +18,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simple session check from cookie
+    // Check session from cookie
     const checkSession = () => {
       const cookies = document.cookie.split(';')
       const sessionCookie = cookies.find(c => c.trim().startsWith('ldc-auth-session='))
@@ -25,10 +26,17 @@ export default function HomePage() {
       if (sessionCookie) {
         try {
           const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
-          setSession(sessionData)
-          console.log('Simple Auth: Session found:', sessionData)
+          // Check if session is not expired
+          if (new Date(sessionData.expires) > new Date()) {
+            setSession(sessionData)
+            console.log('WMACS Auth: Valid session found:', sessionData)
+          } else {
+            console.log('WMACS Auth: Session expired')
+            // Clear expired session
+            document.cookie = 'ldc-auth-session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+          }
         } catch (error) {
-          console.error('Simple Auth: Invalid session cookie')
+          console.error('WMACS Auth: Invalid session cookie')
         }
       }
       setLoading(false)
@@ -37,7 +45,7 @@ export default function HomePage() {
     checkSession()
   }, [])
 
-  console.log('Simple Auth Homepage: Session:', session)
+  console.log('WMACS Auth Homepage: Session:', session)
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -71,15 +79,15 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow p-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            🎉 Simple Auth Login Successful!
+            🛡️ WMACS Authentication Successful!
           </h1>
           <div className="space-y-4">
             <p className="text-lg text-green-600">
-              Welcome to LDC Construction Tools - Industry Standard Simple Authentication
+              Welcome to LDC Construction Tools - WMACS Guardian Protected
             </p>
             <div className="bg-gray-100 p-4 rounded">
               <h3 className="font-semibold mb-2">Authentication Status:</h3>
-              <p><strong>Authenticated:</strong> ✅ Yes (Simple & Stable)</p>
+              <p><strong>Authenticated:</strong> ✅ Yes (WMACS Guardian)</p>
               <p><strong>User:</strong> {session?.user?.name || 'Unknown'}</p>
               <p><strong>Email:</strong> {session?.user?.email || 'Not set'}</p>
               <p><strong>Role:</strong> {session?.user?.role || 'Not set'}</p>
@@ -95,7 +103,7 @@ export default function HomePage() {
                 }}
                 className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
-                Logout (Simple Auth)
+                Logout (WMACS Auth)
               </button>
             </div>
           </div>

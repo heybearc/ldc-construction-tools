@@ -1,9 +1,10 @@
+// WMACS GUARDIAN: Clean Middleware
 import { NextRequest, NextResponse } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  console.log('Simple Auth Middleware: Path:', pathname)
+  console.log('WMACS Auth Middleware: Path:', pathname)
 
   // Allow access to auth pages and API routes
   if (
@@ -15,21 +16,32 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for simple session cookie
+  // Check for session cookie
   const sessionCookie = request.cookies.get('ldc-auth-session')
-  const isLoggedIn = !!sessionCookie
+  let isLoggedIn = false
 
-  console.log('Simple Auth Middleware: Authenticated:', isLoggedIn)
+  if (sessionCookie) {
+    try {
+      const session = JSON.parse(sessionCookie.value)
+      // Check if session is not expired
+      isLoggedIn = new Date(session.expires) > new Date()
+    } catch {
+      // Invalid session cookie
+      isLoggedIn = false
+    }
+  }
+
+  console.log('WMACS Auth Middleware: Authenticated:', isLoggedIn)
 
   // Redirect to signin if not authenticated
   if (!isLoggedIn) {
-    console.log('Simple Auth Middleware: Redirecting to signin')
+    console.log('WMACS Auth Middleware: Redirecting to signin')
     const signinUrl = new URL('/auth/signin', request.url)
     signinUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(signinUrl)
   }
 
-  console.log('Simple Auth Middleware: User authenticated, allowing access')
+  console.log('WMACS Auth Middleware: User authenticated, allowing access')
   return NextResponse.next()
 }
 

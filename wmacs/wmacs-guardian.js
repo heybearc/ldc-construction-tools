@@ -232,10 +232,10 @@ class WMACSGuardian {
   // Container IP mapping
   getContainerIP(container) {
     const mapping = {
-      '134': '10.92.3.24', // staging
-      '135': '10.92.3.25', // if needed
-      '133': '10.92.3.22', // production
-      '132': '10.92.3.23'  // LDC tools
+      '135': '10.92.3.25', // staging - current working
+      '133': '10.92.3.23', // production - CORRECTED IP
+      '131': '10.92.3.21', // database server
+      '132': '10.92.3.22'  // alternative
     };
     return mapping[container] || `10.92.3.${container}`;
   }

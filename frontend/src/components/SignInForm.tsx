@@ -18,7 +18,7 @@ export default function SignInForm() {
     setError('')
 
     try {
-      console.log('Simple Auth: Attempting login for:', email);
+      console.log('WMACS Auth: Attempting login for:', email);
       
       const formData = new FormData()
       formData.append('email', email)
@@ -30,25 +30,25 @@ export default function SignInForm() {
       });
 
       const result = await response.json();
-      console.log('Simple Auth: Result:', result);
+      console.log('WMACS Auth: Result:', result);
 
       if (result?.error || !response.ok) {
-        setError('Invalid email or password');
+        setError(result?.error || 'Invalid email or password');
         setPassword(''); // Clear password on error
       } else if (result?.success) {
-        console.log('Simple Auth: Success, redirecting to:', callbackUrl);
+        console.log('WMACS Auth: Success, redirecting to:', callbackUrl);
         
         // Clear form and redirect
         setEmail('');
         setPassword('');
         setError('');
         
-        // Simple redirect
+        // Force page reload to ensure clean state
         window.location.href = callbackUrl;
       }
     } catch (error) {
       setError('An error occurred during sign in');
-      console.error('Simple Auth error:', error);
+      console.error('WMACS Auth error:', error);
     } finally {
       setIsLoading(false);
     }
