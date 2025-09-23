@@ -12,17 +12,17 @@
       ],
       "environments": {
         "staging": {
-          "container": "135",
-          "ip": "10.92.3.25"
+          "container": "134",
+          "ip": "10.92.3.24"
         },
         "production": {
-          "container": "133", 
+          "container": "132", 
           "ip": "10.92.3.22"
         }
       },
       "guardrails": {
         "maxOperationsPerHour": 10,
-        "allowedHosts": ["10.92.3.22", "10.92.3.25"],
+        "allowedHosts": ["10.92.3.22", "10.92.3.24"],
         "allowedPaths": ["/opt/ldc-construction-tools"],
         "operationLog": "/var/log/wmacs-ldc-mcp-ops.log"
       }

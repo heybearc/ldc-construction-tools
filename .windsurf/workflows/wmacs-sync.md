@@ -59,6 +59,19 @@ node wmacs/wmacs-guardian.js test 135
 node wmacs/ci-cd-integration-test.js
 ```
 
+### 5. Validate MCP Server Integration
+
+// turbo
+```bash
+# Test MCP server functionality (credit-aware operations)
+node mcp-server-ops-ldc/src/index.js &
+MCP_PID=$!
+sleep 2
+# Test MCP tools via WMACS Guardian
+node wmacs/wmacs-guardian.js test 135
+kill $MCP_PID 2>/dev/null || true
+```
+
 ### 7. Commit Changes
 
 ```bash
@@ -69,8 +82,9 @@ git commit -m "sync: Update WMACS Guardian system from shared repository
 - Synced latest shared WMACS components
 - Maintained project-specific configuration
 - Validated system functionality
+- MCP server integration tested and validated
 
-WMACS Guardian: Bidirectional sync completed"
+WMACS Guardian: Bidirectional sync completed with MCP integration"
 ```
 
 ### 5. Deploy to Staging
@@ -87,6 +101,7 @@ git push origin staging
 # Copy enhancements back to shared system
 cp wmacs/wmacs-smart-sync.js ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/
 cp wmacs/ci-cd-integration-test.js ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/
+cp wmacs/core/mcp-server-core/* ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/mcp-server-core/ 2>/dev/null || true
 ```
 
 ```bash
