@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from './auth'
 
-export default auth((req: any) => {
-  const { nextUrl } = req
-  const isLoggedIn = !!req.auth
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  console.log('NextAuth v5 Middleware: Path:', nextUrl.pathname, 'Authenticated:', isLoggedIn)
+  console.log('Simple Auth Middleware: Path:', pathname)
 
   // Allow access to auth pages and API routes
   if (
-    nextUrl.pathname.startsWith('/auth/') ||
-    nextUrl.pathname.startsWith('/api/') ||
-    nextUrl.pathname.startsWith('/_next/') ||
-    nextUrl.pathname.startsWith('/favicon.ico')
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon.ico')
   ) {
     return NextResponse.next()
   }
 
+  // Check for simple session cookie
+  const sessionCookie = request.cookies.get('ldc-auth-session')
+  const isLoggedIn = !!sessionCookie
+
+  console.log('Simple Auth Middleware: Authenticated:', isLoggedIn)
+
   // Redirect to signin if not authenticated
   if (!isLoggedIn) {
-    console.log('NextAuth v5 Middleware: Redirecting to signin')
-    const signinUrl = new URL('/auth/signin', nextUrl.origin)
-    signinUrl.searchParams.set('callbackUrl', nextUrl.pathname)
+    console.log('Simple Auth Middleware: Redirecting to signin')
+    const signinUrl = new URL('/auth/signin', request.url)
+    signinUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(signinUrl)
   }
 
-  console.log('NextAuth v5 Middleware: User authenticated, allowing access')
+  console.log('Simple Auth Middleware: User authenticated, allowing access')
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: [

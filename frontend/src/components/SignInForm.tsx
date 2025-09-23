@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInForm() {
@@ -19,34 +18,37 @@ export default function SignInForm() {
     setError('')
 
     try {
-      console.log('NextAuth SignIn: Attempting login for:', email);
+      console.log('Simple Auth: Attempting login for:', email);
       
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('password', password)
+      
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        body: formData,
       });
 
-      console.log('NextAuth SignIn: Result:', result);
+      const result = await response.json();
+      console.log('Simple Auth: Result:', result);
 
-      if (result?.error) {
+      if (result?.error || !response.ok) {
         setError('Invalid email or password');
         setPassword(''); // Clear password on error
-      } else if (result?.ok) {
-        console.log('NextAuth SignIn: Success, redirecting to:', callbackUrl);
+      } else if (result?.success) {
+        console.log('Simple Auth: Success, redirecting to:', callbackUrl);
         
         // Clear form and redirect
         setEmail('');
         setPassword('');
         setError('');
         
-        // NextAuth handles the redirect
-        router.push(callbackUrl);
-        router.refresh();
+        // Simple redirect
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       setError('An error occurred during sign in');
-      console.error('NextAuth SignIn error:', error);
+      console.error('Simple Auth error:', error);
     } finally {
       setIsLoading(false);
     }

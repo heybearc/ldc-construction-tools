@@ -323,6 +323,42 @@
       },
       "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
       "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-23T19:08:14.653Z",
+      "suggestion": "NextAuth JWT authentication implementation for LDC Construction Tools",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-23T19:08:53.672Z",
+      "suggestion": "JWT-based authentication vs database session authentication for LDC Construction Tools with PostgreSQL backend",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-23T19:10:11.268Z",
+      "suggestion": "Industry standard authentication for Next.js applications with PostgreSQL - simplicity and stability requirements",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
     }
   ],
   "ldc": {
