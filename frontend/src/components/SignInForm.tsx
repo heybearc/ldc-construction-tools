@@ -27,6 +27,11 @@ export default function SignInForm() {
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
         body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+        // Add timeout and better error handling
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       });
 
       const result = await response.json();
@@ -47,8 +52,20 @@ export default function SignInForm() {
         window.location.href = callbackUrl;
       }
     } catch (error) {
-      setError('An error occurred during sign in');
       console.error('WMACS Auth error:', error);
+      
+      // Better error messages based on error type
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          setError('Request timeout. Please try again.');
+        } else if (error.message.includes('fetch')) {
+          setError('Network error. Please check your connection.');
+        } else {
+          setError(`Authentication error: ${error.message}`);
+        }
+      } else {
+        setError('An error occurred during sign in. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

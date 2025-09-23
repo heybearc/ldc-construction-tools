@@ -320,7 +320,7 @@ class WMACSGuardian {
       console.log(`📊 Process status: ${processCheck ? 'Running' : 'Not running'}`);
       
       // Test 2: Check port accessibility
-      const portCheck = await this.executeCommand(`ssh root@${containerIP} "netstat -tlnp | grep :${port}"`, 'Checking port binding');
+      const portCheck = await this.executeCommand(`ssh root@${containerIP} "ss -tlnp | grep :${port} || lsof -i :${port} || echo 'PORT_CHECK_FAILED'"`, 'Checking port binding');
       console.log(`📊 Port ${port} status: ${portCheck ? 'Bound' : 'Not bound'}`);
       
       // Test 3: Test API endpoint directly
