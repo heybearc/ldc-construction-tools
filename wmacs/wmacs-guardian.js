@@ -298,8 +298,8 @@ class WMACSGuardian {
     return this.executeWithGuardian('login-test', container, async () => {
       const containerIP = this.getContainerIP(container);
       
-      // Test login flow
-      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/login -H "Content-Type: application/json" -d '{"email": "admin@jwscheduler.local", "password": "AdminPass123!"}' -s`);
+      // Test login flow - LDC Construction Tools authentication
+      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/signin -F "email=admin@ldc-construction.local" -F "password=AdminPass123!" -s`);
       
       const loginData = JSON.parse(loginResult.stdout);
       if (!loginData.success) {
