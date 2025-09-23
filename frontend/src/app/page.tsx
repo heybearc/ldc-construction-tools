@@ -15,9 +15,12 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<ViewMode>('organizational')
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [authChecked, setAuthChecked] = useState(false)
 
   // Check authentication status
   useEffect(() => {
+    if (authChecked) return // Prevent multiple auth checks
+    
     const checkAuth = () => {
       try {
         // Check multiple storage methods
@@ -43,23 +46,25 @@ export default function HomePage() {
         
         setIsAuthenticated(isAuth)
         setUserEmail(email)
+        setAuthChecked(true)
         
         if (!isAuth) {
           console.log('User not authenticated, redirecting to login')
-          router.push('/auth/signin')
+          setTimeout(() => router.push('/auth/signin'), 100)
         } else {
-          console.log('User authenticated successfully')
+          console.log('User authenticated successfully - staying on homepage')
         }
       } catch (error) {
         console.error('Auth check error:', error)
         setIsAuthenticated(false)
-        router.push('/auth/signin')
+        setAuthChecked(true)
+        setTimeout(() => router.push('/auth/signin'), 100)
       }
     }
 
     // Small delay to ensure all storage is ready
     setTimeout(checkAuth, 100)
-  }, [router])
+  }, [router, authChecked])
 
   // Show loading spinner while checking authentication
   if (isAuthenticated === null) {
@@ -89,66 +94,37 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {getTitle()}
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            🎉 Login Successful!
           </h1>
-          <p className="mt-2 text-gray-600">
-            Construction Group 01.12 organizational structure and crew management
-          </p>
-        </div>
-        
-        {/* View Toggle */}
-        <div className="flex bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setViewMode('organizational')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'organizational'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            🏢 Org Chart
-          </button>
-          <button
-            onClick={() => setViewMode('dashboard')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'dashboard'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            📊 Dashboard
-          </button>
-          <button
-            onClick={() => setViewMode('detailed')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'detailed'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            📋 Detailed
-          </button>
-          <button
-            onClick={() => setViewMode('roles')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'roles'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            👥 Roles
-          </button>
+          <div className="space-y-4">
+            <p className="text-lg text-green-600">
+              Welcome to LDC Construction Tools
+            </p>
+            <div className="bg-gray-100 p-4 rounded">
+              <h3 className="font-semibold mb-2">Authentication Status:</h3>
+              <p><strong>Authenticated:</strong> {isAuthenticated ? '✅ Yes' : '❌ No'}</p>
+              <p><strong>User Email:</strong> {userEmail || 'Not set'}</p>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  document.cookie = 'isAuthenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                  window.location.href = '/auth/signin';
+                }}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      
-      {viewMode === 'organizational' && <OrganizationalDashboard />}
-      {viewMode === 'dashboard' && <TradeTeamsDashboard />}
-      {viewMode === 'detailed' && <TradeTeamsOverview />}
-      {viewMode === 'roles' && <RoleManagement />}
     </div>
   )
 }
