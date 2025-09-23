@@ -1,7 +1,8 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-const authOptions: NextAuthOptions = {
+// Simplified NextAuth handler to eliminate Function.prototype.apply errors
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -9,7 +10,7 @@ const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      authorize: async (credentials) => {
         console.log('Auth attempt for:', credentials?.email);
         
         if (!credentials?.email || !credentials?.password) {
@@ -17,13 +18,13 @@ const authOptions: NextAuthOptions = {
           return null;
         }
 
-        // Development fallback
+        // Development authentication
         if (credentials.email === 'admin@ldc-construction.local' && 
             credentials.password === 'AdminPass123!') {
           console.log('User found: YES');
           console.log('Password match: true');
           
-          return {
+          const user = {
             id: 'dev-admin-id',
             email: 'admin@ldc-construction.local',
             name: 'Development Admin',
@@ -31,6 +32,8 @@ const authOptions: NextAuthOptions = {
             regionId: '01.12',
             zoneId: '01'
           };
+          
+          return user;
         }
         
         console.log('Authentication failed');
@@ -41,31 +44,15 @@ const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/auth/signin'
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as any).role;
-        token.regionId = (user as any).regionId;
-        token.zoneId = (user as any).zoneId;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as any).role = token.role;
-        (session.user as any).regionId = token.regionId;
-        (session.user as any).zoneId = token.zoneId;
-      }
-      return session;
-    }
-  },
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60 // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET || 'ldc-construction-tools-secret-2024'
-};
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60 // 30 days
+  },
+  secret: process.env.NEXTAUTH_SECRET || 'ldc-construction-tools-secret-2024',
+  debug: false // Disable debug to reduce console noise
+});
 
-const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
