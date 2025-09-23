@@ -10,8 +10,7 @@ const nextConfig = {
   },
   // Enable React strict mode - Next.js 15 handles hydration better
   reactStrictMode: true,
-  // Enable SWC minification - improved in Next.js 15
-  swcMinify: true,
+  // SWC minification is enabled by default in Next.js 15
   // Next.js 15 specific optimizations
   experimental: {
     optimizePackageImports: ['lucide-react'],
