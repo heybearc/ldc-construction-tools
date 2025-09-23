@@ -1,39 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-const BACKEND_URL = 'http://10.92.3.25:8000';
+const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   console.log('Volunteers API route called:', request.url);
   
   try {
-    const { searchParams } = new URL(request.url);
-    const queryString = searchParams.toString();
-    const url = `${BACKEND_URL}/api/v1/volunteers/${queryString ? `?${queryString}` : ''}`;
-    
-    console.log('Fetching from backend:', url);
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const users = await prisma.user.findMany({
+      include: {
+        accounts: true,
+        sessions: true
+      }
     });
 
-    console.log('Backend response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Backend error response:', errorText);
-      throw new Error(`Backend responded with ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Backend data received:', data);
-    return NextResponse.json(data);
+    console.log('Users fetched from database:', users.length);
+    return NextResponse.json(users);
   } catch (error) {
-    console.error('API proxy error:', error);
+    console.error('Database error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch volunteers', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to fetch volunteers', details: error instanceof Error ? error.message : 'Database error' },
       { status: 500 }
     );
   }
@@ -43,24 +29,20 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const response = await fetch(`${BACKEND_URL}/api/v1/volunteers/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+    const user = await prisma.user.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        role: body.role || 'READ_ONLY'
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
+    console.log('User created:', user);
+    return NextResponse.json(user);
   } catch (error) {
-    console.error('API proxy error:', error);
+    console.error('Database error:', error);
     return NextResponse.json(
-      { error: 'Failed to create volunteer' },
+      { error: 'Failed to create user', details: error instanceof Error ? error.message : 'Database error' },
       { status: 500 }
     );
   }
