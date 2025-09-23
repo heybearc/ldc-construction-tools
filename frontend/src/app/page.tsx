@@ -75,39 +75,86 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            🛡️ WMACS Authentication Successful!
-          </h1>
-          <div className="space-y-4">
-            <p className="text-lg text-green-600">
-              Welcome to LDC Construction Tools - WMACS Guardian Protected
-            </p>
-            <div className="bg-gray-100 p-4 rounded">
-              <h3 className="font-semibold mb-2">Authentication Status:</h3>
-              <p><strong>Authenticated:</strong> ✅ Yes (WMACS Guardian)</p>
-              <p><strong>User:</strong> {session?.user?.name || 'Unknown'}</p>
-              <p><strong>Email:</strong> {session?.user?.email || 'Not set'}</p>
-              <p><strong>Role:</strong> {session?.user?.role || 'Not set'}</p>
-              <p><strong>Region:</strong> {session?.user?.regionId || 'Not set'}</p>
-              <p><strong>Zone:</strong> {session?.user?.zoneId || 'Not set'}</p>
-              <p><strong>Expires:</strong> {session?.expires ? new Date(session.expires).toLocaleString() : 'Not set'}</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
             </div>
-            <div className="space-y-2">
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">
+                Welcome, {session?.user?.name || 'User'}
+              </span>
               <button
                 onClick={() => {
                   document.cookie = 'ldc-auth-session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                   window.location.href = '/auth/signin';
                 }}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
               >
-                Logout (WMACS Auth)
+                Logout
               </button>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="bg-gray-100 border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8 py-3">
+            <button
+              onClick={() => setViewMode('organizational')}
+              className={`px-3 py-2 rounded text-sm font-medium ${
+                viewMode === 'organizational'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Organizational Dashboard
+            </button>
+            <button
+              onClick={() => setViewMode('dashboard')}
+              className={`px-3 py-2 rounded text-sm font-medium ${
+                viewMode === 'dashboard'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Trade Teams Dashboard
+            </button>
+            <button
+              onClick={() => setViewMode('detailed')}
+              className={`px-3 py-2 rounded text-sm font-medium ${
+                viewMode === 'detailed'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Trade Teams Overview
+            </button>
+            <button
+              onClick={() => setViewMode('roles')}
+              className={`px-3 py-2 rounded text-sm font-medium ${
+                viewMode === 'roles'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Role Management
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {viewMode === 'organizational' && <OrganizationalDashboard />}
+        {viewMode === 'dashboard' && <TradeTeamsDashboard />}
+        {viewMode === 'detailed' && <TradeTeamsOverview />}
+        {viewMode === 'roles' && <RoleManagement />}
       </div>
     </div>
   )
