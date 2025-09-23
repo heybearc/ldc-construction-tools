@@ -1,10 +1,10 @@
 ---
-description: Bidirectional WMACS Guardian system synchronization
+description: WMACS Smart Synchronization - Intelligent sync with config preservation
 ---
 
 # WMACS Guardian System Synchronization
 
-This workflow synchronizes enhancements between the shared WMACS system and the current repository.
+This workflow provides intelligent synchronization between the shared WMACS system and repository-specific configurations, ensuring structural updates while preserving local settings.
 
 ## Prerequisites
 
@@ -13,12 +13,12 @@ This workflow synchronizes enhancements between the shared WMACS system and the 
    ls ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/
    ```
 
-2. Verify current repository has WMACS directory:
+2. Verify WMACS smart sync system is available:
    ```bash
-   ls wmacs/
+   ls wmacs/wmacs-smart-sync.js
    ```
 
-## Synchronization Steps
+## Smart Synchronization Steps
 
 ### 1. Check for Updates in Shared System
 
@@ -28,48 +28,35 @@ git status
 git pull origin main
 ```
 
-### 2. Compare Versions
-
-```bash
-# Check if shared system has newer files
-diff -r ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/ ./wmacs/ --exclude=".git"
-```
-
-### 3. Sync FROM Shared System (Pull Updates)
+### 2. Run Intelligent Sync (Preserves Local Config)
 
 // turbo
 ```bash
-# Copy updated files from shared system
-cp ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/WINDSURF_OPERATIONAL_GUIDELINES.md wmacs/
-cp ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/ENFORCEMENT_MECHANISMS.md wmacs/
-cp ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/OPERATIONAL_PROCEDURES.md wmacs/
-cp ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/wmacs-guardian.js wmacs/
-cp ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/wmacs-research-advisor.js wmacs/
-cp ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/wmacs-auto-advisor.js wmacs/
+# Smart sync automatically preserves repository-specific configurations
+node wmacs/wmacs-smart-sync.js
 ```
 
-### 4. Update Project-Specific Configuration
+This intelligent sync will:
+- ✅ Backup all protected configuration files
+- ✅ Sync shared components to `wmacs/core/`
+- ✅ Generate intelligent wrapper with project settings
+- ✅ Restore protected files (auth, environments, SSH configs)
+- ✅ Validate configuration integrity
 
-```bash
-# Ensure project-specific settings are maintained
-echo "Verifying project-specific configuration..."
-grep -n "ldc-construction-tools" wmacs-config.js
-grep -n "Container 134" wmacs/WINDSURF_OPERATIONAL_GUIDELINES.md
-```
-
-### 5. Sync TO Shared System (Push Enhancements)
-
-```bash
-# Copy any project-specific improvements back to shared system
-cp wmacs/WINDSURF_OPERATIONAL_GUIDELINES.md ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/
-```
-
-### 6. Test WMACS System
+### 3. Validate System Functionality
 
 // turbo
 ```bash
-# Validate WMACS system functionality
-node wmacs/wmacs-guardian.js diagnose
+# Test WMACS Guardian with preserved project configuration
+node wmacs/wmacs-guardian.js test 135
+```
+
+### 4. Run Integration Tests
+
+// turbo
+```bash
+# Comprehensive validation of CI/CD integration
+node wmacs/ci-cd-integration-test.js
 ```
 
 ### 7. Commit Changes
@@ -86,21 +73,33 @@ git commit -m "sync: Update WMACS Guardian system from shared repository
 WMACS Guardian: Bidirectional sync completed"
 ```
 
-### 8. Deploy to Staging
+### 5. Deploy to Staging
 
 ```bash
 # Follow WMACS deployment rules
-git checkout staging
-git merge feature/role-management-module
 git push origin staging
 ```
 
-### 9. Update Shared System Repository
+### 6. Update Shared System Repository (Bidirectional Sync)
+
+// turbo
+```bash
+# Copy enhancements back to shared system
+cp wmacs/wmacs-smart-sync.js ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/
+cp wmacs/ci-cd-integration-test.js ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/
+```
 
 ```bash
 cd ~/Documents/Cloudy-Work/shared/wmacs-guardian-system
 git add .
-git commit -m "sync: Update from ldc-construction-tools project"
+git commit -m "sync: Update from ldc-construction-tools project
+
+🛡️ WMACS BIDIRECTIONAL SYNC:
+- Added smart sync system for config preservation
+- Enhanced CI/CD integration testing
+- Improved modular architecture support
+
+WMACS Guardian: Shared system updated with project improvements"
 git push origin main
 ```
 
@@ -115,17 +114,35 @@ git push origin main
 
 ## Troubleshooting
 
-### Merge Conflicts
-If there are conflicts between shared and local versions:
-1. Review differences carefully
-2. Preserve project-specific settings
-3. Test functionality after resolution
+### Sync Conflicts
+If sync fails due to conflicts:
+```bash
+# Check what's different
+diff -r ~/Documents/Cloudy-Work/shared/wmacs-guardian-system/wmacs-guardian.js wmacs/wmacs-guardian.js
 
-### Missing Files
-If shared system is missing files:
-1. Check if files were moved or renamed
-2. Verify git repository status
-3. Contact system administrator if needed
+# Force regeneration
+rm wmacs/wmacs-guardian.js
+node wmacs/wmacs-smart-sync.js
+```
+
+### Configuration Issues
+If configuration validation fails:
+```bash
+# Check required files exist
+ls wmacs/config/
+cat wmacs/config/project.json
+cat wmacs/config/environments.json
+```
+
+### Testing Issues
+If WMACS tests fail:
+```bash
+# Validate configuration
+node -e "console.log(JSON.stringify(require('./wmacs/config/project.json'), null, 2))"
+
+# Test manually
+curl -X POST -F "email=admin@ldc-construction.local" -F "password=AdminPass123!" http://10.92.3.25:3001/api/auth/signin
+```
 
 ## Automation Notes
 
