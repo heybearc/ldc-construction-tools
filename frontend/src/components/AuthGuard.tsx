@@ -1,8 +1,7 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, ReactNode } from 'react';
+import { useEffect, ReactNode, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
@@ -16,26 +15,48 @@ export default function AuthGuard({
   requireAuth = true, 
   requiredRole 
 }: AuthGuardProps) {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === 'loading') return; // Still loading
+    // For now, since we have a custom auth system, we'll simulate authentication
+    // In a real implementation, you'd check localStorage, cookies, or make an API call
+    const checkAuth = async () => {
+      try {
+        // Simulate checking authentication status
+        // You can replace this with actual auth logic
+        const authStatus = localStorage.getItem('isAuthenticated');
+        const role = localStorage.getItem('userRole');
+        
+        setIsAuthenticated(authStatus === 'true');
+        setUserRole(role);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      }
+    };
 
-    if (requireAuth && status === 'unauthenticated') {
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated === null) return; // Still loading
+
+    if (requireAuth && !isAuthenticated) {
       console.log('User not authenticated, redirecting to login');
       router.push('/auth/signin');
       return;
     }
 
-    if (requiredRole && session?.user?.role !== requiredRole) {
-      console.log(`User role ${session?.user?.role} does not match required role ${requiredRole}`);
+    if (requiredRole && userRole !== requiredRole) {
+      console.log(`User role ${userRole} does not match required role ${requiredRole}`);
       router.push('/auth/signin');
       return;
     }
-  }, [session, status, router, requireAuth, requiredRole]);
+  }, [isAuthenticated, userRole, router, requireAuth, requiredRole]);
 
-  if (status === 'loading') {
+  if (isAuthenticated === null) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -46,11 +67,11 @@ export default function AuthGuard({
     );
   }
 
-  if (requireAuth && status === 'unauthenticated') {
+  if (requireAuth && !isAuthenticated) {
     return null; // Will redirect
   }
 
-  if (requiredRole && session?.user?.role !== requiredRole) {
+  if (requiredRole && userRole !== requiredRole) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
