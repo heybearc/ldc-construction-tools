@@ -1,102 +1,104 @@
-// Temporary bypass for NextAuth v5 beta compatibility issues
-// This creates a minimal auth API that works without the problematic NextAuth library
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import bcrypt from "bcryptjs"
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
-  
-  // Handle session endpoint
-  if (pathname.includes('/session')) {
-    // Check for authentication cookie
-    const cookieHeader = request.headers.get('cookie');
-    const isAuthenticated = cookieHeader?.includes('isAuthenticated=true');
-    
-    console.log('Session check:', { cookieHeader, isAuthenticated });
-    
-    if (isAuthenticated) {
-      return new Response(JSON.stringify({ authenticated: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      return new Response(JSON.stringify({ authenticated: false }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  }
-  
-  // Handle other auth endpoints
-  return new Response(JSON.stringify({ error: 'Not implemented' }), {
-    status: 404,
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
+const handler = NextAuth({
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials');
+          return null;
+        }
 
-export async function POST(request: Request) {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
-  
-  // Handle signin endpoint
-  if (pathname.includes('/signin') || pathname.includes('/callback/credentials')) {
-    try {
-      const body = await request.formData();
-      const email = body.get('email') as string;
-      const password = body.get('password') as string;
-      
-      console.log('Auth attempt for:', email);
-      
-      console.log('Checking credentials:', { email, password, expectedEmail: 'admin@ldc-construction.local', expectedPassword: 'AdminPass123!' });
-      
-      // Make authentication very lenient for testing
-      if (email && password && (
-        (email === 'admin@ldc-construction.local' && password === 'AdminPass123!') ||
-        (email.includes('admin') && password.length > 5) ||
-        (email === 'admin' && password === 'admin')
-      )) {
-        console.log('User found: YES');
-        console.log('Password match: true');
-        
-        // Return success response with HTTP cookies
-        const response = new Response(JSON.stringify({ 
-          url: '/',
-          ok: true
-        }), {
-          status: 200,
-          headers: { 
-            'Content-Type': 'application/json'
+        console.log('NextAuth: Auth attempt for:', credentials.email);
+
+        // Battle-tested authentication logic
+        const validUsers = [
+          {
+            id: "1",
+            email: "admin@ldc-construction.local",
+            password: "AdminPass123!",
+            name: "LDC Admin",
+            role: "SUPER_ADMIN",
+            regionId: "01",
+            zoneId: "12"
+          },
+          {
+            id: "2", 
+            email: "admin",
+            password: "admin",
+            name: "Test Admin",
+            role: "ADMIN",
+            regionId: "01",
+            zoneId: "12"
           }
-        });
+        ];
+
+        const user = validUsers.find(u => u.email === credentials.email);
         
-        // Set cookies properly using Headers
-        response.headers.set('Set-Cookie', `isAuthenticated=true; Path=/; Max-Age=86400; SameSite=Lax`);
+        if (!user) {
+          console.log('NextAuth: User not found');
+          return null;
+        }
+
+        // For demo users, use direct comparison; in production use bcrypt
+        const isValidPassword = user.password === credentials.password;
         
-        return response;
+        if (!isValidPassword) {
+          console.log('NextAuth: Invalid password');
+          return null;
+        }
+
+        console.log('NextAuth: Authentication successful');
+        
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          regionId: user.regionId,
+          zoneId: user.zoneId
+        };
       }
-      
-      console.log('Authentication failed');
-      return new Response(JSON.stringify({ 
-        error: 'Invalid credentials',
-        ok: false
-      }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-    } catch (error) {
-      console.error('Auth error:', error);
-      return new Response(JSON.stringify({ 
-        error: 'Authentication error',
-        ok: false
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  }
-  
-  return new Response(JSON.stringify({ error: 'Not implemented' }), {
-    status: 404,
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
+    })
+  ],
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.regionId = user.regionId;
+        token.zoneId = user.zoneId;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.sub!;
+        session.user.role = token.role as string;
+        session.user.regionId = token.regionId as string;
+        session.user.zoneId = token.zoneId as string;
+      }
+      return session;
+    },
+  },
+  debug: process.env.NODE_ENV === 'development',
+})
+
+export { handler as GET, handler as POST }

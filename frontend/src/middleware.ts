@@ -1,37 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from "next-auth/middleware"
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
-  // TEMPORARILY DISABLE MIDDLEWARE FOR TESTING
-  console.log('Middleware: DISABLED - allowing all access for testing');
-  return NextResponse.next();
-  
-  /* ORIGINAL MIDDLEWARE - DISABLED FOR TESTING
-  // Allow access to auth pages and API routes
-  if (pathname.startsWith('/auth/') || 
-      pathname.startsWith('/api/') ||
-      pathname.startsWith('/_next/') ||
-      pathname.startsWith('/favicon.ico')) {
-    return NextResponse.next();
+export default withAuth(
+  function middleware(req) {
+    console.log('NextAuth Middleware: User authenticated, allowing access');
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => {
+        console.log('NextAuth Middleware: Checking authorization, token exists:', !!token);
+        return !!token;
+      },
+    },
+    pages: {
+      signIn: '/auth/signin',
+    },
   }
-  
-  // Check for authentication cookie (our custom auth system)
-  const authCookie = request.cookies.get('isAuthenticated');
-  
-  if (!authCookie || authCookie.value !== 'true') {
-    // No auth cookie - redirect to signin
-    console.log('Middleware: No auth cookie found, redirecting to signin');
-    const signinUrl = new URL('/auth/signin', request.url);
-    signinUrl.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(signinUrl);
-  }
-  
-  // Auth cookie exists - allow access
-  console.log('Middleware: Auth cookie found, allowing access');
-  return NextResponse.next();
-  */
-}
+)
 
 export const config = {
   matcher: [

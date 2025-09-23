@@ -1,53 +1,52 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get('callbackUrl') || '/';
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams?.get('callbackUrl') || '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
 
     try {
-      // Use custom auth API instead of NextAuth
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('password', password);
+      console.log('NextAuth SignIn: Attempting login for:', email);
       
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        body: formData,
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
-      
-      const result = await response.json();
 
-      if (result?.error || !result?.ok) {
+      console.log('NextAuth SignIn: Result:', result);
+
+      if (result?.error) {
         setError('Invalid email or password');
         setPassword(''); // Clear password on error
       } else if (result?.ok) {
-        console.log('Login successful - server set HTTP cookies');
+        console.log('NextAuth SignIn: Success, redirecting to:', callbackUrl);
         
         // Clear form and redirect
         setEmail('');
         setPassword('');
         setError('');
         
-        // Server has set HTTP cookies, just redirect
-        window.location.href = callbackUrl;
+        // NextAuth handles the redirect
+        router.push(callbackUrl);
+        router.refresh();
       }
     } catch (error) {
       setError('An error occurred during sign in');
-      console.error('Sign in error:', error);
+      console.error('NextAuth SignIn error:', error);
     } finally {
       setIsLoading(false);
     }
