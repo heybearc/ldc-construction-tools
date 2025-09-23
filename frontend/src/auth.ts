@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET || 'ldc-construction-tools-secret-key-for-development',
   providers: [
     CredentialsProvider({
       name: "credentials",
