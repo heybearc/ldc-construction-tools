@@ -135,5 +135,49 @@ module.exports = {
     deploymentTimeout: 300000, // 5 minutes
     healthCheckRetries: 3,
     rollbackOnFailure: true
+  },
+  
+  // Enhanced Enforcement Mechanisms (from shared WMACS)
+  enforcement: {
+    strictMode: true, // Enable all enforcement mechanisms
+    
+    // Hard stops (cannot override)
+    hardStops: [
+      'production_direct_access',
+      'cicd_pipeline_bypass',
+      'database_direct_modifications'
+    ],
+    
+    // Soft stops (require justification)
+    softStops: [
+      'architecture_changes',
+      'performance_optimizations',
+      'security_modifications'
+    ],
+    
+    // Anti-pattern detection
+    antiPatterns: [
+      /bypass.*ci\/cd/i,
+      /skip.*staging/i,
+      /manual.*production/i,
+      /remove.*multi-agent/i,
+      /shortcut.*deployment/i
+    ],
+    
+    // Emergency override protocol
+    emergencyOverride: {
+      enabled: true,
+      requiresIncidentDeclaration: true,
+      timeLimit: 3600000, // 1 hour
+      auditTrail: true
+    }
+  },
+  
+  // Operational Procedures Integration
+  operations: {
+    dailyHealthCheck: true,
+    weeklySync: true,
+    monthlyCompliance: true,
+    knowledgeBaseUpdates: true
   }
 };
