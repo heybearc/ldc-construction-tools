@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SignInForm() {
@@ -20,13 +19,19 @@ export default function SignInForm() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      // Use custom auth API instead of NextAuth
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
+      
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        body: formData,
       });
+      
+      const result = await response.json();
 
-      if (result?.error) {
+      if (result?.error || !result?.ok) {
         setError('Invalid email or password');
       } else if (result?.ok) {
         router.push(callbackUrl);
