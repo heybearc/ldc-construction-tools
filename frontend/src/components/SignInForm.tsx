@@ -34,26 +34,9 @@ export default function SignInForm() {
       if (result?.error || !result?.ok) {
         setError('Invalid email or password');
       } else if (result?.ok) {
-        // Set authentication status in both localStorage and sessionStorage
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userRole', 'SUPER_ADMIN');
-        localStorage.setItem('userEmail', email);
+        console.log('Login successful - server set HTTP cookies');
         
-        sessionStorage.setItem('isAuthenticated', 'true');
-        sessionStorage.setItem('userRole', 'SUPER_ADMIN');
-        sessionStorage.setItem('userEmail', email);
-        
-        // Also set a cookie as backup
-        document.cookie = `isAuthenticated=true; path=/; max-age=86400`;
-        document.cookie = `userEmail=${email}; path=/; max-age=86400`;
-        
-        console.log('Login successful, storage set:', {
-          localStorage: localStorage.getItem('isAuthenticated'),
-          sessionStorage: sessionStorage.getItem('isAuthenticated'),
-          userEmail: email
-        });
-        
-        // Use window.location instead of router for more reliable redirect
+        // Server has set HTTP cookies, just redirect
         window.location.href = callbackUrl;
       }
     } catch (error) {

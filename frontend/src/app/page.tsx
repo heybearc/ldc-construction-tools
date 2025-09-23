@@ -17,53 +17,49 @@ export default function HomePage() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Check authentication status
+  // Check authentication status from server-side cookies
   useEffect(() => {
     if (authChecked) return // Prevent multiple auth checks
     
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        // Check multiple storage methods
-        const localAuth = localStorage.getItem('isAuthenticated')
-        const sessionAuth = sessionStorage.getItem('isAuthenticated')
-        const localEmail = localStorage.getItem('userEmail')
-        const sessionEmail = sessionStorage.getItem('userEmail')
+        // Check authentication via API call (server can read HTTP cookies)
+        const response = await fetch('/api/auth/session', {
+          method: 'GET',
+          credentials: 'include' // Include cookies
+        });
         
-        // Check cookies as backup
-        const cookieAuth = document.cookie.includes('isAuthenticated=true')
+        const isAuth = response.ok;
         
-        console.log('Auth check - multiple sources:', {
-          localStorage: localAuth,
-          sessionStorage: sessionAuth,
-          cookies: cookieAuth,
-          localEmail,
-          sessionEmail
-        })
+        console.log('Auth check via server:', {
+          status: response.status,
+          authenticated: isAuth
+        });
         
-        // Consider authenticated if ANY storage method shows true
-        const isAuth = localAuth === 'true' || sessionAuth === 'true' || cookieAuth
-        const email = localEmail || sessionEmail
-        
-        setIsAuthenticated(isAuth)
-        setUserEmail(email)
-        setAuthChecked(true)
+        setIsAuthenticated(isAuth);
+        setAuthChecked(true);
         
         if (!isAuth) {
-          console.log('User not authenticated, redirecting to login')
-          setTimeout(() => router.push('/auth/signin'), 100)
+          console.log('User not authenticated, redirecting to login');
+          setTimeout(() => router.push('/auth/signin'), 100);
         } else {
-          console.log('User authenticated successfully - staying on homepage')
+          console.log('User authenticated successfully - staying on homepage');
+          // Try to get email from cookies for display
+          const cookies = document.cookie.split(';');
+          const emailCookie = cookies.find(c => c.trim().startsWith('userEmail='));
+          if (emailCookie) {
+            setUserEmail(emailCookie.split('=')[1]);
+          }
         }
       } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-        setAuthChecked(true)
-        setTimeout(() => router.push('/auth/signin'), 100)
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        setTimeout(() => router.push('/auth/signin'), 100);
       }
-    }
+    };
 
-    // Small delay to ensure all storage is ready
-    setTimeout(checkAuth, 100)
+    checkAuth();
   }, [router, authChecked])
 
   // Show loading spinner while checking authentication

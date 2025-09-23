@@ -7,10 +7,23 @@ export async function GET(request: Request) {
   
   // Handle session endpoint
   if (pathname.includes('/session')) {
-    return new Response(JSON.stringify({}), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Check for authentication cookie
+    const cookieHeader = request.headers.get('cookie');
+    const isAuthenticated = cookieHeader?.includes('isAuthenticated=true');
+    
+    console.log('Session check:', { cookieHeader, isAuthenticated });
+    
+    if (isAuthenticated) {
+      return new Response(JSON.stringify({ authenticated: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } else {
+      return new Response(JSON.stringify({ authenticated: false }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   }
   
   // Handle other auth endpoints
@@ -37,14 +50,22 @@ export async function POST(request: Request) {
         console.log('User found: YES');
         console.log('Password match: true');
         
-        // Return success response
-        return new Response(JSON.stringify({ 
+        // Return success response with HTTP cookies
+        const response = new Response(JSON.stringify({ 
           url: '/',
           ok: true
         }), {
           status: 200,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 
+            'Content-Type': 'application/json',
+            'Set-Cookie': [
+              `isAuthenticated=true; Path=/; HttpOnly; Max-Age=86400`,
+              `userEmail=${email}; Path=/; HttpOnly; Max-Age=86400`
+            ].join(', ')
+          }
         });
+        
+        return response;
       }
       
       console.log('Authentication failed');
