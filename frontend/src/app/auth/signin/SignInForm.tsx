@@ -53,7 +53,7 @@ export default function SignInForm() {
           name="email"
           type="email"
           required
-          defaultValue="admin@ldc-construction.local"
+          placeholder="admin@ldc-construction.local"
           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           disabled={isPending}
         />
@@ -68,7 +68,7 @@ export default function SignInForm() {
           name="password"
           type="password"
           required
-          defaultValue="AdminPass123!"
+          placeholder="AdminPass123!"
           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           disabled={isPending}
         />
@@ -91,6 +91,14 @@ export default function SignInForm() {
       >
         {isPending ? 'Signing in...' : 'Sign in'}
       </button>
+      
+      <div className="text-center text-sm text-gray-600 mt-4">
+        <p>Development credentials:</p>
+        <p className="font-mono text-xs mt-1 bg-gray-50 p-2 rounded">
+          Email: admin@ldc-construction.local<br/>
+          Password: AdminPass123!
+        </p>
+      </div>
     </form>
   )
 }
