@@ -1,0 +1,46 @@
+{
+  "staging": {
+    "container": "135",
+    "ip": "10.92.3.25",
+    "hostname": "ldc-staging.cloudigan.net",
+    "sshHost": "prox",
+    "sshConfig": "/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant",
+    "ports": {
+      "frontend": 3001,
+      "backend": 8000,
+      "database": 5432
+    },
+    "services": {
+      "frontend": "next dev",
+      "database": "postgresql://postgres:Cl0udy!!(@)@10.92.3.21:5432/ldc_construction_tools"
+    }
+  },
+  
+  "production": {
+    "container": "133",
+    "ip": "10.92.3.23",
+    "hostname": "ldc-production.cloudigan.net",
+    "sshHost": "prox",
+    "sshConfig": "/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant",
+    "ports": {
+      "frontend": 3001,
+      "backend": 8000,
+      "database": 5432
+    },
+    "services": {
+      "frontend": "npm start",
+      "database": "postgresql://postgres:Cl0udy!!(@)@10.92.3.21:5432/ldc_construction_tools"
+    }
+  },
+  
+  "development": {
+    "container": "local",
+    "ip": "localhost",
+    "hostname": "localhost",
+    "ports": {
+      "frontend": 3001,
+      "backend": 8000,
+      "database": 5432
+    }
+  }
+}
