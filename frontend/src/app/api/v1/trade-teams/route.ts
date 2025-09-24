@@ -1,39 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-const BACKEND_URL = 'http://10.92.3.23:8000';
+const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   console.log('Trade teams API route called:', request.url);
   
   try {
-    const { searchParams } = new URL(request.url);
-    const queryString = searchParams.toString();
-    const url = `${BACKEND_URL}/api/v1/trade-teams/${queryString ? `?${queryString}` : ''}`;
-    
-    console.log('Fetching from backend:', url);
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+    // Direct Prisma query instead of FastAPI backend call
+    const tradeTeams = await prisma.tradeTeam.findMany({
+      include: {
+        crews: {
+          where: { isActive: true }
+        },
+        _count: {
+          select: {
+            crews: true,
+            members: true
+          }
+        }
       },
+      orderBy: { name: 'asc' }
     });
 
-    console.log('Backend response status:', response.status);
+    // Transform data to match expected format
+    const transformedTeams = tradeTeams.map(team => ({
+      id: team.id,
+      name: team.name,
+      crew_count: team._count.crews,
+      total_members: team._count.members,
+      active_crews: team.crews.length,
+      is_active: team.isActive
+    }));
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Backend error response:', errorText);
-      throw new Error(`Backend responded with ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Backend data received:', data);
-    return NextResponse.json(data);
+    console.log(`✅ WMACS: Retrieved ${transformedTeams.length} trade teams via Prisma`);
+    return NextResponse.json(transformedTeams);
+    
   } catch (error) {
-    console.error('API proxy error:', error);
+    console.error('WMACS Trade Teams API Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch trade teams', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to fetch trade teams', details: error.message },
       { status: 500 }
     );
   }
@@ -43,24 +49,29 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const response = await fetch(`${BACKEND_URL}/api/v1/trade-teams/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const tradeTeam = await prisma.tradeTeam.create({
+      data: {
+        name: body.name,
+        description: body.description,
+        isActive: body.isActive ?? true
       },
-      body: JSON.stringify(body),
+      include: {
+        _count: {
+          select: {
+            crews: true,
+            members: true
+          }
+        }
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
+    console.log(`✅ WMACS: Created trade team ${tradeTeam.name} via Prisma`);
+    return NextResponse.json(tradeTeam);
+    
   } catch (error) {
-    console.error('API proxy error:', error);
+    console.error('WMACS Trade Teams Create Error:', error);
     return NextResponse.json(
-      { error: 'Failed to create trade team' },
+      { error: 'Failed to create trade team', details: error.message },
       { status: 500 }
     );
   }

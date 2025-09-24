@@ -74,6 +74,10 @@ model User {
   sentInvitations UserInvitation[] @relation("InvitedBy")
   roleAssignments RoleAssignment[]
   projectAssignments ProjectAssignment[]
+  
+  // Trade Teams and Crews Relations
+  tradeTeams    TradeTeam[] @relation("TradeTeamMembers")
+  crews         Crew[]      @relation("CrewMembers")
 }
 
 model VerificationToken {
@@ -313,4 +317,43 @@ enum ProjectPriority {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+// Trade Teams and Crews Models (Converted from FastAPI)
+model TradeTeam {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  crews       Crew[]
+  members     User[]   @relation("TradeTeamMembers")
+  
+  @@map("trade_teams")
+}
+
+model Crew {
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  tradeTeamId  String
+  status       CrewStatus @default(ACTIVE)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  // Relations
+  tradeTeam    TradeTeam @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+  members      User[]    @relation("CrewMembers")
+  
+  @@map("crews")
+}
+
+enum CrewStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
 }

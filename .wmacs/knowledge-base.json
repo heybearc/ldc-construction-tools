@@ -492,6 +492,30 @@
       },
       "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
       "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T09:57:54.740Z",
+      "suggestion": "Production service crashing due to mixed database connections - Prisma client errors and backend API calls to port 8000. Is this architecture normal for Next.js applications?",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T10:01:12.990Z",
+      "suggestion": "Converting legacy FastAPI backend calls to direct Prisma connections in Next.js application to eliminate architectural inconsistencies and service crashes",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
     }
   ],
   "ldc": {
