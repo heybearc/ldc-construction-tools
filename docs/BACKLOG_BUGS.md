@@ -61,6 +61,38 @@
 - **Effort**: M
 - **Found**: 2025-09-24
 
+#### BUG-013: Email service monitor shows false healthy status
+- **Module**: Health Monitor (/admin/health)
+- **Severity**: Medium
+- **Description**: Email service monitor always shows "healthy and connected" even when email configuration is not set up or invalid
+- **Impact**: Misleading health information, admins can't trust email service status
+- **Workaround**: Manually verify email configuration in Email Config module
+- **Status**: 📝 BACKLOG
+- **Effort**: S
+- **Found**: 2025-09-24
+
+### 🔌 API & Integration Issues
+
+#### BUG-014: User Management API shows warning status incorrectly
+- **Module**: API Status Monitor (/admin/api)
+- **Severity**: Low
+- **Description**: User Management API endpoint shows warning status when it should be healthy or error
+- **Impact**: Confusing API status information, unclear if there are actual issues
+- **Workaround**: Check actual API functionality directly
+- **Status**: 📝 BACKLOG
+- **Effort**: S
+- **Found**: 2025-09-24
+
+#### BUG-015: Email Test API shows error status with mock data
+- **Module**: API Status Monitor (/admin/api)
+- **Severity**: Low
+- **Description**: Email Test API endpoint shows error status even though it's using mock data and should show as "mock" or "development"
+- **Impact**: Misleading error status for development environment
+- **Workaround**: Ignore error status for development, check actual email test functionality
+- **Status**: 📝 BACKLOG
+- **Effort**: S
+- **Found**: 2025-09-24
+
 ## 🔍 INVESTIGATING
 
 *No items currently under investigation*
@@ -85,5 +117,5 @@
 - **Found**: 2025-09-24
 ```
 
-**Total Backlog Bugs**: 5  
-**Effort Distribution**: 2 Small, 3 Medium, 0 Large, 0 Extra Large
+**Total Backlog Bugs**: 8  
+**Effort Distribution**: 5 Small, 3 Medium, 0 Large, 0 Extra Large
