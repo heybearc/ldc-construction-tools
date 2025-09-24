@@ -36,6 +36,25 @@ This document serves as our centralized issue tracking system for bugs, improvem
 - **Created**: 2025-09-24
 - **Estimated Effort**: 8-12 hours
 
+### ✅ RESOLVED BUGS
+*Recently fixed issues*
+
+#### BUG-006: Email Configuration Status Never Shows Active ✅
+- **Module**: Email Configuration (/admin/email)
+- **Description**: Status badge always showed "Inactive" even after successful configuration
+- **Impact**: Confusing user experience, unclear if configuration was saved
+- **Status**: ✅ **RESOLVED** (2025-09-24)
+- **Resolution**: Fixed isActive flag to properly update to true after successful save
+- **Commit**: `3cbfe82`
+
+#### BUG-007: Email Configuration Not Persisting ✅
+- **Module**: Email Configuration (/admin/email)
+- **Description**: Configuration lost when navigating away and returning to page
+- **Impact**: Users had to re-enter configuration every time
+- **Status**: ✅ **RESOLVED** (2025-09-24)
+- **Resolution**: Implemented localStorage persistence with proper loading/saving
+- **Commit**: `3cbfe82`
+
 ### 📋 MEDIUM PRIORITY BUGS
 *Issues that affect functionality but have workarounds*
 
@@ -51,7 +70,7 @@ This document serves as our centralized issue tracking system for bugs, improvem
 #### BUG-004: Email Service Integration
 - **Module**: Email Configuration (/admin/email)
 - **Description**: Email configuration saves but doesn't connect to actual SMTP service
-- **Impact**: Email invitations and notifications not functional
+- **Impact**: Email invitations and notifications not functional (partially mitigated with mock responses)
 - **Status**: 🔄 **PENDING**
 - **Assigned**: Backend Development Team
 - **Created**: 2025-09-24
@@ -239,16 +258,18 @@ This document serves as our centralized issue tracking system for bugs, improvem
 
 ### 🎯 Current Issue Summary
 - **Total Issues**: 8 bugs + 8 features = 16 total
-- **Critical Issues**: 2 (12.5%)
-- **High Priority**: 4 (25%)
-- **Medium Priority**: 4 (25%)
-- **Low Priority**: 6 (37.5%)
+- **Resolved Issues**: 2 bugs ✅
+- **Active Issues**: 6 bugs + 8 features = 14 total
+- **Critical Issues**: 2 (14.3%)
+- **High Priority**: 4 (28.6%)
+- **Medium Priority**: 2 (14.3%)
+- **Low Priority**: 6 (42.8%)
 
 ### 📈 Progress Tracking
-- **Resolved Issues**: 0
+- **Resolved Issues**: 2 ✅
 - **In Progress**: 0
-- **Pending**: 16
-- **Resolution Rate**: 0% (baseline)
+- **Pending**: 14
+- **Resolution Rate**: 12.5% (2/16)
 
 ## 🎯 NEXT ACTIONS
 
