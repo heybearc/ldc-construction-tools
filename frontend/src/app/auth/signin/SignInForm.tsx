@@ -19,12 +19,13 @@ export default function SignInForm() {
     const password = formData.get('password') as string
 
     try {
-      const response = await fetch('/api/auth', {
+      const formDataToSend = new FormData()
+      formDataToSend.append('email', email)
+      formDataToSend.append('password', password)
+      
+      const response = await fetch('/api/auth/signin', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+        body: formDataToSend,
       })
 
       const data = await response.json()

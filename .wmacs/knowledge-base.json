@@ -480,6 +480,18 @@
       },
       "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
       "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T09:31:30.058Z",
+      "suggestion": "Authentication failing on both staging and production with 'Network error. Please try again.' - API endpoint /api/auth returning 404",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
     }
   ],
   "ldc": {
