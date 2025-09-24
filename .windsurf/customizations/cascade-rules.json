@@ -1,0 +1,49 @@
+{
+  "wmacs": {
+    "enabled": true,
+    "strictMode": true,
+    "rules": {
+      "hardStops": [
+        {
+          "pattern": "ssh.*production.*rm -rf",
+          "message": "🚫 HARD STOP: Direct production file deletion blocked",
+          "action": "block"
+        },
+        {
+          "pattern": "bypass.*ci.*cd",
+          "message": "🚫 HARD STOP: CI/CD pipeline bypass not allowed",
+          "action": "block"
+        },
+        {
+          "pattern": "skip.*staging",
+          "message": "🚫 HARD STOP: Staging validation required",
+          "action": "block"
+        }
+      ],
+      "softStops": [
+        {
+          "pattern": "architecture.*change",
+          "message": "⚠️ SOFT STOP: Architecture change requires WMACS Research Advisor analysis",
+          "action": "warn"
+        },
+        {
+          "pattern": "remove.*multi-agent",
+          "message": "⚠️ SOFT STOP: Multi-agent removal requires justification",
+          "action": "warn"
+        }
+      ],
+      "approvedPatterns": [
+        {
+          "pattern": "staging.*first",
+          "message": "✅ APPROVED: Staging-first deployment",
+          "action": "approve"
+        },
+        {
+          "pattern": "wmacs.*sync",
+          "message": "✅ APPROVED: WMACS synchronization",
+          "action": "approve"
+        }
+      ]
+    }
+  }
+}

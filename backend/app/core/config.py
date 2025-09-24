@@ -19,19 +19,19 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Security
-    SECRET_KEY: str = Field(default="development-secret-key-not-for-production", env="SECRET_KEY")
+    SECRET_KEY: str = Field(default="ldc-construction-tools-secret-key-change-in-production", env="SECRET_KEY")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
     
     # Database configuration
     DATABASE_URL: str = Field(
-        default="postgresql://ldc_user:ldc_password@10.92.3.21:5432/ldc_construction_tools_production",
+        default="sqlite:///ldc_construction.db",
         description="Database connection URL"
     )
     
     # CORS
     ALLOWED_ORIGINS: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"],
+        default=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"],
         env="ALLOWED_ORIGINS"
     )
     
@@ -45,5 +45,8 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
 
+
+def get_settings() -> Settings:
+    return Settings()
 
 settings = Settings()

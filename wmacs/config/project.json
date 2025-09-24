@@ -1,0 +1,42 @@
+{
+  "projectName": "ldc-construction-tools",
+  "projectType": "nextjs-construction-management",
+  "version": "1.0.0",
+  "description": "LDC Construction Tools - Personnel Contact Management System",
+  "region": "01.12",
+  "organization": "JW Construction Group",
+  
+  "authentication": {
+    "type": "custom-session",
+    "endpoints": {
+      "signin": "/api/auth/signin",
+      "signout": "/api/auth/signout",
+      "session": "/api/auth/session"
+    },
+    "credentials": {
+      "testUser": "admin@ldc-construction.local",
+      "testPassword": "AdminPass123!"
+    }
+  },
+  
+  "database": {
+    "type": "postgresql",
+    "name": "ldc_construction_tools",
+    "host": "10.92.3.21",
+    "port": 5432
+  },
+  
+  "features": {
+    "roleManagement": true,
+    "personnelTracking": true,
+    "tradeTeamManagement": true,
+    "reportingAnalytics": true,
+    "dataImportExport": true
+  },
+  
+  "customRules": [
+    "construction-safety-compliance",
+    "personnel-data-protection",
+    "trade-team-coordination"
+  ]
+}

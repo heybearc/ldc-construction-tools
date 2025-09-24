@@ -1,26 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-const BACKEND_URL = 'http://10.92.3.25:8000';
+const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/volunteers/stats/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const totalUsers = await prisma.user.count();
+    
+    const stats = {
+      totalUsers,
+      totalRoles: 5, // Static for now
+      totalRoleAssignments: 0, // Static for now
+      activeUsers: totalUsers,
+      lastUpdated: new Date().toISOString()
+    };
 
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
+    console.log('Stats calculated:', stats);
+    return NextResponse.json(stats);
   } catch (error) {
-    console.error('API proxy error:', error);
+    console.error('Database error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch volunteer stats' },
+      { error: 'Failed to fetch volunteer stats', details: error instanceof Error ? error.message : 'Database error' },
       { status: 500 }
     );
   }

@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ctrl+shift+w d",
+    "command": "wmacs.diagnose",
+    "when": "workspaceFolder"
+  },
+  {
+    "key": "ctrl+shift+w s", 
+    "command": "wmacs.sync",
+    "when": "workspaceFolder"
+  },
+  {
+    "key": "ctrl+shift+w t",
+    "command": "wmacs.test", 
+    "when": "workspaceFolder"
+  },
+  {
+    "key": "ctrl+shift+w r",
+    "command": "wmacs.research",
+    "when": "editorHasSelection"
+  }
+]
