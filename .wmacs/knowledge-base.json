@@ -33,6 +33,20 @@
       "impact": "medium",
       "lesson": "Root page should redirect unauthenticated users to /auth/signin but is serving content directly",
       "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:02:42.738Z",
+      "mistake": "Projects API configured to proxy to non-existent backend at 10.92.3.25:8000",
+      "impact": "Critical API failure causing 500 errors",
+      "lesson": "Always verify backend service availability before API proxy configuration",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:07:10.624Z",
+      "mistake": "Backend at 10.92.3.23:8000 does not have projects endpoint",
+      "impact": "Projects API will fail even with correct backend URL",
+      "lesson": "Always verify endpoint availability before configuring API proxies",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
     }
   ],
   "learnings": [
@@ -363,6 +377,18 @@
     {
       "timestamp": "2025-09-23T20:11:02.359Z",
       "suggestion": "Persistent authentication failure in LDC Construction Tools - same login issue recurring despite multiple fixes including NextAuth removal, simple auth implementation, API endpoint corrections, and server restarts",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T00:02:07.999Z",
+      "suggestion": "Projects API returning 500 error on staging Container 135 - need to investigate root cause and fix before production deployment",
       "research": {
         "standardsCount": 0,
         "practicesCount": 0,
