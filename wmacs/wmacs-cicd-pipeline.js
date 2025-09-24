@@ -130,6 +130,10 @@ class WMACsCICDPipeline {
     await this.execOnContainer(this.config.production.container, 
       `cd ${this.projectPath} && git pull origin main`);
     
+    // CRITICAL: Replace staging references with production config
+    console.log('   • Replacing staging references with production config...');
+    await this.replaceEnvironmentConfig();
+    
     // Install dependencies
     console.log('   • Installing production dependencies...');
     await this.execOnContainer(this.config.production.container,
@@ -151,6 +155,45 @@ class WMACsCICDPipeline {
       `cd ${this.projectPath}/frontend && pkill -f "next" || true && sleep 3 && npm start > /dev/null 2>&1 &`);
     
     console.log('   ✅ Production deployment completed');
+  }
+
+  async replaceEnvironmentConfig() {
+    console.log('     🔄 Replacing staging IP addresses with production...');
+    
+    // Replace staging IP (10.92.3.25) with production IP (10.92.3.23) in all API routes
+    const stagingIP = this.config.staging.ip;
+    const productionIP = this.config.production.ip;
+    
+    const apiFiles = [
+      'src/app/api/v1/export/route.ts',
+      'src/app/api/v1/volunteers/[id]/route.ts', 
+      'src/app/api/v1/admin/route.ts',
+      'src/app/api/v1/projects/[id]/route.ts',
+      'src/app/api/v1/projects/[id]/assignments/route.ts',
+      'src/app/api/v1/admin/reset/route.ts'
+    ];
+    
+    for (const file of apiFiles) {
+      await this.execOnContainer(this.config.production.container,
+        `cd ${this.projectPath}/frontend && sed -i 's/${stagingIP}/${productionIP}/g' ${file} || true`);
+    }
+    
+    console.log(`     ✅ Replaced ${stagingIP} → ${productionIP} in ${apiFiles.length} files`);
+    
+    // Replace any other staging references
+    console.log('     🔄 Replacing other staging references...');
+    await this.execOnContainer(this.config.production.container,
+      `cd ${this.projectPath}/frontend && find src -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | xargs grep -l "staging" | xargs sed -i 's/staging/production/g' || true`);
+    
+    // Update environment-specific configuration files
+    console.log('     🔄 Updating environment configuration...');
+    await this.execOnContainer(this.config.production.container,
+      `cd ${this.projectPath} && echo "NODE_ENV=production" > frontend/.env.local`);
+    
+    await this.execOnContainer(this.config.production.container,
+      `cd ${this.projectPath} && echo "NEXT_PUBLIC_API_URL=http://${productionIP}:3001" >> frontend/.env.local`);
+    
+    console.log('     ✅ Environment configuration updated for production');
   }
 
   async validateProduction() {
