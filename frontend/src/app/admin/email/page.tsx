@@ -44,15 +44,31 @@ export default function EmailConfigurationPage() {
   const loadEmailConfig = async () => {
     setLoading(true);
     try {
+      // Try to load from localStorage first (temporary solution until backend is ready)
+      const savedConfig = localStorage.getItem('ldc_email_config');
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setConfig(prevConfig => ({ ...prevConfig, ...parsedConfig }));
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to API call (will fail until backend is implemented)
       const response = await fetch('/api/v1/admin/email/config');
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.config) {
-          setConfig({ ...config, ...data.config });
+          setConfig(prevConfig => ({ ...prevConfig, ...data.config }));
         }
       }
     } catch (error) {
       console.error('Failed to load email configuration:', error);
+      // Load from localStorage as fallback
+      const savedConfig = localStorage.getItem('ldc_email_config');
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setConfig(prevConfig => ({ ...prevConfig, ...parsedConfig }));
+      }
     } finally {
       setLoading(false);
     }
@@ -62,25 +78,47 @@ export default function EmailConfigurationPage() {
     setSaving(true);
     setStatus(null);
     
+    // Validate required fields
+    if (!config.fromEmail || !config.username || !config.password) {
+      setStatus({ type: 'error', message: 'Please fill in all required fields (From Email, Username, Password)' });
+      setSaving(false);
+      return;
+    }
+    
     try {
-      const response = await fetch('/api/v1/admin/email/config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
-      });
-
-      const data = await response.json();
+      // Mark configuration as active when successfully saved
+      const activeConfig = { ...config, isActive: true, updatedAt: new Date().toISOString() };
       
-      if (response.ok && data.success) {
-        setStatus({ type: 'success', message: 'Email configuration saved successfully!' });
-        setConfig({ ...config, ...data.config });
-      } else {
-        setStatus({ type: 'error', message: data.message || 'Failed to save configuration' });
+      // Save to localStorage (temporary solution until backend is ready)
+      localStorage.setItem('ldc_email_config', JSON.stringify(activeConfig));
+      
+      // Try to save to backend API (will fail until backend is implemented)
+      try {
+        const response = await fetch('/api/v1/admin/email/config', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(activeConfig),
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          setConfig(activeConfig);
+          setStatus({ type: 'success', message: 'Email configuration saved successfully to server!' });
+          return;
+        }
+      } catch (apiError) {
+        console.log('Backend API not available, using localStorage fallback');
       }
+      
+      // Fallback success (localStorage saved)
+      setConfig(activeConfig);
+      setStatus({ type: 'success', message: 'Email configuration saved successfully! (Backend API pending - using local storage)' });
+      
     } catch (error) {
-      setStatus({ type: 'error', message: 'Error connecting to server' });
+      setStatus({ type: 'error', message: 'Error saving configuration' });
     } finally {
       setSaving(false);
     }
@@ -89,6 +127,11 @@ export default function EmailConfigurationPage() {
   const sendTestEmail = async () => {
     if (!testEmail) {
       setStatus({ type: 'error', message: 'Please enter a test email address' });
+      return;
+    }
+
+    if (!config.isActive) {
+      setStatus({ type: 'error', message: 'Please save your email configuration first before testing' });
       return;
     }
 
@@ -110,12 +153,20 @@ export default function EmailConfigurationPage() {
       const data = await response.json();
       
       if (response.ok && data.success) {
+        // Update config with test email sent timestamp
+        const updatedConfig = { ...config, testEmailSent: new Date().toISOString() };
+        setConfig(updatedConfig);
+        localStorage.setItem('ldc_email_config', JSON.stringify(updatedConfig));
         setStatus({ type: 'success', message: `Test email sent successfully to ${testEmail}!` });
       } else {
         setStatus({ type: 'error', message: data.message || 'Failed to send test email' });
       }
     } catch (error) {
-      setStatus({ type: 'error', message: 'Error sending test email' });
+      // Mock success for development (since backend API doesn't exist yet)
+      const updatedConfig = { ...config, testEmailSent: new Date().toISOString() };
+      setConfig(updatedConfig);
+      localStorage.setItem('ldc_email_config', JSON.stringify(updatedConfig));
+      setStatus({ type: 'info', message: `Test email simulation completed for ${testEmail} (Backend API pending - this is a mock response)` });
     } finally {
       setTesting(false);
     }
@@ -258,14 +309,28 @@ export default function EmailConfigurationPage() {
 
               {/* Gmail Configuration */}
               {config.provider === 'GMAIL' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Gmail Setup Instructions</h4>
-                  <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                    <li>Enable 2-Factor Authentication on your Gmail account</li>
-                    <li>Go to Google Account Settings → Security → App passwords</li>
-                    <li>Generate an app-specific password for "Mail"</li>
-                    <li>Use your Gmail address as username and the app password below</li>
-                  </ol>
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">Gmail Setup Instructions</h4>
+                    <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                      <li>Enable 2-Factor Authentication on your Gmail account</li>
+                      <li>Go to Google Account Settings → Security → App passwords</li>
+                      <li>Generate an app-specific password for "Mail"</li>
+                      <li>Use your Gmail address as username and the app password below</li>
+                    </ol>
+                  </div>
+                  
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-medium text-yellow-900 mb-2 flex items-center">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Important: App Password Format
+                    </h4>
+                    <p className="text-sm text-yellow-800">
+                      <strong>Remove all spaces</strong> from your Gmail app password before saving. 
+                      Google shows app passwords with spaces (e.g., "abcd efgh ijkl mnop") but you must 
+                      enter it without spaces (e.g., "abcdefghijklmnop") for SMTP to work correctly.
+                    </p>
+                  </div>
                 </div>
               )}
 
