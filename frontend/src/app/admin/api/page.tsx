@@ -32,95 +32,91 @@ export default function APIStatusPage() {
 
   const loadAPIStatus = async () => {
     try {
-      const response = await fetch('/api/v1/admin/api/status');
-      if (response.ok) {
-        const data = await response.json();
-        setEndpoints(data.endpoints);
-        setStats(data.stats);
-      } else {
-        // Mock data for development
-        setEndpoints([
-          {
-            name: 'User Authentication',
-            path: '/api/auth/signin',
-            method: 'POST',
-            status: 'healthy',
-            responseTime: 45,
-            lastChecked: new Date().toISOString(),
-            description: 'User login and authentication endpoint'
-          },
-          {
-            name: 'Admin Email Config',
-            path: '/api/v1/admin/email/config',
-            method: 'GET',
-            status: 'healthy',
-            responseTime: 23,
-            lastChecked: new Date().toISOString(),
-            description: 'Email configuration management'
-          },
-          {
-            name: 'User Management',
-            path: '/api/v1/admin/users',
-            method: 'GET',
-            status: 'warning',
-            responseTime: 156,
-            lastChecked: new Date().toISOString(),
-            description: 'User listing and management'
-          },
-          {
-            name: 'Trade Teams',
-            path: '/api/v1/trade-teams',
-            method: 'GET',
-            status: 'healthy',
-            responseTime: 34,
-            lastChecked: new Date().toISOString(),
-            description: 'Trade team data retrieval'
-          },
-          {
-            name: 'Projects API',
-            path: '/api/v1/projects',
-            method: 'GET',
-            status: 'healthy',
-            responseTime: 67,
-            lastChecked: new Date().toISOString(),
-            description: 'Project management endpoints'
-          },
-          {
-            name: 'Health Check',
-            path: '/api/v1/health',
-            method: 'GET',
-            status: 'healthy',
-            responseTime: 12,
-            lastChecked: new Date().toISOString(),
-            description: 'System health monitoring'
-          },
-          {
-            name: 'Database Connection',
-            path: '/api/v1/admin/health/database',
-            method: 'GET',
-            status: 'healthy',
-            responseTime: 8,
-            lastChecked: new Date().toISOString(),
-            description: 'Database connectivity check'
-          },
-          {
-            name: 'Email Test',
-            path: '/api/v1/admin/email/test',
-            method: 'POST',
-            status: 'error',
-            responseTime: 5000,
-            lastChecked: new Date().toISOString(),
-            description: 'Email sending functionality test'
-          }
-        ]);
+      // For now, use mock data since the API endpoint doesn't exist yet
+      // TODO: Implement actual API endpoint at /api/v1/admin/api/status
+      
+      // Mock data for development
+      setEndpoints([
+        {
+          name: 'User Authentication',
+          path: '/api/auth/signin',
+          method: 'POST',
+          status: 'healthy',
+          responseTime: 45,
+          lastChecked: new Date().toISOString(),
+          description: 'User login and authentication endpoint'
+        },
+        {
+          name: 'Admin Email Config',
+          path: '/api/v1/admin/email/config',
+          method: 'GET',
+          status: 'healthy',
+          responseTime: 23,
+          lastChecked: new Date().toISOString(),
+          description: 'Email configuration management'
+        },
+        {
+          name: 'User Management',
+          path: '/api/v1/admin/users',
+          method: 'GET',
+          status: 'warning',
+          responseTime: 156,
+          lastChecked: new Date().toISOString(),
+          description: 'User listing and management'
+        },
+        {
+          name: 'Trade Teams',
+          path: '/api/v1/trade-teams',
+          method: 'GET',
+          status: 'healthy',
+          responseTime: 34,
+          lastChecked: new Date().toISOString(),
+          description: 'Trade team data retrieval'
+        },
+        {
+          name: 'Projects API',
+          path: '/api/v1/projects',
+          method: 'GET',
+          status: 'healthy',
+          responseTime: 67,
+          lastChecked: new Date().toISOString(),
+          description: 'Project management endpoints'
+        },
+        {
+          name: 'Health Check',
+          path: '/api/v1/health',
+          method: 'GET',
+          status: 'healthy',
+          responseTime: 12,
+          lastChecked: new Date().toISOString(),
+          description: 'System health monitoring'
+        },
+        {
+          name: 'Database Connection',
+          path: '/api/v1/admin/health/database',
+          method: 'GET',
+          status: 'healthy',
+          responseTime: 8,
+          lastChecked: new Date().toISOString(),
+          description: 'Database connectivity check'
+        },
+        {
+          name: 'Email Test',
+          path: '/api/v1/admin/email/test',
+          method: 'POST',
+          status: 'error',
+          responseTime: 5000,
+          lastChecked: new Date().toISOString(),
+          description: 'Email sending functionality test'
+        }
+      ]);
 
-        setStats({
-          totalEndpoints: 8,
-          healthyEndpoints: 6,
-          averageResponseTime: 28,
-          uptime: '99.8%'
-        });
-      }
+      setStats({
+        totalEndpoints: 8,
+        healthyEndpoints: 6,
+        averageResponseTime: 28,
+        uptime: '99.8%'
+      });
     } catch (error) {
       console.error('Failed to load API status:', error);
     } finally {
@@ -413,9 +409,9 @@ export default function APIStatusPage() {
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Response Time Guidelines</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li>• <span className="text-green-600">< 100ms:</span> Excellent performance</li>
+                <li>• <span className="text-green-600">&lt; 100ms:</span> Excellent performance</li>
                 <li>• <span className="text-yellow-600">100-500ms:</span> Acceptable performance</li>
-                <li>• <span className="text-red-600">> 500ms:</span> Poor performance - needs attention</li>
+                <li>• <span className="text-red-600">&gt; 500ms:</span> Poor performance - needs attention</li>
                 <li>• <strong>Target:</strong> 95% of requests under 200ms</li>
               </ul>
             </div>
