@@ -47,6 +47,41 @@
       "impact": "Projects API will fail even with correct backend URL",
       "lesson": "Always verify endpoint availability before configuring API proxies",
       "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:19:21.580Z",
+      "mistake": "Trade teams page does not exist in frontend",
+      "impact": "User sees blank page when trying to access trade teams",
+      "lesson": "Always verify frontend pages exist before assuming API issues",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:29:34.837Z",
+      "mistake": "Trade Teams menu link points to home page instead of /trade-teams",
+      "impact": "Users cannot navigate to trade teams page via menu",
+      "lesson": "Always verify navigation links point to correct routes",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:34:38.369Z",
+      "mistake": "Root page has complex dashboard with missing component dependencies",
+      "impact": "Dashboard menu item may be broken due to component import issues",
+      "lesson": "Always verify component dependencies exist before importing",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:49:53.772Z",
+      "mistake": "Incorrectly referenced Container 134 for LDC production deployment",
+      "impact": "Container 134 is JW Attendant Scheduler, not LDC Construction Tools",
+      "lesson": "Always check INFRASTRUCTURE_IMMUTABLE.md for correct container assignments",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-24T00:52:56.681Z",
+      "mistake": "Production deployment script has incorrect container numbers",
+      "impact": "Script references Container 134 but LDC production is Container 133",
+      "lesson": "Always verify container assignments against INFRASTRUCTURE_IMMUTABLE.md",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
     }
   ],
   "learnings": [
@@ -389,6 +424,42 @@
     {
       "timestamp": "2025-09-24T00:02:07.999Z",
       "suggestion": "Projects API returning 500 error on staging Container 135 - need to investigate root cause and fix before production deployment",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T00:19:34.102Z",
+      "suggestion": "Create trade teams frontend page to display the working trade teams API data",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T00:21:06.712Z",
+      "suggestion": "Need to find original trade teams page specification that previously existed in this project",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T00:57:13.737Z",
+      "suggestion": "Need to replace staging references with production config during deployment to prevent past issues",
       "research": {
         "standardsCount": 0,
         "practicesCount": 0,
