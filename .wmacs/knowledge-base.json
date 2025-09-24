@@ -468,6 +468,18 @@
       },
       "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
       "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-24T09:12:54.195Z",
+      "suggestion": "Need to fix MCP server dependencies and use MCP servers instead of regular Node.js scripts for WMACS operations",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
     }
   ],
   "ldc": {

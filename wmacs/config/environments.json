@@ -17,8 +17,8 @@
   },
   
   "production": {
-    "container": "134",
-    "ip": "10.92.3.24",
+    "container": "133",
+    "ip": "10.92.3.23",
     "hostname": "ldc-production.cloudigan.net",
     "sshHost": "prox",
     "sshConfig": "/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant",
