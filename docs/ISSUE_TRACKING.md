@@ -6,7 +6,20 @@
 
 ## 🎯 ISSUE TRACKING OVERVIEW
 
-This document serves as our centralized issue tracking system for bugs, improvements, and feature requests across all modules and submodules in the LDC Construction Tools project.
+This document tracks **ACTIVE WORK** - critical and high-priority issues requiring immediate attention. For non-critical items that can be addressed later, use the **BACKLOG SYSTEM**:
+
+### 📋 Tracking System Structure:
+- **ISSUE_TRACKING.md** (this file) - Active work, critical/high priority
+- **BACKLOG_BUGS.md** - Non-critical bugs for future resolution
+- **BACKLOG_FEATURES.md** - Feature requests and new functionality  
+- **BACKLOG_IMPROVEMENTS.md** - Performance, code quality, enhancements
+- **BACKLOG_MANAGEMENT.md** - Process guide and templates
+
+### 🎯 When to Use Each:
+- **🔥 Critical Issues** → ISSUE_TRACKING.md (immediate action)
+- **⚠️ High Priority** → ISSUE_TRACKING.md (next sprint)
+- **📋 Medium/Low Priority** → Appropriate BACKLOG_*.md file
+- **💡 Ideas & Improvements** → Appropriate BACKLOG_*.md file
 
 ## 🐛 ACTIVE BUGS
 
