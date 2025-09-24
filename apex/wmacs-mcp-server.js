@@ -41,9 +41,24 @@ class WMACsMCPServer {
     }
 
     try {
-      const command = `ssh prox "pct exec ${env.container} -- bash -c 'cd /opt/ldc-construction-tools/frontend && pkill -f \\"next dev\\" && sleep 2 && npm run dev > /dev/null 2>&1 &'"`;
+      const sshConfig = env.sshConfig ? `-F ${env.sshConfig}` : '';
       
-      execSync(command, { stdio: 'inherit' });
+      // Step 1: Git sync to pull latest staging code
+      console.log(`🔄 APEX MCP: Syncing git repository on ${env.ssh}`);
+      const gitSyncCommand = `ssh ${sshConfig} ${env.ssh} "cd ${env.path} && git fetch origin && git reset --hard origin/${env.branch}"`;
+      execSync(gitSyncCommand, { stdio: 'inherit' });
+      console.log(`✅ APEX MCP: Git sync completed`);
+      
+      // Step 2: Install dependencies if needed
+      console.log(`📦 APEX MCP: Installing dependencies`);
+      const depsCommand = `ssh ${sshConfig} ${env.ssh} "cd ${env.path}/frontend && npm install"`;
+      execSync(depsCommand, { stdio: 'inherit' });
+      
+      // Step 3: Restart application
+      console.log(`🔄 APEX MCP: Restarting application`);
+      const restartCommand = `ssh ${sshConfig} ${env.ssh} "cd ${env.path}/frontend && pkill -f 'next dev' || true && sleep 2 && PORT=${env.port} npm run dev > /dev/null 2>&1 &"`;
+      execSync(restartCommand, { stdio: 'inherit' });
+      
       console.log(`✅ APEX MCP: Application restarted on container ${env.container}`);
       
       return {
@@ -51,7 +66,7 @@ class WMACsMCPServer {
         environment,
         container: env.container,
         ip: env.ip,
-        message: 'Application restarted successfully'
+        message: 'Git sync and application restart completed successfully'
       };
     } catch (error) {
       console.error(`❌ APEX MCP: Failed to restart application:`, error.message);
@@ -69,7 +84,7 @@ class WMACsMCPServer {
 
     try {
       // Test basic connectivity
-      const healthCheck = execSync(`curl -s -o /dev/null -w "%{http_code}" http://${env.ip}:${env.ports.frontend}/`, { encoding: 'utf8' });
+      const healthCheck = execSync(`curl -s -o /dev/null -w "%{http_code}" http://${env.ip}:${env.port}/`, { encoding: 'utf8' });
       
       const result = {
         success: healthCheck.trim() === '307' || healthCheck.trim() === '200',

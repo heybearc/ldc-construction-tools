@@ -3,7 +3,7 @@
 # Usage: ./deploy.sh <environment> [options]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APEX_DEPLOY="$SCRIPT_DIR/apex/core/apex-enhanced-deployment.js"
+APEX_DEPLOY="$SCRIPT_DIR/apex/apex-enhanced-deployment.js"
 
 if [ ! -f "$APEX_DEPLOY" ]; then
     echo "❌ APEX deployment tool not found. Run APEX sync first."
