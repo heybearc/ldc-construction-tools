@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Shield, Users, Mail, Activity, BarChart, FileText, Settings, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Shield, Users, Mail, Activity, BarChart, FileText, Settings, CheckCircle, AlertCircle, TrendingUp, Plus, Upload, FileSpreadsheet, Download, Trash2, Edit } from 'lucide-react';
 import Link from 'next/link';
 
 interface ContactImportData {
