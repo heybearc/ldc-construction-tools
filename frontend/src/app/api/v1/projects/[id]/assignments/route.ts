@@ -4,10 +4,11 @@ const BACKEND_URL = 'http://10.92.3.25:8000';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${params.id}/assignments/`, {
+    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${id}/assignments/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -31,12 +32,13 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const body = await request.json();
     
-    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${params.id}/assignments/`, {
+    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${id}/assignments/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
