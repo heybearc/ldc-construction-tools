@@ -1,68 +1,16 @@
 {
-  "name": "ldc-construction-tools",
+  "name": "ldc-construction-tools-mcp",
   "version": "1.0.0",
-  "description": "LDC Construction Tools - SDD Modular Architecture",
-  "main": "index.js",
+  "description": "LDC Construction Tools MCP Server with credit savings optimization",
+  "main": "enhanced-ldc-mcp.js",
   "scripts": {
-    "install:all": "npm run install:phase1 && npm run install:phase2 && npm run install:phase3",
-    "install:phase1": "cd lib/role-management && npm install && cd ../trade-teams && npm install && cd ../volunteer-management && npm install",
-    "install:phase2": "cd lib/assignment-workflow && npm install && cd ../calendar-scheduling && npm install",
-    "install:phase3": "cd lib/communication-hub && npm install",
-    
-    "build:all": "npm run build:phase1 && npm run build:phase2 && npm run build:phase3",
-    "build:phase1": "cd lib/role-management && npm run build && cd ../trade-teams && npm run build && cd ../volunteer-management && npm run build",
-    "build:phase2": "cd lib/assignment-workflow && npm run build && cd ../calendar-scheduling && npm run build",
-    "build:phase3": "cd lib/communication-hub && npm run build",
-    
-    "test:all": "npm run test:phase1 && npm run test:phase2 && npm run test:phase3",
-    "test:phase1": "cd lib/role-management && npm test && cd ../trade-teams && npm test && cd ../volunteer-management && npm test",
-    "test:phase2": "cd lib/assignment-workflow && npm test && cd ../calendar-scheduling && npm test",
-    "test:phase3": "cd lib/communication-hub && npm test",
-    
-    "test:integration": "jest --config=jest.integration.config.js",
-    "test:integration:phase1": "jest --config=jest.integration.config.js --testPathPattern=phase1",
-    "test:integration:phase2": "jest --config=jest.integration.config.js --testPathPattern=phase2",
-    "test:integration:full-system": "jest --config=jest.integration.config.js --testPathPattern=full-system",
-    
-    "validate:contracts": "npm run validate:contracts:phase1 && npm run validate:contracts:phase2 && npm run validate:contracts:phase3",
-    "validate:contracts:phase1": "swagger-codegen validate -i contracts/openapi.yaml",
-    "validate:contracts:phase2": "swagger-codegen validate -i lib/assignment-workflow/contracts/openapi.yaml && swagger-codegen validate -i lib/calendar-scheduling/contracts/openapi.yaml",
-    "validate:contracts:phase3": "swagger-codegen validate -i lib/communication-hub/contracts/openapi.yaml",
-    
-    "lint:all": "eslint lib/*/src/**/*.ts lib/*/src/**/*.tsx",
-    "lint:fix": "eslint lib/*/src/**/*.ts lib/*/src/**/*.tsx --fix",
-    
-    "start:dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:backend": "node backend/server.js",
-    "start:frontend": "cd frontend && npm start",
-    
-    "deploy:phase1": "npm run build:phase1 && npm run test:phase1 && npm run validate:contracts:phase1 && ./scripts/deploy-phase.sh phase1",
-    "deploy:phase2": "npm run build:phase2 && npm run test:phase2 && npm run validate:contracts:phase2 && ./scripts/deploy-phase.sh phase2",
-    "deploy:phase3": "npm run build:phase3 && npm run test:phase3 && npm run validate:contracts:phase3 && ./scripts/deploy-phase.sh phase3",
-    "deploy:all": "npm run deploy:phase1 && npm run deploy:phase2 && npm run deploy:phase3",
-    
-    "health:check:all": "curl -f http://localhost:3000/api/health && curl -f http://localhost:3000/api/v1/role-management/health && curl -f http://localhost:3000/api/v1/assignment-workflow/health",
-    "monitor:logs": "tail -f logs/application.log",
-    
-    "rollback:latest": "./scripts/rollback.sh latest",
-    "rollback:version": "./scripts/rollback.sh",
-    "rollback:module": "./scripts/rollback-module.sh"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.0.0",
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "concurrently": "^8.0.0",
-    "eslint": "^8.0.0",
-    "jest": "^29.0.0",
-    "swagger-codegen-cli": "^3.0.0",
-    "typescript": "^5.0.0"
+    "start": "node enhanced-ldc-mcp.js",
+    "test": "node enhanced-ldc-mcp.js < test-input.json"
   },
   "dependencies": {
-    "express": "^4.18.0",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
-    "morgan": "^1.10.0"
-  }
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "keywords": ["mcp", "ldc", "construction", "credit-savings"],
+  "author": "APEX Guardian System",
+  "license": "MIT"
 }
