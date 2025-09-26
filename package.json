@@ -2,10 +2,10 @@
   "name": "ldc-construction-tools-mcp",
   "version": "1.0.0",
   "description": "LDC Construction Tools MCP Server with credit savings optimization",
-  "main": "enhanced-ldc-mcp.js",
+  "main": "mcp-server-ops-ldc/src/index.js",
   "scripts": {
-    "start": "node enhanced-ldc-mcp.js",
-    "test": "node enhanced-ldc-mcp.js < test-input.json"
+    "start": "node mcp-server-ops-ldc/src/index.js",
+    "test": "node mcp-server-ops-ldc/src/index.js < test-input.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
