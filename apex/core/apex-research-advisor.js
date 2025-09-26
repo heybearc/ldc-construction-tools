@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-// APEX Research Advisor - Industry Best Practices Analysis with Pushback
+// WMACS Research Advisor - Industry Best Practices Analysis with Pushback
 // Provides informed resistance to suggestions without proper research and validation
 
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
-class APEXResearchAdvisor {
+class WMACSResearchAdvisor {
   constructor() {
     this.knowledgeBase = {
       devops: {
@@ -43,7 +43,7 @@ class APEXResearchAdvisor {
    * Analyzes a suggestion and provides informed pushback with research
    */
   async analyzeSuggestion(suggestion, context = {}) {
-    console.log('🔍 APEX Research Advisor: Analyzing suggestion...');
+    console.log('🔍 WMACS Research Advisor: Analyzing suggestion...');
     console.log(`Suggestion: ${suggestion}`);
     
     // Check against known anti-patterns
@@ -411,7 +411,7 @@ class APEXResearchAdvisor {
 
 // CLI usage
 if (require.main === module) {
-  const advisor = new APEXResearchAdvisor();
+  const advisor = new WMACSResearchAdvisor();
   advisor.loadKnowledgeBase();
   
   const [,, command, ...args] = process.argv;
@@ -421,7 +421,7 @@ if (require.main === module) {
       const suggestion = args.join(' ');
       advisor.analyzeSuggestion(suggestion)
         .then(recommendation => {
-          console.log('\n🎯 APEX Research Advisor Recommendation:');
+          console.log('\n🎯 WMACS Research Advisor Recommendation:');
           console.log(`Decision: ${recommendation.decision}`);
           console.log(`Confidence: ${recommendation.confidence}`);
           console.log('\nReasoning:');
@@ -455,4 +455,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = APEXResearchAdvisor;
+module.exports = WMACSResearchAdvisor;

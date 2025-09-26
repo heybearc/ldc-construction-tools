@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-// APEX Auto-Advisor - Automatic Research Integration
+// WMACS Auto-Advisor - Automatic Research Integration
 // Monitors for suggestions and automatically provides research-backed analysis
 
 const fs = require('fs');
 const path = require('path');
-const APEXResearchAdvisor = require('./apex-research-advisor.js');
+const WMACSResearchAdvisor = require('./apex-research-advisor.js');
 
-class APEXAutoAdvisor {
+class WMACSAutoAdvisor {
   constructor() {
-    this.advisor = new APEXResearchAdvisor();
+    this.advisor = new WMACSResearchAdvisor();
     this.advisor.loadKnowledgeBase();
     
     this.suggestionPatterns = [
@@ -94,7 +94,7 @@ class APEXAutoAdvisor {
       return { analyzed: false, message: 'No suggestions detected requiring analysis' };
     }
 
-    console.log('🤖 APEX Auto-Advisor: Detected suggestions requiring analysis...');
+    console.log('🤖 WMACS Auto-Advisor: Detected suggestions requiring analysis...');
     
     const analyses = [];
     
@@ -142,7 +142,7 @@ class APEXAutoAdvisor {
    * Monitors conversation for suggestions (simulated)
    */
   async monitorConversation(conversationText, context = {}) {
-    console.log('👁️  APEX Auto-Advisor: Monitoring conversation...');
+    console.log('👁️  WMACS Auto-Advisor: Monitoring conversation...');
     
     const result = await this.autoAnalyze(conversationText, context);
     
@@ -178,7 +178,7 @@ class APEXAutoAdvisor {
    * Integration hook for conversation systems
    */
   static async analyzeUserInput(userInput, context = {}) {
-    const autoAdvisor = new APEXAutoAdvisor();
+    const autoAdvisor = new WMACSAutoAdvisor();
     return await autoAdvisor.monitorConversation(userInput, context);
   }
 }
@@ -190,7 +190,7 @@ if (require.main === module) {
   switch (command) {
     case 'monitor':
       const text = args.join(' ');
-      APEXAutoAdvisor.analyzeUserInput(text)
+      WMACSAutoAdvisor.analyzeUserInput(text)
         .then(result => {
           if (!result.analyzed) {
             console.log('✅ No high-risk suggestions detected');
@@ -212,7 +212,7 @@ if (require.main === module) {
       
       testSuggestions.forEach(async (suggestion, index) => {
         console.log(`--- Test ${index + 1} ---`);
-        await APEXAutoAdvisor.analyzeUserInput(suggestion);
+        await WMACSAutoAdvisor.analyzeUserInput(suggestion);
         console.log('');
       });
       break;
@@ -224,4 +224,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = APEXAutoAdvisor;
+module.exports = WMACSAutoAdvisor;

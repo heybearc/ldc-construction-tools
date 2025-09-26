@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * APEX Base MCP Server
+ * WMACS Base MCP Server
  * 
- * Shared foundation for all APEX MCP servers across projects
+ * Shared foundation for all WMACS MCP servers across projects
  * Provides common functionality, security, and guardrails
  */
 
@@ -17,7 +17,7 @@ const path = require('path');
 
 const execAsync = promisify(exec);
 
-class APEXBaseMCPServer {
+class WMACSBaseMCPServer {
   constructor(config) {
     this.config = {
       name: config.name || 'apex-mcp-server',
@@ -45,14 +45,14 @@ class APEXBaseMCPServer {
     this.operationCount = new Map();
     this.tools = new Map();
     
-    // Add common APEX tools
+    // Add common WMACS tools
     this.addCommonTools();
   }
 
   addCommonTools() {
-    // Health check tool (available to all APEX MCP servers)
+    // Health check tool (available to all WMACS MCP servers)
     this.addTool('apex_health_check', {
-      description: 'Check APEX system health across environments',
+      description: 'Check WMACS system health across environments',
       inputSchema: {
         type: 'object',
         properties: {
@@ -70,7 +70,7 @@ class APEXBaseMCPServer {
 
     // System status tool
     this.addTool('apex_system_status', {
-      description: 'Get comprehensive APEX system status',
+      description: 'Get comprehensive WMACS system status',
       inputSchema: {
         type: 'object',
         properties: {
@@ -252,4 +252,4 @@ class APEXBaseMCPServer {
   }
 }
 
-module.exports = APEXBaseMCPServer;
+module.exports = WMACSBaseMCPServer;

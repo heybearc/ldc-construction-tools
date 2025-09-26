@@ -33,7 +33,7 @@
       "softStops": [
         {
           "pattern": "architecture.*change",
-          "message": "⚠️ SOFT STOP: Architecture change requires APEX Research Advisor analysis",
+          "message": "⚠️ SOFT STOP: Architecture change requires WMACS Research Advisor analysis",
           "action": "warn"
         },
         {
@@ -60,7 +60,7 @@
         },
         {
           "pattern": "apex.*sync",
-          "message": "✅ APPROVED: APEX synchronization",
+          "message": "✅ APPROVED: WMACS synchronization",
           "action": "approve"
         },
         {
