@@ -23,10 +23,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
     
-    # Database configuration
+    # Database configuration - PostgreSQL only (Prisma integration)
     DATABASE_URL: str = Field(
-        default="sqlite:///ldc_construction.db",
-        description="Database connection URL"
+        default="postgresql://ldc_user:ldc_password@10.92.3.21:5432/ldc_construction_tools_staging",
+        env="DATABASE_URL",
+        description="PostgreSQL database connection URL"
     )
     
     # CORS
