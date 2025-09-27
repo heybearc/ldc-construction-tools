@@ -7,6 +7,7 @@ interface AuditLog {
   id: string;
   userId?: string;
   userName?: string;
+  userRole?: string;
   action: string;
   resource: string;
   resourceId?: string;
@@ -15,6 +16,12 @@ interface AuditLog {
   ipAddress?: string;
   userAgent?: string;
   timestamp: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  category: 'USER_ACTIVITY' | 'ROLE_CHANGE' | 'SYSTEM_OPERATION' | 'DATA_MODIFICATION';
+  consultationRequired?: boolean;
+  consultationStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  consultedBy?: string;
+  consultationNotes?: string;
 }
 
 interface AuditFilters {
@@ -24,6 +31,9 @@ interface AuditFilters {
   dateFrom: string;
   dateTo: string;
   search: string;
+  severity: string;
+  category: string;
+  consultationStatus: string;
 }
 
 export default function AuditLogsPage() {
@@ -36,7 +46,10 @@ export default function AuditLogsPage() {
     userId: '',
     dateFrom: '',
     dateTo: '',
-    search: ''
+    search: '',
+    severity: '',
+    category: '',
+    consultationStatus: ''
   });
 
   useEffect(() => {
@@ -61,45 +74,60 @@ export default function AuditLogsPage() {
             id: '1',
             userId: 'user1',
             userName: 'John Doe',
+            userRole: 'ADMIN',
             action: 'CREATE',
             resource: 'USER',
             resourceId: 'user123',
             newValues: { name: 'Jane Smith', email: 'jane@example.com', role: 'COORDINATOR' },
             ipAddress: '192.168.1.100',
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+            timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+            severity: 'MEDIUM',
+            category: 'USER_ACTIVITY'
           },
           {
             id: '2',
             userId: 'user1',
             userName: 'John Doe',
+            userRole: 'ADMIN',
             action: 'UPDATE',
             resource: 'EMAIL_CONFIG',
             resourceId: 'config1',
             oldValues: { fromEmail: 'old@example.com' },
             newValues: { fromEmail: 'new@example.com' },
             ipAddress: '192.168.1.100',
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+            severity: 'LOW',
+            category: 'SYSTEM_OPERATION'
           },
           {
             id: '3',
             userId: 'user2',
             userName: 'Admin User',
+            userRole: 'ADMIN',
             action: 'LOGIN',
             resource: 'SESSION',
             ipAddress: '192.168.1.101',
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString()
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+            severity: 'LOW',
+            category: 'USER_ACTIVITY'
           },
           {
             id: '4',
             userId: 'user1',
             userName: 'John Doe',
-            action: 'DELETE',
-            resource: 'PROJECT',
-            resourceId: 'proj456',
-            oldValues: { name: 'Old Project', status: 'ACTIVE' },
+            userRole: 'COORDINATOR',
+            action: 'ROLE_CHANGE',
+            resource: 'USER',
+            resourceId: 'user789',
+            oldValues: { role: 'VOLUNTEER' },
+            newValues: { role: 'COORDINATOR' },
             ipAddress: '192.168.1.100',
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString()
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+            severity: 'HIGH',
+            category: 'ROLE_CHANGE',
+            consultationRequired: true,
+            consultationStatus: 'PENDING'
           }
         ]);
       }
@@ -269,7 +297,10 @@ export default function AuditLogsPage() {
                 userId: '',
                 dateFrom: '',
                 dateTo: '',
-                search: ''
+                search: '',
+                severity: '',
+                category: '',
+                consultationStatus: ''
               })}
               className="w-full px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
