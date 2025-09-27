@@ -1,9 +1,55 @@
 # LDC Construction Tools - Bug Backlog
 
 **Purpose**: Non-critical bugs for future resolution  
-**Updated**: 2025-09-24
+**Updated**: 2025-09-27
 
 ## 📝 ACTIVE BACKLOG
+
+### 🔧 System Operations Issues
+
+#### BUG-015: System Operations deployment operations showing failed status
+- **Module**: System Operations (/admin/system)
+- **Severity**: Medium
+- **Description**: Deployment operations section shows "failed" status and all "Run" buttons fail when clicked
+- **Impact**: System operations functionality appears non-functional, unclear purpose of deployment operations
+- **Investigation Needed**: 
+  - What are deployment operations intended for?
+  - Why do all operations fail when executed?
+  - Is this submodule fully functional or needs implementation?
+- **Status**: 📝 BACKLOG - INVESTIGATION REQUIRED
+- **Effort**: L-M (depends on investigation results)
+- **Found**: 2025-09-27
+- **Reporter**: User testing Phase 2 deployment
+
+### 📊 API Status Monitoring Issues
+
+#### BUG-016: User Management API endpoint showing warning status
+- **Module**: API Status (/admin/api)
+- **Severity**: Medium
+- **Description**: User Management endpoint (/api/v1/admin/users) consistently shows warning status
+- **Impact**: Indicates potential performance or reliability issues with user management API
+- **Investigation Needed**: 
+  - Check actual API response times and error rates
+  - Verify if warning is accurate or false positive
+  - Optimize if genuine performance issue
+- **Status**: 📝 BACKLOG - INVESTIGATION REQUIRED
+- **Effort**: M
+- **Found**: 2025-09-27
+- **Reporter**: User testing Phase 2 deployment
+
+#### BUG-017: Email Test API endpoint showing error status
+- **Module**: API Status (/admin/api)
+- **Severity**: High
+- **Description**: Email Test endpoint showing error status in API monitoring
+- **Impact**: Email testing functionality may be broken, affects email configuration validation
+- **Investigation Needed**: 
+  - Check email test endpoint functionality
+  - Verify SMTP configuration and connectivity
+  - Fix underlying email service issues
+- **Status**: 📝 BACKLOG - HIGH PRIORITY
+- **Effort**: M
+- **Found**: 2025-09-27
+- **Reporter**: User testing Phase 2 deployment
 
 ### 📱 Mobile & Responsive Issues
 
