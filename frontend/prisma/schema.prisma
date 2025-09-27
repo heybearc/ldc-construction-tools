@@ -78,6 +78,9 @@ model User {
   // Trade Teams and Crews Relations
   tradeTeams    TradeTeam[] @relation("TradeTeamMembers")
   crews         Crew[]      @relation("CrewMembers")
+  
+  // Audit Log Relations
+  auditLogs     AuditLog[]
 }
 
 model VerificationToken {
@@ -356,4 +359,50 @@ enum CrewStatus {
   ACTIVE
   INACTIVE
   PENDING
+}
+
+// Email Provider and Security Enums for existing EmailConfiguration model
+enum EmailProvider {
+  GMAIL
+  CUSTOM_SMTP
+}
+
+enum EmailSecurity {
+  NONE
+  SSL_TLS
+  STARTTLS
+}
+
+// Email Templates
+model EmailTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  category     String   // USER_INVITATION, PASSWORD_RESET, NOTIFICATION
+  subject      String
+  htmlContent  String   @db.Text
+  textContent  String?  @db.Text
+  variables    Json     // Array of template variables
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("email_templates")
+}
+
+// Audit Logs
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
+  resource    String   // USER, ROLE, PROJECT, etc.
+  resourceId  String?
+  oldValues   Json?
+  newValues   Json?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+  
+  user User? @relation(fields: [userId], references: [id])
+  
+  @@map("audit_logs")
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { Upload, Users, FileSpreadsheet, Download, Trash2, Edit, Plus } from 'lucide-react';
-// AuthGuard removed to fix compilation error
+import React, { useState, useEffect, useRef } from 'react';
+import { Shield, Users, Mail, Activity, BarChart, FileText, Settings, CheckCircle, AlertCircle, TrendingUp, Plus, Upload, FileSpreadsheet, Download, Trash2, Edit } from 'lucide-react';
+import Link from 'next/link';
 
 interface ContactImportData {
   firstName: string;

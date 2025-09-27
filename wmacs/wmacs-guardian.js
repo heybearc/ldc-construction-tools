@@ -113,6 +113,29 @@ class WMACSGuardian {
       throw error;
     }
   }
+<<<<<<< HEAD
+=======
+
+  async guardedLoginTest(container, port = 3001) {
+    return this.executeWithGuardian('login-test', container, async () => {
+      const containerIP = this.getContainerIP(container);
+      
+      // Test login flow - LDC Construction Tools authentication
+      const loginResult = await execAsync(`curl -c /tmp/guardian-cookies.txt -X POST http://${containerIP}:${port}/api/auth/signin -F "email=admin@ldc-construction.local" -F "password=AdminPass123!" -s`);
+      
+      const loginData = JSON.parse(loginResult.stdout);
+      if (!loginData.success) {
+        throw new Error(`Login failed: ${loginData.error || 'Unknown error'}`);
+      }
+      
+      // Test dashboard access
+      const dashboardResult = await execAsync(`curl -b /tmp/guardian-cookies.txt -I http://${containerIP}:${port}/dashboard -s`);
+      
+      console.log(`✅ Login test completed successfully`);
+      return { login: 'success', dashboard: dashboardResult.stdout.includes('200') ? 'accessible' : 'redirect' };
+    });
+  }
+>>>>>>> feature/role-management-module
 }
 
 // CLI Interface
