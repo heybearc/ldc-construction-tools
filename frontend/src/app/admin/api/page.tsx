@@ -11,6 +11,13 @@ interface APIEndpoint {
   responseTime: number;
   lastChecked: string;
   description: string;
+  errorRate: number;
+  requestCount24h: number;
+  averageResponseTime24h: number;
+  slaTarget: number;
+  slaCompliance: number;
+  lastError?: string;
+  alertsEnabled: boolean;
 }
 
 interface APIStats {
@@ -18,6 +25,10 @@ interface APIStats {
   healthyEndpoints: number;
   averageResponseTime: number;
   uptime: string;
+  totalRequests24h: number;
+  errorRate24h: number;
+  slaCompliance: number;
+  alertsActive: number;
 }
 
 export default function APIStatusPage() {
@@ -44,7 +55,13 @@ export default function APIStatusPage() {
           status: 'healthy',
           responseTime: 45,
           lastChecked: new Date().toISOString(),
-          description: 'User login and authentication endpoint'
+          description: 'User login and authentication endpoint',
+          errorRate: 0.2,
+          requestCount24h: 1247,
+          averageResponseTime24h: 52,
+          slaTarget: 200,
+          slaCompliance: 98.5,
+          alertsEnabled: true
         },
         {
           name: 'Admin Email Config',
@@ -53,7 +70,13 @@ export default function APIStatusPage() {
           status: 'healthy',
           responseTime: 23,
           lastChecked: new Date().toISOString(),
-          description: 'Email configuration management'
+          description: 'Email configuration management',
+          errorRate: 0.1,
+          requestCount24h: 342,
+          averageResponseTime24h: 28,
+          slaTarget: 100,
+          slaCompliance: 99.2,
+          alertsEnabled: true
         },
         {
           name: 'User Management',
@@ -62,7 +85,14 @@ export default function APIStatusPage() {
           status: 'warning',
           responseTime: 156,
           lastChecked: new Date().toISOString(),
-          description: 'User listing and management'
+          description: 'User management and administration',
+          errorRate: 2.1,
+          requestCount24h: 856,
+          averageResponseTime24h: 142,
+          slaTarget: 150,
+          slaCompliance: 89.3,
+          lastError: 'Database connection timeout',
+          alertsEnabled: true
         },
         {
           name: 'Trade Teams',
