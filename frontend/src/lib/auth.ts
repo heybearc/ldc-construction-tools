@@ -1,7 +1,7 @@
 // WMACS GUARDIAN: Clean, Simple Authentication System
 // Following WMACS principles: Simplicity over complexity, Stability over chaos
 
-import { cookies } from 'next/headers'
+import { cookies } from "next/headers"
 
 export interface User {
   id: string
@@ -21,21 +21,12 @@ export interface AuthSession {
 const VALID_USERS = [
   {
     id: "1",
-    email: "admin@ldc-construction.local",
+    email: "admin@ldctools.local",
     password: "AdminPass123!",
     name: "LDC Admin",
     role: "SUPER_ADMIN",
-    regionId: "01",
-    zoneId: "12"
-  },
-  {
-    id: "2", 
-    email: "admin",
-    password: "admin",
-    name: "Test Admin",
-    role: "ADMIN",
-    regionId: "01",
-    zoneId: "12"
+    regionId: "01.12",
+    zoneId: "01"
   }
 ]
 
@@ -43,7 +34,7 @@ const VALID_USERS = [
 export async function getSession(): Promise<AuthSession | null> {
   try {
     const cookieStore = cookies()
-    const sessionCookie = cookieStore.get('ldc-auth-session')
+    const sessionCookie = cookieStore.get("ldc-auth-session")
     
     if (!sessionCookie) {
       return null
@@ -64,16 +55,16 @@ export async function getSession(): Promise<AuthSession | null> {
 
 // Authenticate user credentials
 export async function authenticate(email: string, password: string): Promise<{ success: boolean; user?: User; error?: string }> {
-  console.log('WMACS Auth: Login attempt for:', email)
+  console.log("WMACS Auth: Login attempt for:", email)
 
   const user = VALID_USERS.find(u => u.email === email)
   
   if (!user || user.password !== password) {
-    console.log('WMACS Auth: Invalid credentials')
-    return { success: false, error: 'Invalid credentials' }
+    console.log("WMACS Auth: Invalid credentials")
+    return { success: false, error: "Invalid credentials" }
   }
 
-  console.log('WMACS Auth: Authentication successful')
+  console.log("WMACS Auth: Authentication successful")
   
   // Remove password from returned user
   const { password: _, ...userWithoutPassword } = user
