@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,22 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// NextAuth.js Models (Required for Prisma Adapter)
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -42,45 +34,32 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  
-  // LDC Construction Tools specific fields
-  firstName     String?
-  lastName      String?
-  role          UserRole  @default(READ_ONLY)
-  status        UserStatus @default(INVITED)
-  regionId      String    @default("01.12")
-  zoneId        String    @default("01")
-  passwordHash  String?
-  
-  // Authentication tracking
-  lastLogin     DateTime?
-  loginCount    Int       @default(0)
-  
-  // Invitation tracking
-  invitedBy     String?
-  invitedAt     DateTime?
-  
-  // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts      Account[]
-  sessions      Session[]
-  sentInvitations UserInvitation[] @relation("InvitedBy")
-  roleAssignments RoleAssignment[]
+  id                 String              @id @default(cuid())
+  name               String?
+  email              String              @unique
+  emailVerified      DateTime?
+  image              String?
+  firstName          String?
+  lastName           String?
+  role               UserRole            @default(READ_ONLY)
+  status             UserStatus          @default(INVITED)
+  regionId           String              @default("01.12")
+  zoneId             String              @default("01")
+  passwordHash       String?
+  lastLogin          DateTime?
+  loginCount         Int                 @default(0)
+  invitedBy          String?
+  invitedAt          DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  accounts           Account[]
+  sessions           Session[]
+  sentInvitations    UserInvitation[]    @relation("InvitedBy")
+  CrewMembers        CrewMembers[]
+  TradeTeamMembers   TradeTeamMembers[]
+  auditLogs          AuditLog[]
   projectAssignments ProjectAssignment[]
-  
-  // Trade Teams and Crews Relations
-  tradeTeams    TradeTeam[] @relation("TradeTeamMembers")
-  crews         Crew[]      @relation("CrewMembers")
-  
-  // Audit Log Relations
-  auditLogs     AuditLog[]
+  roleAssignments    RoleAssignment[]
 }
 
 model VerificationToken {
@@ -91,121 +70,231 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// LDC Construction Tools Models
 model UserInvitation {
-  id              String     @id @default(cuid())
+  id              String           @id @default(cuid())
   email           String
   firstName       String
   lastName        String
   role            UserRole
   regionId        String
   zoneId          String
-  
-  // Invitation details
   invitedBy       String
-  invitedByUser   User       @relation("InvitedBy", fields: [invitedBy], references: [id])
-  invitationToken String     @unique
+  invitationToken String           @unique
   expiresAt       DateTime
-  
-  // Status tracking
   status          InvitationStatus @default(PENDING)
   sentAt          DateTime?
   acceptedAt      DateTime?
-  
-  // Reminder tracking
-  remindersSent   Int        @default(0)
+  remindersSent   Int              @default(0)
   lastReminderAt  DateTime?
-  
-  // Timestamps
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  invitedByUser   User             @relation("InvitedBy", fields: [invitedBy], references: [id])
 }
 
 model EmailConfiguration {
-  id                    String   @id @default(cuid())
-  provider              String   // 'gmail', 'smtp', etc.
-  displayName           String
-  smtpHost              String?
-  smtpPort              Int?
-  username              String?
-  appPasswordEncrypted  String?  // Encrypted app password
-  fromEmail             String
-  fromName              String
-  encryption            String?  // 'tls', 'ssl', 'none'
-  isDefault             Boolean  @default(false)
-  isActive              Boolean  @default(true)
-  testStatus            String   @default("untested") // 'untested', 'success', 'failed'
-  lastTested            DateTime?
-  regionId              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  provider             String
+  displayName          String
+  smtpHost             String?
+  smtpPort             Int?
+  username             String?
+  appPasswordEncrypted String?
+  fromEmail            String
+  fromName             String
+  encryption           String?
+  isDefault            Boolean   @default(false)
+  isActive             Boolean   @default(true)
+  testStatus           String    @default("untested")
+  lastTested           DateTime?
+  regionId             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   @@map("email_configurations")
 }
 
-// Role Management Models
 model Role {
-  id                    String   @id @default(cuid())
-  name                  String   @unique
-  displayName           String
-  description           String?
-  type                  RoleType
-  scope                 RoleScope
-  level                 Int      @default(0) // For hierarchy (higher = more permissions)
-  permissions           String[] // JSON array of permission strings
-  isActive              Boolean  @default(true)
-  regionId              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                 String              @id @default(cuid())
+  name               String              @unique
+  displayName        String
+  description        String?
+  type               RoleType
+  scope              RoleScope
+  level              Int                 @default(0)
+  permissions        String[]
+  isActive           Boolean             @default(true)
+  regionId           String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  projectAssignments ProjectAssignment[]
+  assignments        RoleAssignment[]
 
-  // Relations
-  assignments           RoleAssignment[]
-  projectAssignments    ProjectAssignment[]
-  
   @@map("roles")
 }
 
 model RoleAssignment {
-  id                    String   @id @default(cuid())
-  userId                String
-  roleId                String
-  assignmentType        AssignmentType
-  scope                 String?  // Project ID, Team ID, or Region ID
-  startDate             DateTime @default(now())
-  endDate               DateTime?
-  isActive              Boolean  @default(true)
-  assignedBy            String   // User ID who made the assignment
-  consultationRequired  Boolean  @default(false)
-  consultationStatus    String?  // 'pending', 'approved', 'rejected'
-  notes                 String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   String         @id @default(cuid())
+  userId               String
+  roleId               String
+  assignmentType       AssignmentType
+  scope                String?
+  startDate            DateTime       @default(now())
+  endDate              DateTime?
+  isActive             Boolean        @default(true)
+  assignedBy           String
+  consultationRequired Boolean        @default(false)
+  consultationStatus   String?
+  notes                String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  role                 Role           @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role                  Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  
   @@unique([userId, roleId, scope])
   @@map("role_assignments")
 }
 
 model RoleChangeLog {
-  id                    String   @id @default(cuid())
-  roleAssignmentId      String?
-  userId                String
-  roleId                String
-  action                String   // 'assigned', 'removed', 'modified'
-  previousData          String?  // JSON of previous state
-  newData               String?  // JSON of new state
-  reason                String?
-  performedBy           String   // User ID who performed the action
-  impactAssessment      String?
-  createdAt             DateTime @default(now())
+  id               String   @id @default(cuid())
+  roleAssignmentId String?
+  userId           String
+  roleId           String
+  action           String
+  previousData     String?
+  newData          String?
+  reason           String?
+  performedBy      String
+  impactAssessment String?
+  createdAt        DateTime @default(now())
 
   @@map("role_change_logs")
 }
 
-// Enums
+model Project {
+  id                String              @id @default(cuid())
+  name              String
+  description       String?
+  status            ProjectStatus       @default(PLANNING)
+  priority          ProjectPriority     @default(MEDIUM)
+  regionId          String
+  zoneId            String?
+  startDate         DateTime?
+  endDate           DateTime?
+  estimatedDuration Int?
+  actualDuration    Int?
+  budget            Decimal?            @db.Decimal(10, 2)
+  actualCost        Decimal?            @db.Decimal(10, 2)
+  projectManager    String?
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  assignments       ProjectAssignment[]
+
+  @@map("projects")
+}
+
+model ProjectAssignment {
+  id             String         @id @default(cuid())
+  projectId      String
+  userId         String
+  roleId         String
+  assignmentType AssignmentType
+  startDate      DateTime       @default(now())
+  endDate        DateTime?
+  isActive       Boolean        @default(true)
+  assignedBy     String
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role           Role           @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId, roleId])
+  @@map("project_assignments")
+}
+
+model TradeTeam {
+  id               String             @id @default(cuid())
+  name             String             @unique
+  description      String?
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  TradeTeamMembers TradeTeamMembers[]
+  crews            Crew[]
+
+  @@map("trade_teams")
+}
+
+model Crew {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  tradeTeamId String
+  status      CrewStatus    @default(ACTIVE)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  CrewMembers CrewMembers[]
+  tradeTeam   TradeTeam     @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+
+  @@map("crews")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  subject     String
+  htmlContent String
+  textContent String?
+  variables   Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("email_templates")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model CrewMembers {
+  A     String
+  B     String
+  crews Crew   @relation(fields: [A], references: [id], onDelete: Cascade)
+  User  User   @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_CrewMembers_AB_pkey")
+  @@index([B], map: "_CrewMembers_B_index")
+  @@map("_CrewMembers")
+}
+
+model TradeTeamMembers {
+  A           String
+  B           String
+  trade_teams TradeTeam @relation(fields: [A], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_TradeTeamMembers_AB_pkey")
+  @@index([B], map: "_TradeTeamMembers_B_index")
+  @@map("_TradeTeamMembers")
+}
+
 enum UserRole {
   SUPER_ADMIN
   ZONE_OVERSEER
@@ -231,7 +320,6 @@ enum InvitationStatus {
   CANCELLED
 }
 
-// Role Management Enums
 enum RoleType {
   TRADE_TEAM_OVERSEER
   TRADE_TEAM_ASSISTANT
@@ -246,65 +334,16 @@ enum RoleType {
 }
 
 enum RoleScope {
-  GLOBAL      // System-wide permissions
-  REGIONAL    // Region-specific permissions
-  PROJECT     // Project-specific permissions
-  TEAM        // Team-specific permissions
+  GLOBAL
+  REGIONAL
+  PROJECT
+  TEAM
 }
 
 enum AssignmentType {
-  BRANCH_APPOINTED      // Appointed by branch
-  FIELD_CONTINUOUS      // Field-assigned continuous
-  FIELD_TEMPORARY       // Field-assigned temporary
-}
-
-// Project Management Models
-model Project {
-  id                    String   @id @default(cuid())
-  name                  String
-  description           String?
-  status                ProjectStatus @default(PLANNING)
-  priority              ProjectPriority @default(MEDIUM)
-  regionId              String
-  zoneId                String?
-  startDate             DateTime?
-  endDate               DateTime?
-  estimatedDuration     Int?     // Duration in days
-  actualDuration        Int?     // Actual duration in days
-  budget                Decimal? @db.Decimal(10,2)
-  actualCost            Decimal? @db.Decimal(10,2)
-  projectManager        String?  // User ID
-  isActive              Boolean  @default(true)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  // Relations
-  assignments           ProjectAssignment[]
-  
-  @@map("projects")
-}
-
-model ProjectAssignment {
-  id                    String   @id @default(cuid())
-  projectId             String
-  userId                String
-  roleId                String
-  assignmentType        AssignmentType
-  startDate             DateTime @default(now())
-  endDate               DateTime?
-  isActive              Boolean  @default(true)
-  assignedBy            String   // User ID who made the assignment
-  notes                 String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  // Relations
-  project               Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role                  Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  
-  @@unique([projectId, userId, roleId])
-  @@map("project_assignments")
+  BRANCH_APPOINTED
+  FIELD_CONTINUOUS
+  FIELD_TEMPORARY
 }
 
 enum ProjectStatus {
@@ -322,46 +361,12 @@ enum ProjectPriority {
   CRITICAL
 }
 
-// Trade Teams and Crews Models (Converted from FastAPI)
-model TradeTeam {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  crews       Crew[]
-  members     User[]   @relation("TradeTeamMembers")
-  
-  @@map("trade_teams")
-}
-
-model Crew {
-  id           String    @id @default(cuid())
-  name         String
-  description  String?
-  tradeTeamId  String
-  status       CrewStatus @default(ACTIVE)
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  
-  // Relations
-  tradeTeam    TradeTeam @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
-  members      User[]    @relation("CrewMembers")
-  
-  @@map("crews")
-}
-
 enum CrewStatus {
   ACTIVE
   INACTIVE
   PENDING
 }
 
-// Email Provider and Security Enums for existing EmailConfiguration model
 enum EmailProvider {
   GMAIL
   CUSTOM_SMTP
@@ -371,38 +376,4 @@ enum EmailSecurity {
   NONE
   SSL_TLS
   STARTTLS
-}
-
-// Email Templates
-model EmailTemplate {
-  id           String   @id @default(cuid())
-  name         String
-  category     String   // USER_INVITATION, PASSWORD_RESET, NOTIFICATION
-  subject      String
-  htmlContent  String   @db.Text
-  textContent  String?  @db.Text
-  variables    Json     // Array of template variables
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@map("email_templates")
-}
-
-// Audit Logs
-model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  action      String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
-  resource    String   // USER, ROLE, PROJECT, etc.
-  resourceId  String?
-  oldValues   Json?
-  newValues   Json?
-  ipAddress   String?
-  userAgent   String?
-  timestamp   DateTime @default(now())
-  
-  user User? @relation(fields: [userId], references: [id])
-  
-  @@map("audit_logs")
 }
