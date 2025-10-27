@@ -1,9 +1,70 @@
 # LDC Construction Tools - Bug Backlog
 
 **Purpose**: Non-critical bugs for future resolution  
-**Updated**: 2025-09-24
+**Updated**: 2025-09-27
 
 ## 📝 ACTIVE BACKLOG
+
+### 🔧 System Operations Issues
+
+#### BUG-015: System Operations deployment operations showing failed status
+- **Module**: System Operations (/admin/system)
+- **Severity**: Medium
+- **Description**: Deployment operations section shows "failed" status and all "Run" buttons fail when clicked
+- **Impact**: System operations functionality appears non-functional, unclear purpose of deployment operations
+- **Investigation Needed**: 
+  - What are deployment operations intended for?
+  - Why do all operations fail when executed?
+  - Is this submodule fully functional or needs implementation?
+- **Status**: 📝 BACKLOG - INVESTIGATION REQUIRED
+- **Effort**: L-M (depends on investigation results)
+- **Found**: 2025-09-27
+- **Reporter**: User testing Phase 2 deployment
+
+### 📊 API Status Monitoring Issues
+
+#### BUG-016: User Management API endpoint showing warning status
+- **Module**: API Status (/admin/api)
+- **Severity**: Medium
+- **Description**: User Management endpoint (/api/v1/admin/users) consistently shows warning status
+- **Impact**: Indicates potential performance or reliability issues with user management API
+- **Investigation Needed**: 
+  - Check actual API response times and error rates
+  - Verify if warning is accurate or false positive
+  - Optimize if genuine performance issue
+- **Status**: 📝 BACKLOG - INVESTIGATION REQUIRED
+- **Effort**: M
+- **Found**: 2025-09-27
+- **Reporter**: User testing Phase 2 deployment
+
+#### BUG-017: Email Test API endpoint showing error status - PARTIALLY RESOLVED
+- **Module**: API Status (/admin/api)
+- **Severity**: Medium (downgraded)
+- **Description**: Email Test endpoint showing error status in API monitoring, but actual email testing works
+- **Impact**: API monitoring shows false negative, but functionality is operational
+- **Investigation Needed**: 
+  - Fix API status monitoring to reflect actual email test functionality
+  - Verify API endpoint health check logic
+  - Update mock data or endpoint validation
+- **Status**: 📝 BACKLOG - MEDIUM PRIORITY (functionality works, monitoring issue)
+- **Effort**: S-M
+- **Found**: 2025-09-27
+- **Updated**: 2025-09-27 - Email testing confirmed working
+- **Reporter**: User testing Phase 2 deployment
+
+#### BUG-018: API endpoints still showing errors after database fix
+- **Module**: API Status (/admin/api)
+- **Severity**: Medium
+- **Description**: Multiple API endpoints still showing error/warning status despite database configuration fix
+- **Impact**: API monitoring dashboard shows concerning status, unclear if real issues or monitoring problems
+- **Investigation Needed**: 
+  - Check actual API endpoint functionality vs monitoring display
+  - Verify if errors are real or false positives in monitoring
+  - Update API health check logic if needed
+- **Status**: 📝 BACKLOG - INVESTIGATION REQUIRED
+- **Effort**: M
+- **Found**: 2025-09-27
+- **Reporter**: User testing after database fix
 
 ### 📱 Mobile & Responsive Issues
 
