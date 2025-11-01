@@ -24,7 +24,7 @@ export default function EmailConfigurationPage() {
     smtpPort: 587,
     security: 'STARTTLS',
     fromEmail: '',
-    fromName: 'LDC Construction Tools',
+    fromName: 'LDC Tools',
     username: '',
     password: '',
     isActive: false
@@ -405,7 +405,7 @@ export default function EmailConfigurationPage() {
                       type="text"
                       value={config.fromName}
                       onChange={(e) => setConfig({ ...config, fromName: e.target.value })}
-                      placeholder="LDC Construction Tools"
+                      placeholder="LDC Tools"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>

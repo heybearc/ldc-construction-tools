@@ -26,7 +26,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-gray-900">
-                LDC Construction Tools
+                LDC Tools
               </h1>
               <span className="ml-2 text-sm text-gray-500">
                 Region 01.12

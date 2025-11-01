@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const mailOptions = {
       from: `"${emailConfig.fromName}" <${emailConfig.fromEmail}>`,
       to: testEmail,
-      subject: 'LDC Construction Tools - Email Configuration Test',
+      subject: 'LDC Tools - Email Configuration Test',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
             <h2 style="color: #1f2937; margin-bottom: 20px;">✅ Email Configuration Successful!</h2>
             
             <p style="color: #4b5563; line-height: 1.6;">
-              This is a test email from your LDC Construction Tools admin panel. 
+              This is a test email from your LDC Tools admin panel. 
               If you're receiving this message, your email configuration is working correctly.
             </p>
             
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
             
             <div style="text-align: center; margin-top: 30px;">
               <p style="color: #9ca3af; font-size: 14px;">
-                Sent from LDC Construction Tools Admin Panel<br>
+                Sent from LDC Tools Admin Panel<br>
                 ${new Date().toLocaleString()}
               </p>
             </div>
@@ -123,11 +123,11 @@ export async function POST(request: NextRequest) {
         </div>
       `,
       text: `
-        LDC Construction Tools - Email Configuration Test
+        LDC Tools - Email Configuration Test
         
         ✅ Email Configuration Successful!
         
-        This is a test email from your LDC Construction Tools admin panel. 
+        This is a test email from your LDC Tools admin panel. 
         If you're receiving this message, your email configuration is working correctly.
         
         Configuration Details:
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
         
         You can now use this configuration to send user invitations and system notifications.
         
-        Sent from LDC Construction Tools Admin Panel
+        Sent from LDC Tools Admin Panel
         ${new Date().toLocaleString()}
       `
     };

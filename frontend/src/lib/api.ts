@@ -1,5 +1,5 @@
 /**
- * API client for LDC Construction Tools
+ * API client for LDC Tools
  */
 
 const API_BASE_URL = '/api/v1';
