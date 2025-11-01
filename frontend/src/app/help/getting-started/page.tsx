@@ -47,7 +47,7 @@ export default async function GettingStartedPage() {
           {/* First Login */}
           <h2>🔐 Your First Login</h2>
           <h3>Step 1: Access the Login Page</h3>
-          <p>Navigate to: <code>https://blue.ldctools.cloudigan.net</code> or <code>https://green.ldctools.cloudigan.net</code></p>
+          <p>Navigate to: <code>https://ldctools.com</code></p>
 
           <h3>Step 2: Enter Your Credentials</h3>
           <ul>

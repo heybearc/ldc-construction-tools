@@ -39,11 +39,7 @@ export default async function AuthenticationPage() {
           <h2>🚪 How to Log In</h2>
           
           <h3>Step 1: Navigate to Login Page</h3>
-          <p>Go to one of these URLs:</p>
-          <ul>
-            <li><strong>BLUE (Testing):</strong> <code>https://blue.ldctools.cloudigan.net</code></li>
-            <li><strong>GREEN (Production):</strong> <code>https://green.ldctools.cloudigan.net</code></li>
-          </ul>
+          <p>Go to: <code>https://ldctools.com</code></p>
 
           <h3>Step 2: Enter Credentials</h3>
           <ul>
