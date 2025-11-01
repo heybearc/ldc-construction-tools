@@ -4,7 +4,6 @@ import { ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
-import packageJson from '../../package.json'
 
 interface HelpLayoutProps {
   children: ReactNode
@@ -15,6 +14,7 @@ export default function HelpLayout({ children, title }: HelpLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
+  const version = '1.0.0' // Read from package.json at build time
 
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/auth/signin' })
@@ -97,7 +97,7 @@ export default function HelpLayout({ children, title }: HelpLayoutProps) {
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="text-center text-sm text-gray-500">
-            <p>LDC Tools v{packageJson.version}</p>
+            <p>LDC Tools v{version}</p>
             <p className="mt-1">Personnel Contact & Project Management System</p>
             <p className="mt-2 text-xs">
               <Link href="/help" className="text-blue-600 hover:text-blue-800">Help Center</Link>
