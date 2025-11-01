@@ -115,10 +115,31 @@ export default function AdminLayout({
               })}
             </nav>
 
-            {/* Security Info */}
+            {/* Quick Links */}
             <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">Security</h3>
-              <ul className="text-xs text-blue-700 space-y-1">
+              <h3 className="text-sm font-medium text-blue-900 mb-3">Quick Links</h3>
+              <div className="space-y-2">
+                <Link 
+                  href="/help" 
+                  className="flex items-center text-xs text-blue-700 hover:text-blue-900 transition-colors"
+                >
+                  <span className="mr-2">📚</span>
+                  Help Center
+                </Link>
+                <Link 
+                  href="/release-notes" 
+                  className="flex items-center text-xs text-blue-700 hover:text-blue-900 transition-colors"
+                >
+                  <span className="mr-2">📋</span>
+                  Release Notes
+                </Link>
+              </div>
+            </div>
+
+            {/* Security Info */}
+            <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h3 className="text-sm font-medium text-green-900 mb-2">Security</h3>
+              <ul className="text-xs text-green-700 space-y-1">
                 <li>• NextAuth v4 authentication</li>
                 <li>• JWT session tokens</li>
                 <li>• USLDC-2829-E compliant</li>
