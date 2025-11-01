@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-// NextAuth v4 + WMACS fallback authentication
+// NextAuth v4 Authentication
 export default function SignInForm() {
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()

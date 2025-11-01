@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, ReactNode, useState } from 'react';
+import { useEffect, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
@@ -16,60 +17,23 @@ export default function AuthGuard({
   requiredRole 
 }: AuthGuardProps) {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    // Check WMACS authentication via session cookie
-    const checkAuth = async () => {
-      try {
-        const cookies = document.cookie.split(';')
-        const sessionCookie = cookies.find(c => c.trim().startsWith('ldc-auth-session='))
-        
-        if (sessionCookie) {
-          const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
-          // Check if session is not expired
-          if (new Date(sessionData.expires) > new Date()) {
-            setIsAuthenticated(true);
-            setUserRole(sessionData.user?.role || null);
-            console.log('WMACS AuthGuard: Valid session found:', sessionData);
-            return;
-          } else {
-            console.log('WMACS AuthGuard: Session expired');
-            // Clear expired session
-            document.cookie = 'ldc-auth-session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-          }
-        }
-        
-        setIsAuthenticated(false);
-        setUserRole(null);
-      } catch (error) {
-        console.error('WMACS AuthGuard: Auth check error:', error);
-        setIsAuthenticated(false);
-        setUserRole(null);
-      }
-    };
+    if (status === 'loading') return; // Still loading
 
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
-    if (isAuthenticated === null) return; // Still loading
-
-    if (requireAuth && !isAuthenticated) {
-      console.log('User not authenticated, redirecting to login');
+    if (requireAuth && status === 'unauthenticated') {
       router.push('/auth/signin');
       return;
     }
 
-    if (requiredRole && userRole !== requiredRole) {
-      console.log(`User role ${userRole} does not match required role ${requiredRole}`);
+    if (requiredRole && session?.user?.role !== requiredRole) {
       router.push('/auth/signin');
       return;
     }
-  }, [isAuthenticated, userRole, router, requireAuth, requiredRole]);
+  }, [status, session, router, requireAuth, requiredRole]);
 
-  if (isAuthenticated === null) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -80,11 +44,11 @@ export default function AuthGuard({
     );
   }
 
-  if (requireAuth && !isAuthenticated) {
+  if (requireAuth && status === 'unauthenticated') {
     return null; // Will redirect
   }
 
-  if (requiredRole && userRole !== requiredRole) {
+  if (requiredRole && session?.user?.role !== requiredRole) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
