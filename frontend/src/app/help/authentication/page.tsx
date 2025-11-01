@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth-config'
 import HelpLayout from '@/components/HelpLayout'
 import Link from 'next/link'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function AuthenticationPage() {
   const session = await getServerSession(authOptions)
 

@@ -4,6 +4,9 @@ import matter from 'gray-matter'
 import { marked } from 'marked'
 import HelpLayout from '@/components/HelpLayout'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 interface Release {
   version: string
   date: string
