@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession, SessionProvider } from 'next-auth/react'
 import Link from 'next/link'
 
 interface HelpLayoutProps {
@@ -10,7 +10,7 @@ interface HelpLayoutProps {
   title?: string
 }
 
-export default function HelpLayout({ children, title }: HelpLayoutProps) {
+function HelpLayoutContent({ children, title }: HelpLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
@@ -108,5 +108,13 @@ export default function HelpLayout({ children, title }: HelpLayoutProps) {
         </div>
       </footer>
     </div>
+  )
+}
+
+export default function HelpLayout(props: HelpLayoutProps) {
+  return (
+    <SessionProvider>
+      <HelpLayoutContent {...props} />
+    </SessionProvider>
   )
 }
