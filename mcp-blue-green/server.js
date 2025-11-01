@@ -1,0 +1,1 @@
+../../../jw-attendant-scheduler/mcp-blue-green/server.js
