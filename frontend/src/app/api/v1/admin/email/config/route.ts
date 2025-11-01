@@ -37,7 +37,7 @@ export async function GET() {
         smtpPort: 587,
         encryption: 'tls',
         fromEmail: '',
-        fromName: 'LDC Construction Tools',
+        fromName: 'LDC Tools',
         username: '',
         isActive: false,
         testStatus: 'untested'

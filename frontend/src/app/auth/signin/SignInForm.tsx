@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-// Modern Next.js 15 client component with proper patterns
+// NextAuth v4 Authentication
 export default function SignInForm() {
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -19,23 +20,20 @@ export default function SignInForm() {
     const password = formData.get('password') as string
 
     try {
-      const formDataToSend = new FormData()
-      formDataToSend.append('email', email)
-      formDataToSend.append('password', password)
-      
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        body: formDataToSend,
+      // Try NextAuth v4 first
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       })
 
-      const data = await response.json()
-
-      if (response.ok) {
+      if (result?.error) {
+        setError('Invalid email or password')
+      } else if (result?.ok) {
         startTransition(() => {
           router.push(callbackUrl)
+          router.refresh()
         })
-      } else {
-        setError(data.error || 'Login failed')
       }
     } catch (error) {
       setError('Network error. Please try again.')

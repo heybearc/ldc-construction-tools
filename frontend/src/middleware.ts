@@ -1,10 +1,8 @@
-// WMACS GUARDIAN: Clean Middleware
+// NextAuth v4 Middleware
 import { NextRequest, NextResponse } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  console.log('WMACS Auth Middleware: Path:', pathname)
 
   // Allow access to auth pages and API routes
   if (
@@ -16,32 +14,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for session cookie
-  const sessionCookie = request.cookies.get('ldc-auth-session')
-  let isLoggedIn = false
-
-  if (sessionCookie) {
-    try {
-      const session = JSON.parse(sessionCookie.value)
-      // Check if session is not expired
-      isLoggedIn = new Date(session.expires) > new Date()
-    } catch {
-      // Invalid session cookie
-      isLoggedIn = false
-    }
-  }
-
-  console.log('WMACS Auth Middleware: Authenticated:', isLoggedIn)
-
-  // Redirect to signin if not authenticated
-  if (!isLoggedIn) {
-    console.log('WMACS Auth Middleware: Redirecting to signin')
+  // Check for NextAuth session token
+  const sessionToken = request.cookies.get('next-auth.session-token') || 
+                       request.cookies.get('__Secure-next-auth.session-token')
+  
+  // If no session token, redirect to signin
+  if (!sessionToken) {
     const signinUrl = new URL('/auth/signin', request.url)
     signinUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(signinUrl)
   }
 
-  console.log('WMACS Auth Middleware: User authenticated, allowing access')
   return NextResponse.next()
 }
 

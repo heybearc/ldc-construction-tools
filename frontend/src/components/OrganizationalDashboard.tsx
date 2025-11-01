@@ -7,7 +7,7 @@ export default function OrganizationalDashboard() {
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
           <Building className="mr-3 h-8 w-8 text-blue-600" />
-          LDC Construction Tools - Region 01.12
+          LDC Tools - Region 01.12
         </h2>
         <p className="text-gray-600 mb-6">
           Personnel Contact assistance system for construction group coordination and trade team management.

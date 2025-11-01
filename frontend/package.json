@@ -1,8 +1,8 @@
 {
-  "name": "ldc-construction-tools-frontend",
-  "version": "0.1.0",
+  "name": "ldc-tools-frontend",
+  "version": "1.0.0",
   "private": true,
-  "description": "Frontend for LDC Construction Tools - Personnel Contact assistance system",
+  "description": "Frontend for LDC Tools - Personnel Contact assistance system",
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3001",
     "build": "next build",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
     "@hookform/resolvers": "^3.10.0",
+    "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/client": "^6.16.2",
     "@tanstack/react-query": "^5.59.20",
     "@tanstack/react-query-devtools": "^5.59.20",
@@ -24,9 +25,11 @@
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.460.0",
+    "marked": "^16.4.1",
     "next": "14.2.33",
-    "next-auth": "5.0.0-beta.25",
+    "next-auth": "^4.24.10",
     "nodemailer": "^6.10.1",
     "prisma": "^6.16.2",
     "react": "18.3.1",
