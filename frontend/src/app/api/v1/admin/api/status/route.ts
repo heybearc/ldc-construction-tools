@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
+import { isAdmin } from '@/lib/auth-helpers';
 
 interface EndpointTest {
   name: string;
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!isAdmin(session)) {
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
         { status: 401 }
