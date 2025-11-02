@@ -14,8 +14,7 @@ export async function GET(request: NextRequest) {
         },
         _count: {
           select: {
-            crews: true,
-            members: true
+            crews: true
           }
         }
       },
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest) {
       id: team.id,
       name: team.name,
       crew_count: team._count.crews,
-      total_members: team._count.members,
+      total_members: 0, // TODO: Count members from TradeTeamMembers join table
       active_crews: team.crews.length,
       is_active: team.isActive
     }));
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('WMACS Trade Teams API Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch trade teams', details: error.message },
+      { error: 'Failed to fetch trade teams', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -70,7 +69,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('WMACS Trade Teams Create Error:', error);
     return NextResponse.json(
-      { error: 'Failed to create trade team', details: error.message },
+      { error: 'Failed to create trade team', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
