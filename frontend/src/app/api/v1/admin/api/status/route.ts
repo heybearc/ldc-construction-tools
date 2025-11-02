@@ -111,12 +111,24 @@ async function testEndpoint(
         error = `Slow response: ${responseTime}ms`;
       }
     } else if (response.status === 401 || response.status === 403) {
-      // Auth errors are expected for some endpoints
+      // Auth errors are expected for authenticated endpoints - this means the endpoint is working
       status = 'healthy';
-      error = undefined; // Not really an error, just requires auth
+      error = undefined; // Not an error, endpoint is working and requires auth as expected
     } else if (response.status === 404) {
       status = 'warning';
       error = 'Endpoint not found';
+    } else if (response.status === 500) {
+      // Server error - endpoint exists but has an issue
+      status = 'error';
+      error = `Server error: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          error = `Server error: ${errorData.error}`;
+        }
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
     } else {
       status = 'error';
       error = `HTTP ${response.status}: ${response.statusText}`;
