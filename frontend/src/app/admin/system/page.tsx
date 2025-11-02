@@ -34,13 +34,16 @@ export default function SystemOperationsPage() {
 
   const loadSystemData = async () => {
     try {
-      const response = await fetch('/api/v1/admin/system/info');
+      const response = await fetch('/api/v1/admin/system/info', {
+        cache: 'no-store',
+      });
+      
       if (response.ok) {
         const data = await response.json();
-        setOperations(data.operations);
         setSystemInfo(data.systemInfo);
-      } else {
-        // Mock data for development
+        
+        // Set predefined operations (these are UI-only for now)
+        // In production, these would trigger actual system operations
         setOperations([
           {
             id: 'cache-clear',
@@ -97,15 +100,8 @@ export default function SystemOperationsPage() {
             duration: 180
           }
         ]);
-
-        setSystemInfo({
-          version: '1.0.0-beta',
-          environment: 'Staging',
-          uptime: '2 days, 14 hours, 32 minutes',
-          lastDeployment: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-          databaseVersion: 'PostgreSQL 15.2',
-          nodeVersion: 'Node.js 18.17.0'
-        });
+      } else {
+        console.error('Failed to load system info:', response.statusText);
       }
     } catch (error) {
       console.error('Failed to load system data:', error);

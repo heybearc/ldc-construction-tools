@@ -33,56 +33,24 @@ export default function HealthMonitorPage() {
 
   const loadHealthData = async () => {
     try {
-      const response = await fetch('/api/v1/admin/health/status');
+      const response = await fetch('/api/v1/admin/health/status', {
+        cache: 'no-store',
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setHealth(data.health);
       } else {
-        // Mock data for development
+        console.error('Failed to load health data:', response.statusText);
         setHealth({
-          overall: 'healthy',
-          uptime: '2 days, 14 hours, 32 minutes',
+          overall: 'error',
+          uptime: 'Unknown',
           metrics: [
             {
-              name: 'Database Connection',
-              status: 'healthy',
-              value: '< 5ms',
-              description: 'PostgreSQL connection response time',
-              lastChecked: new Date().toISOString()
-            },
-            {
-              name: 'API Response Time',
-              status: 'healthy',
-              value: '28ms avg',
-              description: 'Average API endpoint response time',
-              lastChecked: new Date().toISOString()
-            },
-            {
-              name: 'Memory Usage',
-              status: 'warning',
-              value: '78%',
-              description: 'Current memory utilization',
-              lastChecked: new Date().toISOString()
-            },
-            {
-              name: 'Disk Space',
-              status: 'healthy',
-              value: '45% used',
-              description: 'Available disk space',
-              lastChecked: new Date().toISOString()
-            },
-            {
-              name: 'Email Service',
-              status: 'healthy',
-              value: 'Connected',
-              description: 'SMTP connection status',
-              lastChecked: new Date().toISOString()
-            },
-            {
-              name: 'Background Jobs',
-              status: 'healthy',
-              value: '3 active',
-              description: 'Running background processes',
+              name: 'System Health',
+              status: 'error',
+              value: 'Unable to load',
+              description: 'Failed to fetch health metrics',
               lastChecked: new Date().toISOString()
             }
           ]
@@ -90,6 +58,19 @@ export default function HealthMonitorPage() {
       }
     } catch (error) {
       console.error('Failed to load health data:', error);
+      setHealth({
+        overall: 'error',
+        uptime: 'Unknown',
+        metrics: [
+          {
+            name: 'System Health',
+            status: 'error',
+            value: 'Connection failed',
+            description: error instanceof Error ? error.message : 'Unknown error',
+            lastChecked: new Date().toISOString()
+          }
+        ]
+      });
     } finally {
       setLoading(false);
     }

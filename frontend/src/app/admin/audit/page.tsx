@@ -45,63 +45,16 @@ export default function AuditLogsPage() {
 
   const loadAuditLogs = async () => {
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
+      const response = await fetch('/api/v1/admin/audit/logs', {
+        cache: 'no-store',
       });
-
-      const response = await fetch(`/api/v1/admin/audit?${params}`);
+      
       if (response.ok) {
         const data = await response.json();
         setLogs(data.logs || []);
       } else {
-        // Mock data for development
-        setLogs([
-          {
-            id: '1',
-            userId: 'user1',
-            userName: 'John Doe',
-            action: 'CREATE',
-            resource: 'USER',
-            resourceId: 'user123',
-            newValues: { name: 'Jane Smith', email: 'jane@example.com', role: 'COORDINATOR' },
-            ipAddress: '192.168.1.100',
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString()
-          },
-          {
-            id: '2',
-            userId: 'user1',
-            userName: 'John Doe',
-            action: 'UPDATE',
-            resource: 'EMAIL_CONFIG',
-            resourceId: 'config1',
-            oldValues: { fromEmail: 'old@example.com' },
-            newValues: { fromEmail: 'new@example.com' },
-            ipAddress: '192.168.1.100',
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
-          },
-          {
-            id: '3',
-            userId: 'user2',
-            userName: 'Admin User',
-            action: 'LOGIN',
-            resource: 'SESSION',
-            ipAddress: '192.168.1.101',
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString()
-          },
-          {
-            id: '4',
-            userId: 'user1',
-            userName: 'John Doe',
-            action: 'DELETE',
-            resource: 'PROJECT',
-            resourceId: 'proj456',
-            oldValues: { name: 'Old Project', status: 'ACTIVE' },
-            ipAddress: '192.168.1.100',
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString()
-          }
-        ]);
+        console.error('Failed to load audit logs:', response.statusText);
+        setLogs([]);
       }
     } catch (error) {
       console.error('Failed to load audit logs:', error);
