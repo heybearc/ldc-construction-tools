@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';;
 
-const prisma = new PrismaClient();
 
 // GET /api/v1/role-assignments/health - Health check endpoint
 export async function GET(request: NextRequest) {

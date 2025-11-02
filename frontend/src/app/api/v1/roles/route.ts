@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';;
 import { getServerSession } from 'next-auth';
 import { authConfig } from '../../../../../auth.config';
 
-const prisma = new PrismaClient();
 
 // GET /api/v1/roles - List all roles
 export async function GET(request: NextRequest) {

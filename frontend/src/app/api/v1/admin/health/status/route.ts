@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { isAdmin } from '@/lib/auth-helpers';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';;
 import os from 'os';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
-const prisma = new PrismaClient();
 
 interface HealthMetric {
   name: string;

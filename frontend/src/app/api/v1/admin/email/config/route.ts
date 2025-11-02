@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';;
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
 
 // GET /api/v1/admin/email/config - Get current email configuration
 export async function GET() {
