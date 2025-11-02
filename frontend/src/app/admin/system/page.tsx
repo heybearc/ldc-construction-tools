@@ -91,12 +91,12 @@ export default function SystemOperationsPage() {
             duration: 10
           },
           {
-            id: 'deploy-staging',
-            name: 'Deploy to Staging',
-            description: 'Deploy latest changes to staging environment',
+            id: 'deploy-standby',
+            name: 'Deploy to STANDBY (GREEN)',
+            description: 'Deploy latest changes to STANDBY environment for testing',
             category: 'deployment',
-            status: 'failed',
-            lastRun: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+            status: 'completed',
+            lastRun: new Date().toISOString(),
             duration: 180
           }
         ]);
