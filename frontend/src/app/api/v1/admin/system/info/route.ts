@@ -18,6 +18,7 @@ interface SystemInfo {
   database: string;
   runtime: string;
   nodeVersion: string;
+  nextVersion: string;
   platform: string;
   hostname: string;
 }
@@ -63,6 +64,17 @@ async function getVersion(): Promise<string> {
   }
 }
 
+// Helper to get Next.js version from package.json
+async function getNextVersion(): Promise<string> {
+  try {
+    const packagePath = join(process.cwd(), 'package.json');
+    const packageJson = JSON.parse(await readFile(packagePath, 'utf-8'));
+    return packageJson.dependencies?.next || 'Unknown';
+  } catch (error) {
+    return 'Unknown';
+  }
+}
+
 // Helper to get last deployment time
 async function getLastDeployment(): Promise<string> {
   try {
@@ -100,9 +112,10 @@ export async function GET(request: NextRequest) {
     }
     
     // Gather system information
-    const [version, lastDeployment] = await Promise.all([
+    const [version, lastDeployment, nextVersion] = await Promise.all([
       getVersion(),
       getLastDeployment(),
+      getNextVersion(),
     ]);
     
     const systemInfo: SystemInfo = {
@@ -113,6 +126,7 @@ export async function GET(request: NextRequest) {
       database: getDatabaseInfo(),
       runtime: `Node.js ${process.version}`,
       nodeVersion: process.version,
+      nextVersion,
       platform: `${os.platform()} ${os.arch()}`,
       hostname: os.hostname(),
     };
