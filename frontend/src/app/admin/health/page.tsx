@@ -222,7 +222,7 @@ export default function HealthMonitorPage() {
             <div className="text-center">
               <Wifi className="h-8 w-8 text-purple-600 mx-auto mb-2" />
               <div className="text-sm font-medium text-gray-900">Framework</div>
-              <div className="text-sm text-gray-500">Next.js 15.1.3</div>
+              <div className="text-sm text-gray-500">Next.js 14.2.33</div>
             </div>
             
             <div className="text-center">
