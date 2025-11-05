@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
 
@@ -10,8 +11,14 @@ interface ConditionalLayoutProps {
 
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const isAuthPage = pathname?.startsWith('/auth');
   const isHelpPage = pathname?.startsWith('/help') || pathname?.startsWith('/release-notes');
+
+  // Get user's zone and region from session (if available)
+  const userZone = (session?.user as any)?.zoneId || '';
+  const userRegion = (session?.user as any)?.regionId || '';
+  const displayLocation = userZone && userRegion ? `Zone ${userZone} • Region ${userRegion}` : '';
 
   if (isAuthPage || isHelpPage) {
     // For auth and help pages, just return children (they have their own layouts)
@@ -28,9 +35,11 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
               <h1 className="text-2xl font-bold text-gray-900">
                 LDC Tools
               </h1>
-              <span className="ml-2 text-sm text-gray-500">
-                Region 01.12
-              </span>
+              {displayLocation && (
+                <span className="ml-2 text-sm text-gray-500">
+                  {displayLocation}
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-6">
               <nav className="flex space-x-6">
@@ -71,7 +80,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">
-              <p>LDC Tools v1.0.0 • Region 01.12</p>
+              <p>LDC Tools v1.0.0{displayLocation && ` • ${displayLocation}`}</p>
             </div>
             <div className="flex space-x-6 text-sm">
               <Link href="/help" className="text-gray-600 hover:text-blue-600">
