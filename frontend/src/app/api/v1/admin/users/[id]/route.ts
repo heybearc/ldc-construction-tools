@@ -23,6 +23,8 @@ export async function PATCH(
     const body = await request.json();
     const { name, email, role, adminLevel, status } = body;
     
+    console.log('Update user request:', { name, email, role, adminLevel, status });
+    
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
@@ -30,10 +32,12 @@ export async function PATCH(
         name,
         email,
         role,
-        adminLevel: adminLevel || null, // Convert empty string to null
+        adminLevel: adminLevel === '' ? null : adminLevel, // Convert empty string to null
         status,
       },
     });
+    
+    console.log('User updated successfully:', updatedUser.id, updatedUser.role, updatedUser.adminLevel, updatedUser.status);
     
     return NextResponse.json({
       success: true,
