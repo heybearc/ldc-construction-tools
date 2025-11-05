@@ -397,14 +397,14 @@ export default function UserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white shadow rounded-lg overflow-visible pb-32">
+      <div className="bg-white shadow rounded-lg overflow-visible min-h-[400px]">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">
             Users ({filteredUsers.length})
           </h3>
         </div>
 
-        <div className="overflow-x-auto overflow-y-visible pb-4">
+        <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -497,7 +497,7 @@ export default function UserManagementPage() {
                             <MoreVertical className="h-4 w-4" />
                           </button>
                           {openDropdownId === user.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
                               <div className="py-1">
                                 <button
                                   onClick={() => {
