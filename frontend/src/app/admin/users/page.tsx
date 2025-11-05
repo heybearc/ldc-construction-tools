@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  adminLevel?: string;
   status: 'ACTIVE' | 'INVITED' | 'INACTIVE';
   regionId: string;
   zoneId: string;
@@ -34,8 +35,8 @@ export default function UserManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: '', role: '', regionId: '', zoneId: '' });
-  const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
+  const [inviteForm, setInviteForm] = useState({ email: '', role: '', adminLevel: '', regionId: '', zoneId: '' });
+  const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', adminLevel: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
@@ -83,7 +84,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User invitation sent successfully!');
-        setInviteForm({ email: '', role: '', regionId: '', zoneId: '' });
+        setInviteForm({ email: '', role: '', adminLevel: '', regionId: '', zoneId: '' });
         setIsInviteModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -111,7 +112,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User created successfully!');
-        setCreateForm({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
+        setCreateForm({ name: '', email: '', role: '', adminLevel: '', regionId: '', zoneId: '', password: '' });
         setIsCreateModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -140,6 +141,7 @@ export default function UserManagementPage() {
           name: selectedUser.name,
           email: selectedUser.email,
           role: selectedUser.role,
+          adminLevel: selectedUser.adminLevel,
           status: selectedUser.status
         })
       });
@@ -599,6 +601,23 @@ export default function UserManagementPage() {
                 </select>
               </div>
               
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admin Level (Optional)
+                </label>
+                <select
+                  value={inviteForm.adminLevel}
+                  onChange={(e) => setInviteForm({...inviteForm, adminLevel: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">No Admin Access</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="READ_ONLY_ADMIN">Read-Only Admin</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">Grant admin access in addition to their role</p>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -777,6 +796,23 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR_ASSISTANT">Safety Coordinator Assistant</option>
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
                 </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admin Level (Optional)
+                </label>
+                <select
+                  value={createForm.adminLevel}
+                  onChange={(e) => setCreateForm({...createForm, adminLevel: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">No Admin Access</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="READ_ONLY_ADMIN">Read-Only Admin</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">Grant admin access in addition to their role</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -1020,6 +1056,22 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR_ASSISTANT">Safety Coordinator Assistant</option>
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
                 </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admin Level (Optional)
+                </label>
+                <select
+                  defaultValue={selectedUser.adminLevel || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">No Admin Access</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="READ_ONLY_ADMIN">Read-Only Admin</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">Grant admin access in addition to their role</p>
               </div>
               
               <div>
