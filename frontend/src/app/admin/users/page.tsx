@@ -570,7 +570,6 @@ export default function UserManagementPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Role</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
                   <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
                   <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
@@ -767,7 +766,6 @@ export default function UserManagementPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="">Select Role</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
                   <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
                   <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
@@ -1027,7 +1025,6 @@ export default function UserManagementPage() {
                   defaultValue={selectedUser.role}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
                   <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
                   <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
