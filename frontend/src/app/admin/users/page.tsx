@@ -37,6 +37,7 @@ export default function UserManagementPage() {
   const [inviteForm, setInviteForm] = useState({ email: '', role: '', regionId: '', zoneId: '' });
   const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -122,6 +123,64 @@ export default function UserManagementPage() {
       alert('Failed to create user. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch(`/api/v1/admin/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: selectedUser.name,
+          email: selectedUser.email,
+          role: selectedUser.role,
+          status: selectedUser.status
+        })
+      });
+      
+      if (response.ok) {
+        alert('User updated successfully!');
+        setIsEditModalOpen(false);
+        setSelectedUser(null);
+        loadUsers();
+        loadUserStats();
+      } else {
+        alert('Failed to update user. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      alert('Failed to update user. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/v1/admin/users/${userId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        alert('User deleted successfully!');
+        loadUsers();
+        loadUserStats();
+      } else {
+        alert('Failed to delete user. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      alert('Failed to delete user. Please try again.');
     }
   };
 
@@ -409,19 +468,53 @@ export default function UserManagementPage() {
                       {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => {
                             setSelectedUser(user);
                             setIsEditModalOpen(true);
                           }}
                           className="text-blue-600 hover:text-blue-900"
+                          title="Edit user"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenDropdownId(openDropdownId === user.id ? null : user.id)}
+                            className="text-gray-400 hover:text-gray-600"
+                            title="More actions"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                          {openDropdownId === user.id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                              <div className="py-1">
+                                <button
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setIsEditModalOpen(true);
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit User
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleDeleteUser(user.id);
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete User
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -954,10 +1047,21 @@ export default function UserManagementPage() {
                   Cancel
                 </button>
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                  onClick={handleUpdateUser}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Update User
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Update User
+                    </>
+                  )}
                 </button>
               </div>
             </div>
