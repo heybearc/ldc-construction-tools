@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Shield, Users, Mail, Activity, BarChart, FileText, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -11,6 +11,21 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [environment, setEnvironment] = useState<string>('');
+
+  useEffect(() => {
+    // Detect environment from hostname
+    const hostname = window.location.hostname;
+    if (hostname.includes('green')) {
+      setEnvironment('GREEN');
+    } else if (hostname.includes('blue')) {
+      setEnvironment('BLUE');
+    } else if (hostname === 'ldctools.com' || hostname === 'www.ldctools.com') {
+      setEnvironment('PRODUCTION');
+    } else {
+      setEnvironment('DEVELOPMENT');
+    }
+  }, []);
 
   const adminModules = [
     {
@@ -74,9 +89,16 @@ export default function AdminLayout({
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 NextAuth v4
               </span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Blue Environment
-              </span>
+              {environment && (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  environment === 'GREEN' ? 'bg-green-100 text-green-800' :
+                  environment === 'BLUE' ? 'bg-blue-100 text-blue-800' :
+                  environment === 'PRODUCTION' ? 'bg-purple-100 text-purple-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {environment} Environment
+                </span>
+              )}
             </div>
           </div>
         </div>

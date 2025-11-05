@@ -349,37 +349,6 @@ export default function AdminPage() {
     document.body.removeChild(a);
   };
 
-  const testBackendConnectivity = async () => {
-    console.log('🔍 Testing backend connectivity...');
-    
-    try {
-      const url = '/api/v1/admin/debug/connectivity';
-      console.log('🌐 Making request to:', url);
-      
-      const response = await fetch(url);
-      console.log('📥 Debug response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Backend connectivity test successful:', data);
-        alert(`Backend Status: ${data.status}\nMessage: ${data.message}\nDatabase Stats: ${JSON.stringify(data.database_stats, null, 2)}`);
-      } else {
-        const errorText = await response.text();
-        console.error('❌ Backend connectivity test failed - Status:', response.status);
-        console.error('❌ Error response:', errorText);
-        alert(`Backend connectivity test failed: HTTP ${response.status}`);
-      }
-    } catch (error) {
-      console.error('❌ Backend connectivity network error:', error);
-      console.error('❌ Error details:', {
-        name: (error as Error).name,
-        message: (error as Error).message,
-        stack: (error as Error).stack
-      });
-      alert(`Backend connectivity test failed: ${(error as Error).message}`);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -566,17 +535,6 @@ export default function AdminPage() {
                     className="w-full px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                   >
                     Export CSV
-                  </button>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-medium text-gray-900 mb-2">Test Backend</h3>
-                  <p className="text-sm text-gray-600 mb-3">Test backend connectivity and database access</p>
-                  <button 
-                    onClick={testBackendConnectivity}
-                    className="w-full px-4 py-2 border border-purple-300 text-sm font-medium rounded-md text-purple-700 bg-white hover:bg-purple-50"
-                  >
-                    Test Connection
                   </button>
                 </div>
               </div>
