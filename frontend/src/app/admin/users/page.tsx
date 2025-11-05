@@ -476,8 +476,8 @@ export default function UserManagementPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
+                      <div className="flex items-center justify-end space-x-2 relative">
                         <button
                           onClick={() => {
                             setSelectedUser(user);
@@ -488,7 +488,7 @@ export default function UserManagementPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <div className="relative">
+                        <div className="relative z-50">
                           <button
                             onClick={() => setOpenDropdownId(openDropdownId === user.id ? null : user.id)}
                             className="text-gray-400 hover:text-gray-600"
@@ -497,31 +497,39 @@ export default function UserManagementPage() {
                             <MoreVertical className="h-4 w-4" />
                           </button>
                           {openDropdownId === user.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
-                              <div className="py-1">
-                                <button
-                                  onClick={() => {
-                                    setSelectedUser(user);
-                                    setIsEditModalOpen(true);
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                                >
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit User
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    handleDeleteUser(user.id);
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete User
-                                </button>
+                            <>
+                              {/* Backdrop to close dropdown when clicking outside */}
+                              <div 
+                                className="fixed inset-0 z-40" 
+                                onClick={() => setOpenDropdownId(null)}
+                              />
+                              {/* Dropdown menu */}
+                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200">
+                                <div className="py-1">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedUser(user);
+                                      setIsEditModalOpen(true);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                  >
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit User
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleDeleteUser(user.id);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete User
+                                  </button>
+                                </div>
                               </div>
-                            </div>
+                            </>
                           )}
                         </div>
                       </div>
