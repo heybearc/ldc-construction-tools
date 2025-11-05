@@ -16,8 +16,8 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   const isHelpPage = pathname?.startsWith('/help') || pathname?.startsWith('/release-notes');
 
   // Get user's zone and region from session (if available)
-  const userZone = (session?.user as any)?.zoneId || '';
-  const userRegion = (session?.user as any)?.regionId || '';
+  const userZone = session?.user ? (session.user as any)?.zoneId : '';
+  const userRegion = session?.user ? (session.user as any)?.regionId : '';
   const displayLocation = userZone && userRegion ? `Zone ${userZone} • Region ${userRegion}` : '';
 
   if (isAuthPage || isHelpPage) {
