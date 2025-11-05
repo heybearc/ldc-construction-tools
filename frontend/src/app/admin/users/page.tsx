@@ -451,9 +451,16 @@ export default function UserManagementPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {user.role}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 w-fit">
+                          {user.role?.replace(/_/g, ' ')}
+                        </span>
+                        {user.adminLevel && (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 w-fit">
+                            {user.adminLevel.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -1022,7 +1029,8 @@ export default function UserManagementPage() {
                   Role
                 </label>
                 <select
-                  defaultValue={selectedUser.role}
+                  value={selectedUser.role}
+                  onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
@@ -1060,7 +1068,8 @@ export default function UserManagementPage() {
                   Admin Level (Optional)
                 </label>
                 <select
-                  defaultValue={selectedUser.adminLevel || ''}
+                  value={selectedUser.adminLevel || ''}
+                  onChange={(e) => setSelectedUser({...selectedUser, adminLevel: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">No Admin Access</option>
@@ -1076,7 +1085,8 @@ export default function UserManagementPage() {
                   Status
                 </label>
                 <select
-                  defaultValue={selectedUser.status}
+                  value={selectedUser.status}
+                  onChange={(e) => setSelectedUser({...selectedUser, status: e.target.value as 'ACTIVE' | 'INVITED' | 'INACTIVE'})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ACTIVE">Active</option>
