@@ -411,14 +411,15 @@ export default function UserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white shadow rounded-lg overflow-visible min-h-[400px] pb-32">
+      <div className="bg-white shadow rounded-lg pb-32">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">
             Users ({filteredUsers.length})
           </h3>
         </div>
 
-        <div className="overflow-x-auto overflow-y-visible pb-4">
+        <div className="relative">
+          <div className="overflow-x-auto pb-4">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -514,7 +515,7 @@ export default function UserManagementPage() {
                           {openDropdownId === user.id && (
                             <div 
                               id={`dropdown-${user.id}`}
-                              className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200"
+                              className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200"
                               style={{
                                 maxHeight: '300px',
                                 overflowY: 'auto'
@@ -553,6 +554,7 @@ export default function UserManagementPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
