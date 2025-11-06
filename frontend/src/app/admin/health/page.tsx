@@ -17,19 +17,46 @@ interface SystemHealth {
   metrics: HealthMetric[];
 }
 
+interface SystemInfo {
+  database: string;
+  runtime: string;
+  nextVersion: string;
+  environment: string;
+}
+
 export default function HealthMonitorPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
     loadHealthData();
+    loadSystemInfo();
     
     if (autoRefresh) {
-      const interval = setInterval(loadHealthData, 30000); // Refresh every 30 seconds
+      const interval = setInterval(() => {
+        loadHealthData();
+        loadSystemInfo();
+      }, 30000); // Refresh every 30 seconds
       return () => clearInterval(interval);
     }
   }, [autoRefresh]);
+
+  const loadSystemInfo = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/system/info', {
+        cache: 'no-store',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSystemInfo(data.systemInfo);
+      }
+    } catch (error) {
+      console.error('Failed to load system info:', error);
+    }
+  };
 
   const loadHealthData = async () => {
     try {
@@ -197,7 +224,7 @@ export default function HealthMonitorPage() {
         </div>
       )}
 
-      {/* System Information */}
+      {/* System Information - Dynamic */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 flex items-center">
@@ -206,56 +233,35 @@ export default function HealthMonitorPage() {
           </h3>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <Database className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <div className="text-sm font-medium text-gray-900">Database</div>
-              <div className="text-sm text-gray-500">PostgreSQL 14.2</div>
+          {systemInfo ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="text-center">
+                <Database className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">Database</div>
+                <div className="text-sm text-gray-500">{systemInfo.database}</div>
+              </div>
+              
+              <div className="text-center">
+                <Server className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">Runtime</div>
+                <div className="text-sm text-gray-500">{systemInfo.runtime}</div>
+              </div>
+              
+              <div className="text-center">
+                <Wifi className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">Framework</div>
+                <div className="text-sm text-gray-500">Next.js {systemInfo.nextVersion}</div>
+              </div>
+              
+              <div className="text-center">
+                <TrendingUp className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <div className="text-sm font-medium text-gray-900">Environment</div>
+                <div className="text-sm text-gray-500">{systemInfo.environment}</div>
+              </div>
             </div>
-            
-            <div className="text-center">
-              <Server className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <div className="text-sm font-medium text-gray-900">Runtime</div>
-              <div className="text-sm text-gray-500">Node.js 18.17.0</div>
-            </div>
-            
-            <div className="text-center">
-              <Wifi className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <div className="text-sm font-medium text-gray-900">Framework</div>
-              <div className="text-sm text-gray-500">Next.js 14.2.33</div>
-            </div>
-            
-            <div className="text-center">
-              <TrendingUp className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <div className="text-sm font-medium text-gray-900">Environment</div>
-              <div className="text-sm text-gray-500">Staging</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Quick Actions</h3>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="p-4 border border-gray-300 rounded-lg text-left hover:bg-gray-50">
-              <div className="font-medium text-gray-900">Clear Cache</div>
-              <div className="text-sm text-gray-500 mt-1">Clear application cache and temporary files</div>
-            </button>
-            
-            <button className="p-4 border border-gray-300 rounded-lg text-left hover:bg-gray-50">
-              <div className="font-medium text-gray-900">Restart Services</div>
-              <div className="text-sm text-gray-500 mt-1">Restart background services and workers</div>
-            </button>
-            
-            <button className="p-4 border border-gray-300 rounded-lg text-left hover:bg-gray-50">
-              <div className="font-medium text-gray-900">Export Logs</div>
-              <div className="text-sm text-gray-500 mt-1">Download system logs for analysis</div>
-            </button>
-          </div>
+          ) : (
+            <div className="text-center text-gray-500">Loading system information...</div>
+          )}
         </div>
       </div>
     </div>
