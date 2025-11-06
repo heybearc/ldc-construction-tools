@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';;
 import bcrypt from 'bcryptjs';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/admin/email/config - Get current email configuration
 export async function GET() {
