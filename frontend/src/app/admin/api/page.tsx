@@ -45,7 +45,16 @@ export default function APIStatusPage() {
       });
       
       if (!response.ok) {
-        throw new Error(`API status check failed: ${response.statusText}`);
+        console.error('API status check failed:', response.status, response.statusText);
+        // Set empty state instead of throwing to show UI
+        setEndpoints([]);
+        setStats({
+          totalEndpoints: 0,
+          healthyEndpoints: 0,
+          averageResponseTime: 0,
+          uptime: '0%',
+        });
+        return;
       }
       
       const data = await response.json();
@@ -59,6 +68,14 @@ export default function APIStatusPage() {
       });
     } catch (error) {
       console.error('Failed to load API status:', error);
+      // Set empty state on error
+      setEndpoints([]);
+      setStats({
+        totalEndpoints: 0,
+        healthyEndpoints: 0,
+        averageResponseTime: 0,
+        uptime: '0%',
+      });
     } finally {
       setLoading(false);
     }
