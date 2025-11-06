@@ -111,9 +111,10 @@ async function testEndpoint(
         error = `Slow response: ${responseTime}ms`;
       }
     } else if (response.status === 401 || response.status === 403) {
-      // Auth errors are expected for authenticated endpoints - this means the endpoint is working
+      // Auth errors are expected for authenticated endpoints when testing internally
+      // This means the endpoint is working correctly (exists and requires auth)
       status = 'healthy';
-      error = undefined; // Not an error, endpoint is working and requires auth as expected
+      error = undefined;
     } else if (response.status === 404) {
       status = 'warning';
       error = 'Endpoint not found';

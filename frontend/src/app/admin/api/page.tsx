@@ -40,6 +40,7 @@ export default function APIStatusPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies for authentication
         cache: 'no-store',
       });
       
