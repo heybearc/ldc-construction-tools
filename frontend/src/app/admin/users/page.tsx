@@ -514,7 +514,7 @@ export default function UserManagementPage() {
                           {openDropdownId === user.id && (
                             <div 
                               id={`dropdown-${user.id}`}
-                              className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200"
+                              className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200"
                               style={{
                                 maxHeight: '300px',
                                 overflowY: 'auto'
