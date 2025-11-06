@@ -528,7 +528,7 @@ export default function UserManagementPage() {
                           >
                             <MoreVertical className="h-4 w-4" />
                           </button>
-                          {openDropdownId === user.id && dropdownPosition && typeof window !== 'undefined' && createPortal(
+                          {openDropdownId === user.id && dropdownPosition && typeof window !== 'undefined' ? createPortal(
                             <div 
                               id={`dropdown-${user.id}`}
                               className="fixed w-48 bg-white rounded-md shadow-xl z-[9999] border border-gray-200"
@@ -564,7 +564,7 @@ export default function UserManagementPage() {
                               </div>
                             </div>,
                             document.body
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </td>
