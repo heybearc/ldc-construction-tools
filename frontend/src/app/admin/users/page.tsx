@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Users, Plus, Mail, Search, Filter, MoreVertical, Edit, Trash2, UserCheck, UserX, Upload, UserPlus, Send, X } from 'lucide-react';
 
 interface User {
@@ -39,6 +40,8 @@ export default function UserManagementPage() {
   const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', adminLevel: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -505,18 +508,33 @@ export default function UserManagementPage() {
                         </button>
                         <div className="relative">
                           <button
+                            ref={(el) => { buttonRefs.current[user.id] = el; }}
                             id={`actions-btn-${user.id}`}
-                            onClick={() => setOpenDropdownId(openDropdownId === user.id ? null : user.id)}
+                            onClick={(e) => {
+                              if (openDropdownId === user.id) {
+                                setOpenDropdownId(null);
+                                setDropdownPosition(null);
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setDropdownPosition({
+                                  top: rect.bottom + window.scrollY + 8,
+                                  left: rect.right + window.scrollX - 192 // 192px = w-48
+                                });
+                                setOpenDropdownId(user.id);
+                              }
+                            }}
                             className="text-gray-400 hover:text-gray-600"
                             title="More actions"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </button>
-                          {openDropdownId === user.id && (
+                          {openDropdownId === user.id && dropdownPosition && typeof window !== 'undefined' && createPortal(
                             <div 
                               id={`dropdown-${user.id}`}
-                              className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200"
+                              className="fixed w-48 bg-white rounded-md shadow-xl z-[9999] border border-gray-200"
                               style={{
+                                top: `${dropdownPosition.top}px`,
+                                left: `${dropdownPosition.left}px`,
                                 maxHeight: '300px',
                                 overflowY: 'auto'
                               }}
@@ -544,7 +562,8 @@ export default function UserManagementPage() {
                                   Delete User
                                 </button>
                               </div>
-                            </div>
+                            </div>,
+                            document.body
                           )}
                         </div>
                       </div>
