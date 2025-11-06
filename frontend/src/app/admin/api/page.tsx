@@ -59,6 +59,10 @@ export default function APIStatusPage() {
       
       const data = await response.json();
       
+      console.log('API Status Response:', data);
+      console.log('Endpoints:', data.endpoints);
+      console.log('Stats:', data.stats);
+      
       setEndpoints(data.endpoints || []);
       setStats(data.stats || {
         totalEndpoints: 0,
