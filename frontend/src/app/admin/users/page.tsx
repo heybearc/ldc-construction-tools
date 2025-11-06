@@ -411,14 +411,14 @@ export default function UserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white shadow rounded-lg overflow-visible min-h-[400px]">
+      <div className="bg-white shadow rounded-lg overflow-visible min-h-[400px] pb-32">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">
             Users ({filteredUsers.length})
           </h3>
         </div>
 
-        <div className="overflow-x-auto overflow-y-visible">
+        <div className="overflow-x-auto overflow-y-visible pb-4">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
