@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { isAdmin } from '@/lib/auth-helpers';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+// Force Node.js runtime for child_process
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+// Import exec dynamically to avoid bundling issues
+const execAsync = async (command: string): Promise<{ stdout: string; stderr: string }> => {
+  const { exec } = await import('child_process');
+  const { promisify } = await import('util');
+  const execPromise = promisify(exec);
+  return execPromise(command);
+};
 
 export async function GET(request: NextRequest) {
   try {
