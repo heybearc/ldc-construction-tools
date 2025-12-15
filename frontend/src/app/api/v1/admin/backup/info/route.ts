@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
+import { isAdmin } from '@/lib/auth-helpers';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
-
-// Helper to check if user is admin
-function isAdmin(session: any): boolean {
-  return session?.user?.role === 'ADMIN' || session?.user?.adminLevel >= 1;
-}
 
 export async function GET(request: NextRequest) {
   try {
