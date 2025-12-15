@@ -46,6 +46,7 @@ export default function AuditLogsPage() {
   const loadAuditLogs = async () => {
     try {
       const response = await fetch('/api/v1/admin/audit/logs', {
+        credentials: 'include',
         cache: 'no-store',
       });
       
