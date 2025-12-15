@@ -197,24 +197,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* System Status */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">System Status</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-sm text-gray-600">Database Connected</span>
-            </div>
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-sm text-gray-600">API Services Running</span>
-            </div>
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-sm text-gray-600">Authentication Active</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

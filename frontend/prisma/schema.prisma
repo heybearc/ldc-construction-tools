@@ -61,6 +61,8 @@ model User {
   auditLogs          AuditLog[]
   projectAssignments ProjectAssignment[]
   roleAssignments    RoleAssignment[]
+  feedback           Feedback[]
+  feedbackComments   FeedbackComment[]
 }
 
 model VerificationToken {
@@ -405,4 +407,67 @@ enum AdminLevel {
   SUPER_ADMIN
   ADMIN
   READ_ONLY_ADMIN
+}
+
+// Feedback System
+model Feedback {
+  id          String             @id @default(cuid())
+  type        FeedbackType
+  title       String
+  description String
+  priority    FeedbackPriority   @default(MEDIUM)
+  status      FeedbackStatus     @default(NEW)
+  submittedBy String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [submittedBy], references: [id], onDelete: Cascade)
+  attachments FeedbackAttachment[]
+  comments    FeedbackComment[]
+
+  @@map("feedback")
+}
+
+model FeedbackAttachment {
+  id         String   @id @default(cuid())
+  feedbackId String
+  filename   String
+  filePath   String
+  fileSize   Int
+  mimeType   String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@map("feedback_attachments")
+}
+
+model FeedbackComment {
+  id         String   @id @default(cuid())
+  feedbackId String
+  authorId   String
+  content    String
+  createdAt  DateTime @default(now())
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@map("feedback_comments")
+}
+
+enum FeedbackType {
+  BUG
+  ENHANCEMENT
+  FEATURE
+}
+
+enum FeedbackPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
 }
