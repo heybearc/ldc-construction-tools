@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     // Get list of backups with details from NFS storage
     const { stdout: backupList } = await execAsync(
-      'ssh root@10.92.3.21 "ls -lh /mnt/data/ldc-tools-backups/database/automated/db-ldc-tools-*.sql.gz 2>/dev/null | tail -10"'
+      'ssh -o StrictHostKeyChecking=no root@10.92.3.21 "ls -lh /mnt/data/ldc-tools-backups/database/automated/db-ldc-tools-*.sql.gz 2>/dev/null | tail -10"'
     );
 
     // Parse backup list
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Get database size
     const { stdout: dbSizes } = await execAsync(
-      'ssh root@10.92.3.21 "sudo -u postgres psql -t -c \\"SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database WHERE datname = \'ldc_tools\';\\""'
+      'ssh -o StrictHostKeyChecking=no root@10.92.3.21 "sudo -u postgres psql -t -c \\"SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database WHERE datname = \'ldc_tools\';\\""'
     );
 
     const databases = dbSizes.trim().split('\n').filter(line => line.trim()).map(line => {

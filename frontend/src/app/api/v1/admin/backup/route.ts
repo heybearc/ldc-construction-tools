@@ -20,12 +20,12 @@ export async function POST(request: NextRequest) {
 
     // Trigger the backup script on the database server
     const { stdout, stderr } = await execAsync(
-      'ssh root@10.92.3.21 "/usr/local/bin/backup-ldc-tools.sh"'
+      'ssh -o StrictHostKeyChecking=no root@10.92.3.21 "/usr/local/bin/backup-ldc-tools.sh"'
     );
 
     // Get list of recent backups from NFS storage
     const { stdout: backupList } = await execAsync(
-      'ssh root@10.92.3.21 "ls -lh /mnt/data/ldc-tools-backups/database/automated/db-ldc-tools-*.sql.gz | tail -10"'
+      'ssh -o StrictHostKeyChecking=no root@10.92.3.21 "ls -lh /mnt/data/ldc-tools-backups/database/automated/db-ldc-tools-*.sql.gz | tail -10"'
     );
 
     return NextResponse.json({
