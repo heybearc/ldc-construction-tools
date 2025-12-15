@@ -14,7 +14,7 @@ When the user says "bump" for LDC Tools, follow this complete workflow.
 - **Database (Container 131):** 10.92.3.21 - Shared
 - **HAProxy (Container 136):** Routes ldctools.com traffic
 - **Repository:** `/opt/ldc-construction-tools`
-- **Branch:** `feature/app-rename-and-nextauth-v4` (will merge to main)
+- **Branch:** `dev` (GREEN), `main` (BLUE)
 
 ## Step 1: Analyze Recent Changes
 
@@ -198,15 +198,18 @@ git commit -m "Release vX.Y.Z - [Brief Description]
 [Detailed commit message with changes]
 
 [If help docs added: mention it]"
-git push origin feature/app-rename-and-nextauth-v4
+git push origin dev
 ```
 
-## Step 8: Deploy to STANDBY (Container 135 - GREEN)
+## Step 8: Deploy to STANDBY (GREEN)
 
-Deploy to STANDBY environment for testing:
+Use MCP tool to deploy to STANDBY:
 ```bash
-# Deploy to GREEN (STANDBY)
-ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-construction-tools && git pull origin feature/app-rename-and-nextauth-v4 && cd frontend && npm install --legacy-peer-deps && npm run build && pm2 restart ldc-production --update-env'"
+# Check current deployment status
+mcp3_get_deployment_status --app=ldc-tools
+
+# Deploy to STANDBY (GREEN)
+mcp3_deploy_to_standby --app=ldc-tools --pullGithub=true --createBackup=true
 ```
 
 ## Step 9: Test on STANDBY

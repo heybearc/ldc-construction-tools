@@ -28,57 +28,43 @@ description: Switch traffic from STANDBY to PRODUCTION for LDC Tools (after bump
 
 ### 1. Verify Current Status
 
-Check which environment is currently PROD:
+Check which environment is currently PROD using MCP tool:
 ```bash
-# Check HAProxy stats
-ssh prox "pct exec 136 -- systemctl status haproxy | head -20"
-
-# Or check which backend is active for ldctools.com
-# Current: ldc_blue (BLUE is PROD)
+mcp3_get_deployment_status --app=ldc-tools
 ```
 
-### 2. Update HAProxy Configuration
+This shows:
+- Current PROD server (BLUE or GREEN)
+- Current STANDBY server
+- Health status of both
+- HAProxy backend status
 
-**If switching from BLUE to GREEN (BLUE→GREEN):**
+### 2. Switch Traffic
 
-Edit HAProxy config to route main domain to GREEN:
+Use MCP tool to switch traffic:
 ```bash
-# Backup current config
-ssh prox "pct exec 136 -- cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.backup-$(date +%Y%m%d-%H%M%S)"
+# First run with approval required (shows what will happen)
+mcp3_switch_traffic --app=ldc-tools --requireApproval=true
 
-# Update routing rules:
-# Change: use_backend ldc_blue if is_ldc
-# To: use_backend ldc_green if is_ldc
+# Then run without approval to execute
+mcp3_switch_traffic --app=ldc-tools --requireApproval=false
 ```
 
-**If switching from GREEN to BLUE (GREEN→BLUE):**
-```bash
-# Change: use_backend ldc_green if is_ldc
-# To: use_backend ldc_blue if is_ldc
-```
+This automatically:
+- Checks STANDBY health
+- Updates HAProxy configuration
+- Reloads HAProxy (zero downtime)
+- Updates deployment state tracking
 
-### 3. Validate and Reload HAProxy
-
-```bash
-# Validate configuration
-ssh prox "pct exec 136 -- haproxy -c -f /etc/haproxy/haproxy.cfg"
-
-# Reload HAProxy (zero downtime)
-ssh prox "pct exec 136 -- systemctl reload haproxy"
-
-# Verify reload successful
-ssh prox "pct exec 136 -- systemctl status haproxy | head -20"
-```
-
-### 4. Verify Traffic Switch
+### 3. Verify Traffic Switch
 
 Test that traffic is now going to the new PROD:
 ```bash
 # Test main domain
 curl -I https://ldctools.com
 
-# Check HAProxy logs
-ssh prox "pct exec 136 -- tail -20 /var/log/haproxy.log | grep ldc"
+# Verify with MCP tool
+mcp3_get_deployment_status --app=ldc-tools
 ```
 
 ### 5. Report and STOP
