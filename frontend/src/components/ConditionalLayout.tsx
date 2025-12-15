@@ -72,6 +72,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
               <p>LDC Tools v{APP_VERSION}</p>
             </div>
             <div className="flex space-x-6 text-sm">
+              <Link href="/help/feedback" className="text-gray-600 hover:text-blue-600">
+                💡 Send Feedback
+              </Link>
               <Link href="/help" className="text-gray-600 hover:text-blue-600">
                 Help Center
               </Link>
