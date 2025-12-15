@@ -103,6 +103,7 @@ export default function SystemOperationsPage() {
         
         // Set predefined operations (these are UI-only for now)
         // In production, these would trigger actual system operations
+        // Note: Database backup is handled by the Data Protection section
         setOperations([
           {
             id: 'cache-clear',
@@ -114,15 +115,6 @@ export default function SystemOperationsPage() {
             duration: 15
           },
           {
-            id: 'db-backup',
-            name: 'Database Backup',
-            description: 'Create a full backup of the PostgreSQL database',
-            category: 'backup',
-            status: 'completed',
-            lastRun: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-            duration: 120
-          },
-          {
             id: 'restart-services',
             name: 'Restart Background Services',
             description: 'Restart all background workers and services',
@@ -132,15 +124,6 @@ export default function SystemOperationsPage() {
             duration: 30
           },
           {
-            id: 'health-check',
-            name: 'System Health Check',
-            description: 'Run comprehensive system diagnostics',
-            category: 'monitoring',
-            status: 'idle',
-            lastRun: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            duration: 45
-          },
-          {
             id: 'log-cleanup',
             name: 'Clean Old Logs',
             description: 'Remove log files older than 30 days',
@@ -148,6 +131,15 @@ export default function SystemOperationsPage() {
             status: 'idle',
             lastRun: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
             duration: 10
+          },
+          {
+            id: 'health-check',
+            name: 'System Health Check',
+            description: 'Run comprehensive system diagnostics',
+            category: 'monitoring',
+            status: 'idle',
+            lastRun: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+            duration: 45
           },
           {
             id: 'deploy-standby',
@@ -325,70 +317,65 @@ export default function SystemOperationsPage() {
       )}
 
       {/* Operations by Category */}
-      {['maintenance', 'backup', 'deployment', 'monitoring'].map(category => {
+      {['maintenance', 'deployment', 'monitoring'].map(category => {
         const categoryOps = operations.filter(op => op.category === category);
         if (categoryOps.length === 0) return null;
+
+        const categoryTitles: Record<string, string> = {
+          maintenance: 'Maintenance',
+          deployment: 'Deployment',
+          monitoring: 'Monitoring'
+        };
 
         return (
           <div key={category} className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center capitalize">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
                 {getCategoryIcon(category)}
-                <span className="ml-2">{category} Operations</span>
+                <span className="ml-2">{categoryTitles[category]} Operations</span>
               </h3>
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoryOps.map((operation) => (
-                  <div key={operation.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center">
-                          {getCategoryIcon(operation.category)}
-                          <h4 className="ml-2 text-sm font-medium text-gray-900">{operation.name}</h4>
-                        </div>
-                        <p className="text-sm text-gray-500 mt-1">{operation.description}</p>
-                        
-                        <div className="flex items-center mt-3 space-x-4">
-                          <div className="flex items-center">
-                            {getStatusIcon(operation.status)}
-                            <span className={`ml-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(operation.status)}`}>
-                              {operation.status}
-                            </span>
-                          </div>
-                          
-                          {operation.lastRun && (
-                            <div className="text-xs text-gray-500">
-                              Last run: {new Date(operation.lastRun).toLocaleString()}
-                            </div>
-                          )}
-                          
-                          {operation.duration && (
-                            <div className="text-xs text-gray-500">
-                              Duration: {operation.duration}s
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <button
-                        onClick={() => runOperation(operation)}
-                        disabled={runningOperation === operation.id || operation.status === 'running'}
-                        className="ml-4 inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        {runningOperation === operation.id ? (
-                          <>
-                            <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
-                            Running
-                          </>
-                        ) : (
-                          'Run'
-                        )}
-                      </button>
+            <div className="divide-y divide-gray-100">
+              {categoryOps.map((operation) => (
+                <div key={operation.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                  <div className="flex items-center flex-1 min-w-0">
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(operation.status)}
+                    </div>
+                    <div className="ml-4 flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{operation.name}</p>
+                      <p className="text-sm text-gray-500 truncate">{operation.description}</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className="flex items-center space-x-6 ml-4">
+                    <div className="hidden sm:flex flex-col items-end text-xs text-gray-500">
+                      {operation.lastRun && (
+                        <span>Last: {new Date(operation.lastRun).toLocaleDateString()}</span>
+                      )}
+                      {operation.duration && (
+                        <span>{operation.duration}s</span>
+                      )}
+                    </div>
+                    <span className={`inline-flex px-2.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(operation.status)}`}>
+                      {operation.status}
+                    </span>
+                    <button
+                      onClick={() => runOperation(operation)}
+                      disabled={runningOperation === operation.id || operation.status === 'running'}
+                      className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {runningOperation === operation.id ? (
+                        <>
+                          <RefreshCw className="mr-1.5 h-3 w-3 animate-spin" />
+                          Running
+                        </>
+                      ) : (
+                        'Run'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         );
