@@ -114,6 +114,12 @@ Edit `frontend/package.json`:
 All components (HelpLayout, ConditionalLayout, etc.) automatically use this version.
 You only need to update `package.json` - no other files need version changes.
 
+## Branch Strategy
+
+- **`green-development`** - Active development branch, deploys to GREEN (STANDBY)
+- **`dev`** - Stable development branch, merged from green-development after testing
+- **`main`** - Production branch, deploys to BLUE (PROD)
+
 ## Step 5: Create User-Friendly Release Notes
 
 Create `/frontend/release-notes/vX.Y.Z.md` with frontmatter:
