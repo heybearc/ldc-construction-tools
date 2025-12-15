@@ -5,6 +5,43 @@ All notable changes to LDC Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-15
+
+### Added
+- **Real Audit Logging System**
+  - AuditLog Prisma model for database storage
+  - Audit utility functions (`frontend/src/lib/audit.ts`)
+  - Audit logs API endpoint (`/api/v1/admin/audit/logs`)
+  - Integration with NextAuth signIn/signOut events
+  - User management actions logged (update, delete)
+
+- **Data Protection with TrueNAS Backups**
+  - Backup API endpoints (`/api/v1/admin/backup` and `/api/v1/admin/backup/info`)
+  - Backup script on database server (`/usr/local/bin/backup-ldc-tools.sh`)
+  - Daily automated backups at 2 AM via cron
+  - Backups stored at `/mnt/data/ldc-tools-backups/database/automated/`
+  - Rolling 30-backup retention policy
+
+- **API Auto-Testing**
+  - API Status page auto-tests all endpoints on load
+  - Client-side testing with pending status indicators
+
+### Changed
+- **System Operations Page Redesign**
+  - Changed from horizontal grid to vertical list layout
+  - Removed old Database Backup operation (replaced by Data Protection)
+  - Professional table-like format with status, last run, and actions
+
+- **Admin UI Cleanup**
+  - Removed NextAuth v4 tag from admin header
+  - Removed Security info box from admin sidebar
+
+### Fixed
+- Audit logs API route deployment (was ignored by .gitignore)
+- Audit logs fetch missing credentials
+- Backup API SSH host key verification
+- Backup API admin authentication check
+
 ## [1.0.0] - 2025-11-01
 
 ### 🎉 Major Release: NextAuth v4 Migration

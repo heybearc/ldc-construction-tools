@@ -14,7 +14,7 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
-  const version = '1.0.0' // Read from package.json at build time
+  const version = '1.1.0' // Read from package.json at build time
 
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/auth/signin' })
