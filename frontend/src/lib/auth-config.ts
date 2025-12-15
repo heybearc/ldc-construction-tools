@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
+import { logUserLogin, logUserLogout } from "./audit"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -106,9 +107,17 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn({ user }) {
       console.log(`NextAuth: User signed in: ${user.email}`)
+      // Log to audit trail
+      if (user.id && user.email) {
+        await logUserLogin(user.id, user.email)
+      }
     },
     async signOut({ token }) {
       console.log(`NextAuth: User signed out: ${token?.email}`)
+      // Log to audit trail
+      if (token?.id && token?.email) {
+        await logUserLogout(token.id as string, token.email as string)
+      }
     }
   },
 

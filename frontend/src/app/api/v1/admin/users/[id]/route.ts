@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { isAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
+import { logUpdate, logDelete } from '@/lib/audit';
 
 // PATCH /api/v1/admin/users/[id] - Update user
 export async function PATCH(
@@ -23,7 +24,11 @@ export async function PATCH(
     const body = await request.json();
     const { name, email, role, adminLevel, status } = body;
     
-    console.log('Update user request:', { name, email, role, adminLevel, status });
+    // Get current user data for audit log
+    const currentUser = await prisma.user.findUnique({
+      where: { id: params.id },
+      select: { name: true, email: true, role: true, adminLevel: true, status: true }
+    });
     
     // Update user
     const updatedUser = await prisma.user.update({
@@ -32,12 +37,19 @@ export async function PATCH(
         name,
         email,
         role,
-        adminLevel: adminLevel === '' ? null : adminLevel, // Convert empty string to null
+        adminLevel: adminLevel === '' ? null : adminLevel,
         status,
       },
     });
     
-    console.log('User updated successfully:', updatedUser.id, updatedUser.role, updatedUser.adminLevel, updatedUser.status);
+    // Log the update to audit trail
+    await logUpdate(
+      session?.user?.id || null,
+      'USER',
+      params.id,
+      { name: currentUser?.name, email: currentUser?.email, role: currentUser?.role, adminLevel: currentUser?.adminLevel, status: currentUser?.status },
+      { name, email, role, adminLevel, status }
+    );
     
     return NextResponse.json({
       success: true,
@@ -72,10 +84,24 @@ export async function DELETE(
       );
     }
     
+    // Get user data for audit log before deletion
+    const userToDelete = await prisma.user.findUnique({
+      where: { id: params.id },
+      select: { name: true, email: true, role: true, status: true }
+    });
+    
     // Delete user
     await prisma.user.delete({
       where: { id: params.id }
     });
+    
+    // Log the deletion to audit trail
+    await logDelete(
+      session?.user?.id || null,
+      'USER',
+      params.id,
+      { name: userToDelete?.name, email: userToDelete?.email, role: userToDelete?.role, status: userToDelete?.status }
+    );
     
     return NextResponse.json({
       success: true,
