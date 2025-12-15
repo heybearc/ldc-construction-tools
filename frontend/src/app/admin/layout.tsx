@@ -86,9 +86,6 @@ export default function AdminLayout({
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                NextAuth v4
-              </span>
               {environment && (
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   environment === 'GREEN' ? 'bg-green-100 text-green-800' :
@@ -158,16 +155,6 @@ export default function AdminLayout({
               </div>
             </div>
 
-            {/* Security Info */}
-            <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-              <h3 className="text-sm font-medium text-green-900 mb-2">Security</h3>
-              <ul className="text-xs text-green-700 space-y-1">
-                <li>• NextAuth v4 authentication</li>
-                <li>• JWT session tokens</li>
-                <li>• USLDC-2829-E compliant</li>
-                <li>• Role-based access control</li>
-              </ul>
-            </div>
           </div>
 
           {/* Main Content Area */}
