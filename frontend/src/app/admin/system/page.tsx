@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings, Server, Database, RefreshCw, Download, Upload, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Settings, Server, Database, RefreshCw, Download, Upload, Trash2, AlertTriangle, CheckCircle, HardDrive } from 'lucide-react';
 
 interface SystemOperation {
   id: string;
@@ -22,14 +22,73 @@ interface SystemInfo {
   nodeVersion: string;
 }
 
+interface BackupInfo {
+  backups: Array<{ filename: string; size: string; date: string }>;
+  lastBackup: { filename: string; size: string; date: string } | null;
+  databases: Array<{ name: string; size: string }>;
+  backupCount: number;
+}
+
 export default function SystemOperationsPage() {
   const [operations, setOperations] = useState<SystemOperation[]>([]);
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [runningOperation, setRunningOperation] = useState<string | null>(null);
+  const [backupInfo, setBackupInfo] = useState<BackupInfo | null>(null);
+  const [backupStatus, setBackupStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
+  const [backupMessage, setBackupMessage] = useState('');
+  const [showBackupList, setShowBackupList] = useState(false);
+
+  const fetchBackupInfo = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/backup/info', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBackupInfo(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch backup info:', error);
+    }
+  };
+
+  const handleBackup = async () => {
+    setBackupStatus('running');
+    setBackupMessage('Creating backup...');
+    
+    try {
+      const response = await fetch('/api/v1/admin/backup', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setBackupStatus('success');
+        setBackupMessage('Backup completed successfully!');
+        fetchBackupInfo(); // Refresh backup info
+      } else {
+        setBackupStatus('error');
+        setBackupMessage(data.error || 'Backup failed');
+      }
+    } catch (error) {
+      setBackupStatus('error');
+      setBackupMessage('Failed to trigger backup');
+    }
+    
+    setTimeout(() => {
+      setBackupStatus('idle');
+      setBackupMessage('');
+    }, 5000);
+  };
 
   useEffect(() => {
     loadSystemData();
+    fetchBackupInfo();
+    const interval = setInterval(fetchBackupInfo, 60000); // Refresh every minute
+    return () => clearInterval(interval);
   }, []);
 
   const loadSystemData = async () => {
@@ -334,6 +393,85 @@ export default function SystemOperationsPage() {
           </div>
         );
       })}
+
+      {/* Data Protection - Backup Section */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+              <HardDrive className="mr-2 h-5 w-5 text-green-600" />
+              Data Protection
+            </h3>
+            {backupInfo && backupInfo.backupCount > 0 && (
+              <button
+                onClick={() => setShowBackupList(!showBackupList)}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                {showBackupList ? '▼ Hide' : '▶'} View {backupInfo.backupCount} Backups
+              </button>
+            )}
+          </div>
+          <p className="text-sm text-gray-600 mt-1">Database backups to TrueNAS (auto-backups run daily at 2 AM)</p>
+        </div>
+        <div className="p-6">
+          {backupMessage && (
+            <div className={`mb-4 p-4 rounded-lg ${
+              backupStatus === 'success' ? 'bg-green-100 text-green-800' : 
+              backupStatus === 'error' ? 'bg-red-100 text-red-800' : 
+              'bg-blue-100 text-blue-800'
+            }`}>
+              {backupMessage}
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+            {backupInfo?.databases.map((db, idx) => (
+              <div key={idx}>
+                <div className="text-gray-600">Database Size</div>
+                <div className="font-medium">{db.size || 'Unknown'}</div>
+              </div>
+            ))}
+            <div>
+              <div className="text-gray-600">Total Backups</div>
+              <div className="font-medium">{backupInfo?.backupCount || 0}</div>
+            </div>
+            <div>
+              <div className="text-gray-600">Last Backup</div>
+              <div className="font-medium">{backupInfo?.lastBackup?.date || 'Never'}</div>
+            </div>
+            <div>
+              <button
+                onClick={handleBackup}
+                disabled={backupStatus === 'running'}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  backupStatus === 'running'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {backupStatus === 'running' ? '⏳ Running...' : '▶️ Backup Now'}
+              </button>
+            </div>
+          </div>
+
+          {showBackupList && backupInfo && (
+            <div className="mt-4 border-t pt-4">
+              <h4 className="font-semibold text-gray-900 mb-2">Recent Backups</h4>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {backupInfo.backups.map((backup, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-sm py-2 px-3 bg-gray-50 rounded">
+                    <div className="flex-1">
+                      <div className="font-mono text-xs text-gray-600">{backup.filename}</div>
+                    </div>
+                    <div className="text-gray-600 ml-4">{backup.size}</div>
+                    <div className="text-gray-500 ml-4 text-xs">{backup.date}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Emergency Operations */}
       <div className="bg-red-50 border border-red-200 rounded-lg">
