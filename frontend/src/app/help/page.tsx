@@ -34,28 +34,28 @@ const helpTopics: HelpTopic[] = [
     id: 'trade-teams',
     title: 'Trade Teams',
     description: 'Managing trade teams, crews, and assignments',
-    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT'],
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
     icon: '👥'
   },
   {
     id: 'projects',
     title: 'Project Management',
     description: 'Creating and managing construction projects',
-    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT'],
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
     icon: '📋'
   },
   {
     id: 'volunteers',
     title: 'Volunteer Management',
     description: 'Tracking and managing volunteer information',
-    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT'],
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
     icon: '🙋'
   },
   {
     id: 'admin',
     title: 'Admin Panel',
     description: 'System administration, users, and configuration',
-    roles: ['SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
     icon: '⚙️'
   },
   {
