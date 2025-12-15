@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
           users: userCount
         }
       },
-      version: '1.0.0',
+      version: process.env.npm_package_version || 'unknown',
       environment: process.env.NODE_ENV || 'development'
     });
 
