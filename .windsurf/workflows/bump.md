@@ -110,9 +110,9 @@ Edit `frontend/package.json`:
 "version": "X.Y.Z"
 ```
 
-Also update version in:
-- `/frontend/src/components/HelpLayout.tsx` (line 17: `const version = 'X.Y.Z'`)
-- `/frontend/src/components/ConditionalLayout.tsx` (footer version)
+**Note:** Version is now dynamically read from `package.json` via `/frontend/src/lib/version.ts`.
+All components (HelpLayout, ConditionalLayout, etc.) automatically use this version.
+You only need to update `package.json` - no other files need version changes.
 
 ## Step 5: Create User-Friendly Release Notes
 

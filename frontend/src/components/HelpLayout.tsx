@@ -4,6 +4,7 @@ import { ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { signOut, useSession, SessionProvider } from 'next-auth/react'
 import Link from 'next/link'
+import { APP_VERSION } from '@/lib/version'
 
 interface HelpLayoutProps {
   children: ReactNode
@@ -14,7 +15,7 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
-  const version = '1.1.0' // Read from package.json at build time
+  const version = APP_VERSION
 
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/auth/signin' })

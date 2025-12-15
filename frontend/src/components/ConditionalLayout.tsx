@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
+import { APP_VERSION } from '@/lib/version';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -68,7 +69,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">
-              <p>LDC Tools v1.0.0</p>
+              <p>LDC Tools v{APP_VERSION}</p>
             </div>
             <div className="flex space-x-6 text-sm">
               <Link href="/help" className="text-gray-600 hover:text-blue-600">
