@@ -7,7 +7,7 @@ interface APIEndpoint {
   name: string;
   path: string;
   method: string;
-  status: 'healthy' | 'warning' | 'error';
+  status: 'healthy' | 'warning' | 'error' | 'pending';
   responseTime: number;
   lastChecked: string;
   description: string;
@@ -18,6 +18,13 @@ interface APIStats {
   healthyEndpoints: number;
   averageResponseTime: number;
   uptime: string;
+}
+
+interface APIStatusResponse {
+  endpoints: APIEndpoint[];
+  stats: APIStats;
+  needsClientTest?: boolean;
+  timestamp: string;
 }
 
 export default function APIStatusPage() {
@@ -57,11 +64,7 @@ export default function APIStatusPage() {
         return;
       }
       
-      const data = await response.json();
-      
-      console.log('API Status Response:', data);
-      console.log('Endpoints:', data.endpoints);
-      console.log('Stats:', data.stats);
+      const data: APIStatusResponse = await response.json();
       
       setEndpoints(data.endpoints || []);
       setStats(data.stats || {
@@ -70,6 +73,12 @@ export default function APIStatusPage() {
         averageResponseTime: 0,
         uptime: '0%',
       });
+      
+      // If server indicates we need to test client-side, run all tests
+      if (data.needsClientTest && data.endpoints) {
+        // Test all endpoints in parallel from the client
+        testAllEndpoints(data.endpoints);
+      }
     } catch (error) {
       console.error('Failed to load API status:', error);
       // Set empty state on error
@@ -83,6 +92,49 @@ export default function APIStatusPage() {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const testAllEndpoints = async (endpointsToTest: APIEndpoint[]) => {
+    // Test all endpoints in parallel
+    const testPromises = endpointsToTest.map(async (endpoint) => {
+      try {
+        const startTime = Date.now();
+        const response = await fetch(endpoint.path, {
+          method: endpoint.method,
+          credentials: 'include',
+          headers: endpoint.method === 'POST' ? { 'Content-Type': 'application/json' } : {}
+        });
+        const responseTime = Date.now() - startTime;
+
+        return {
+          ...endpoint,
+          status: response.ok ? 'healthy' as const : 'error' as const,
+          responseTime,
+          lastChecked: new Date().toISOString()
+        };
+      } catch (error) {
+        return {
+          ...endpoint,
+          status: 'error' as const,
+          responseTime: 0,
+          lastChecked: new Date().toISOString()
+        };
+      }
+    });
+
+    const results = await Promise.all(testPromises);
+    setEndpoints(results);
+    
+    // Update stats based on test results
+    const healthyCount = results.filter(e => e.status === 'healthy').length;
+    const totalResponseTime = results.reduce((sum, e) => sum + e.responseTime, 0);
+    const avgResponseTime = results.length > 0 ? Math.round(totalResponseTime / results.length) : 0;
+    
+    setStats(prev => prev ? {
+      ...prev,
+      healthyEndpoints: healthyCount,
+      averageResponseTime: avgResponseTime,
+    } : null);
   };
 
   const testEndpoint = async (endpoint: APIEndpoint) => {
@@ -131,6 +183,8 @@ export default function APIStatusPage() {
         return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
       case 'error':
         return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      case 'pending':
+        return <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />;
       default:
         return <Clock className="h-5 w-5 text-gray-500" />;
     }
@@ -144,6 +198,8 @@ export default function APIStatusPage() {
         return 'bg-yellow-100 text-yellow-800';
       case 'error':
         return 'bg-red-100 text-red-800';
+      case 'pending':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

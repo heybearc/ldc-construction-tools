@@ -172,39 +172,72 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Get base URL from request
-    const baseUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    // Check if we should run tests (query param ?test=true)
+    const shouldTest = request.nextUrl.searchParams.get('test') === 'true';
     
-    // Get session cookie for authenticated requests
-    const sessionCookie = request.headers.get('cookie') || undefined;
+    if (shouldTest) {
+      // Get base URL from request
+      const baseUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+      
+      // Get session cookie for authenticated requests
+      const sessionCookie = request.headers.get('cookie') || undefined;
+      
+      // Test all endpoints in parallel
+      const testPromises = ENDPOINTS_TO_TEST.map(endpoint =>
+        testEndpoint(endpoint, baseUrl, sessionCookie)
+      );
+      
+      const endpoints = await Promise.all(testPromises);
+      
+      // Calculate statistics
+      const healthyEndpoints = endpoints.filter(e => e.status === 'healthy').length;
+      const warningEndpoints = endpoints.filter(e => e.status === 'warning').length;
+      const errorEndpoints = endpoints.filter(e => e.status === 'error').length;
+      const totalResponseTime = endpoints.reduce((sum, e) => sum + e.responseTime, 0);
+      const averageResponseTime = Math.round(totalResponseTime / endpoints.length);
+      
+      const stats: APIStats = {
+        totalEndpoints: endpoints.length,
+        healthyEndpoints,
+        warningEndpoints,
+        errorEndpoints,
+        averageResponseTime,
+        uptime: '99.9%',
+        lastUpdated: new Date().toISOString(),
+      };
+      
+      return NextResponse.json({
+        endpoints,
+        stats,
+        timestamp: new Date().toISOString(),
+      });
+    }
     
-    // Test all endpoints in parallel
-    const testPromises = ENDPOINTS_TO_TEST.map(endpoint =>
-      testEndpoint(endpoint, baseUrl, sessionCookie)
-    );
-    
-    const endpoints = await Promise.all(testPromises);
-    
-    // Calculate statistics
-    const healthyEndpoints = endpoints.filter(e => e.status === 'healthy').length;
-    const warningEndpoints = endpoints.filter(e => e.status === 'warning').length;
-    const errorEndpoints = endpoints.filter(e => e.status === 'error').length;
-    const totalResponseTime = endpoints.reduce((sum, e) => sum + e.responseTime, 0);
-    const averageResponseTime = Math.round(totalResponseTime / endpoints.length);
+    // Return endpoint definitions without testing (let client test them)
+    const endpoints: EndpointTest[] = ENDPOINTS_TO_TEST.map(endpoint => ({
+      name: endpoint.name,
+      path: endpoint.path,
+      method: endpoint.method,
+      status: 'pending' as any, // Will be tested client-side
+      responseTime: 0,
+      lastChecked: new Date().toISOString(),
+      description: endpoint.description,
+    }));
     
     const stats: APIStats = {
       totalEndpoints: endpoints.length,
-      healthyEndpoints,
-      warningEndpoints,
-      errorEndpoints,
-      averageResponseTime,
-      uptime: '99.9%', // TODO: Calculate actual uptime from monitoring data
+      healthyEndpoints: 0,
+      warningEndpoints: 0,
+      errorEndpoints: 0,
+      averageResponseTime: 0,
+      uptime: '99.9%',
       lastUpdated: new Date().toISOString(),
     };
     
     return NextResponse.json({
       endpoints,
       stats,
+      needsClientTest: true, // Signal to client to run tests
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
