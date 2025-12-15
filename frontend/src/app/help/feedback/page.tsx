@@ -81,11 +81,45 @@ export default function FeedbackPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
+      {/* Header */}
       <div className="mb-8">
+        <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+          <Link href="/help" className="hover:text-blue-600">Help Center</Link>
+          <span>/</span>
+          <span>Send Feedback</span>
+        </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">💡 Send Feedback</h1>
         <p className="text-gray-600">
           Help us improve LDC Tools by reporting bugs, suggesting enhancements, or requesting new features.
         </p>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <h2 className="text-lg font-semibold text-blue-900 mb-4">📋 How Feedback Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="flex items-start space-x-3">
+            <span className="text-2xl">1️⃣</span>
+            <div>
+              <p className="font-medium text-blue-900">Submit</p>
+              <p className="text-blue-700">Fill out the form below with details about your feedback</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-3">
+            <span className="text-2xl">2️⃣</span>
+            <div>
+              <p className="font-medium text-blue-900">Review</p>
+              <p className="text-blue-700">Our team reviews all feedback and prioritizes improvements</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-3">
+            <span className="text-2xl">3️⃣</span>
+            <div>
+              <p className="font-medium text-blue-900">Implement</p>
+              <p className="text-blue-700">We work on fixes and features based on your input</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {error && (
@@ -95,11 +129,13 @@ export default function FeedbackPage() {
       )}
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Submit Your Feedback</h2>
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Feedback Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              Feedback Type
+              What type of feedback is this?
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
@@ -165,12 +201,17 @@ export default function FeedbackPage() {
                   : "Please describe the new feature you'd like to see and how it would help you..."
               }
             />
+            <p className="mt-2 text-sm text-gray-500">
+              {feedbackType === 'bug' && "Tip: Include steps to reproduce the issue and what you expected to happen."}
+              {feedbackType === 'enhancement' && "Tip: Explain how this improvement would help your workflow."}
+              {feedbackType === 'feature' && "Tip: Describe the problem this feature would solve."}
+            </p>
           </div>
 
           {/* Priority */}
           <div>
             <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
-              Priority
+              How important is this to you?
             </label>
             <select
               id="priority"
@@ -192,6 +233,7 @@ export default function FeedbackPage() {
               <p><strong>Name:</strong> {session?.user?.name || 'Unknown'}</p>
               <p><strong>Email:</strong> {session?.user?.email || 'Unknown'}</p>
             </div>
+            <p className="text-xs text-gray-500 mt-2">This information is attached to your feedback so we can follow up if needed.</p>
           </div>
 
           {/* Submit Button */}
@@ -211,6 +253,25 @@ export default function FeedbackPage() {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="mt-8 bg-gray-50 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">❓ Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-medium text-gray-900">What happens after I submit feedback?</h3>
+            <p className="text-gray-600 text-sm mt-1">Your feedback is reviewed by our team. We prioritize based on impact and frequency of similar requests.</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900">Will I get a response?</h3>
+            <p className="text-gray-600 text-sm mt-1">For urgent issues, we may reach out directly. For features and enhancements, check the Release Notes for updates.</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900">What's the difference between a bug and an enhancement?</h3>
+            <p className="text-gray-600 text-sm mt-1">A bug is when something doesn't work as expected. An enhancement is when something works but could be better.</p>
+          </div>
+        </div>
       </div>
     </div>
   );
