@@ -9,7 +9,6 @@ interface User {
   name: string;
   email: string;
   role: string;
-  adminLevel?: string;
   status: 'ACTIVE' | 'INVITED' | 'INACTIVE';
   regionId: string;
   zoneId: string;
@@ -36,8 +35,8 @@ export default function UserManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: '', role: '', adminLevel: '', regionId: '', zoneId: '' });
-  const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', adminLevel: '', regionId: '', zoneId: '', password: '' });
+  const [inviteForm, setInviteForm] = useState({ email: '', role: '', regionId: '', zoneId: '' });
+  const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -101,7 +100,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User invitation sent successfully!');
-        setInviteForm({ email: '', role: '', adminLevel: '', regionId: '', zoneId: '' });
+        setInviteForm({ email: '', role: '', regionId: '', zoneId: '' });
         setIsInviteModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -129,7 +128,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User created successfully!');
-        setCreateForm({ name: '', email: '', role: '', adminLevel: '', regionId: '', zoneId: '', password: '' });
+        setCreateForm({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
         setIsCreateModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -158,7 +157,6 @@ export default function UserManagementPage() {
           name: selectedUser.name,
           email: selectedUser.email,
           role: selectedUser.role,
-          adminLevel: selectedUser.adminLevel,
           status: selectedUser.status
         })
       });
@@ -469,16 +467,9 @@ export default function UserManagementPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 w-fit">
-                          {user.role?.replace(/_/g, ' ')}
-                        </span>
-                        {user.adminLevel && (
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 w-fit">
-                            {user.adminLevel.replace(/_/g, ' ')}
-                          </span>
-                        )}
-                      </div>
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 w-fit">
+                        {user.role?.replace(/_/g, ' ')}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -620,6 +611,7 @@ export default function UserManagementPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Role</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
                   <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
                   <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
@@ -647,24 +639,8 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR">Safety Coordinator</option>
                   <option value="SAFETY_COORDINATOR_ASSISTANT">Safety Coordinator Assistant</option>
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
+                  <option value="READ_ONLY">Read Only</option>
                 </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Admin Level (Optional)
-                </label>
-                <select
-                  value={inviteForm.adminLevel}
-                  onChange={(e) => setInviteForm({...inviteForm, adminLevel: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">No Admin Access</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="ADMIN">Admin</option>
-                  <option value="READ_ONLY_ADMIN">Read-Only Admin</option>
-                </select>
-                <p className="mt-1 text-xs text-gray-500">Grant admin access in addition to their role</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -816,6 +792,7 @@ export default function UserManagementPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="">Select Role</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
                   <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
                   <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
@@ -843,24 +820,8 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR">Safety Coordinator</option>
                   <option value="SAFETY_COORDINATOR_ASSISTANT">Safety Coordinator Assistant</option>
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
+                  <option value="READ_ONLY">Read Only</option>
                 </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Admin Level (Optional)
-                </label>
-                <select
-                  value={createForm.adminLevel}
-                  onChange={(e) => setCreateForm({...createForm, adminLevel: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">No Admin Access</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="ADMIN">Admin</option>
-                  <option value="READ_ONLY_ADMIN">Read-Only Admin</option>
-                </select>
-                <p className="mt-1 text-xs text-gray-500">Grant admin access in addition to their role</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -1076,6 +1037,7 @@ export default function UserManagementPage() {
                   onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
+                  <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="ZONE_OVERSEER">Zone Overseer</option>
                   <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
                   <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
@@ -1103,24 +1065,8 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR">Safety Coordinator</option>
                   <option value="SAFETY_COORDINATOR_ASSISTANT">Safety Coordinator Assistant</option>
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
+                  <option value="READ_ONLY">Read Only</option>
                 </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Admin Level (Optional)
-                </label>
-                <select
-                  value={selectedUser.adminLevel || ''}
-                  onChange={(e) => setSelectedUser({...selectedUser, adminLevel: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">No Admin Access</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="ADMIN">Admin</option>
-                  <option value="READ_ONLY_ADMIN">Read-Only Admin</option>
-                </select>
-                <p className="mt-1 text-xs text-gray-500">Grant admin access in addition to their role</p>
               </div>
               
               <div>
