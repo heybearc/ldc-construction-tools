@@ -39,18 +39,28 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        // Check if user is active
-        if (user.status !== 'ACTIVE') {
+        // Check if user is inactive (explicitly disabled)
+        // INVITED users CAN log in - they become ACTIVE on first login
+        if (user.status === 'INACTIVE') {
           return null
         }
 
-        // Update last login
+        // Update last login and auto-activate if this is first login
+        // If user was INVITED and has valid password, activate them
+        const updateData: any = {
+          lastLogin: new Date(),
+          loginCount: { increment: 1 }
+        }
+        
+        // Auto-activate: set emailVerified and status to ACTIVE on first successful login
+        if (!user.emailVerified) {
+          updateData.emailVerified = new Date()
+          updateData.status = 'ACTIVE'
+        }
+        
         await prisma.user.update({
           where: { id: user.id },
-          data: {
-            lastLogin: new Date(),
-            loginCount: { increment: 1 }
-          }
+          data: updateData
         })
 
         // Return user object for session
