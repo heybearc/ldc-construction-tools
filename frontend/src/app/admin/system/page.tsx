@@ -29,6 +29,13 @@ interface BackupInfo {
   backupCount: number;
 }
 
+interface DeploymentState {
+  prodServer: string;
+  standbyServer: string;
+  deployTarget: string;
+  currentEnvironment: string;
+}
+
 export default function SystemOperationsPage() {
   const [operations, setOperations] = useState<SystemOperation[]>([]);
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
@@ -38,6 +45,7 @@ export default function SystemOperationsPage() {
   const [backupStatus, setBackupStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [backupMessage, setBackupMessage] = useState('');
   const [showBackupList, setShowBackupList] = useState(false);
+  const [deploymentState, setDeploymentState] = useState<DeploymentState | null>(null);
 
   const fetchBackupInfo = async () => {
     try {
@@ -84,9 +92,22 @@ export default function SystemOperationsPage() {
     }, 5000);
   };
 
+  const fetchDeploymentState = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/system/deployment-state');
+      if (response.ok) {
+        const data = await response.json();
+        setDeploymentState(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch deployment state:', error);
+    }
+  };
+
   useEffect(() => {
     loadSystemData();
     fetchBackupInfo();
+    fetchDeploymentState();
     const interval = setInterval(fetchBackupInfo, 60000); // Refresh every minute
     return () => clearInterval(interval);
   }, []);
@@ -143,8 +164,8 @@ export default function SystemOperationsPage() {
           },
           {
             id: 'deploy-standby',
-            name: 'Deploy to STANDBY (GREEN)',
-            description: 'Deploy latest changes to STANDBY environment for testing',
+            name: `Deploy to ${deploymentState?.deployTarget || 'STANDBY'}`,
+            description: `Deploy latest changes to ${deploymentState?.standbyServer || 'STANDBY'} environment for testing`,
             category: 'deployment',
             status: 'completed',
             lastRun: new Date().toISOString(),
