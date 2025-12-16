@@ -1,86 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
 
-const BACKEND_URL = 'http://10.92.3.25:8000';
-
+// GET /api/v1/projects/[id] - Get single project with crew assignments
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${params.id}/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      include: {
+        constructionGroup: true,
+        crewAssignments: {
+          where: { isActive: true },
+          include: {
+            crew: {
+              include: {
+                tradeTeam: true,
+                _count: {
+                  select: { CrewMembers: true },
+                },
+              },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        _count: {
+          select: {
+            crewAssignments: { where: { isActive: true } },
+          },
+        },
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(project);
   } catch (error) {
-    console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch project' },
-      { status: 500 }
-    );
+    console.error('Get project error:', error);
+    return NextResponse.json({ error: 'Failed to fetch project' }, { status: 500 });
   }
 }
 
-export async function PUT(
+// PATCH /api/v1/projects/[id] - Update project
+export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json();
-    
-    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${params.id}/`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const body = await request.json();
+    const { name, description, status, startDate, endDate, isActive } = body;
+
+    const project = await prisma.project.update({
+      where: { id: params.id },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(description !== undefined && { description }),
+        ...(status !== undefined && { status }),
+        ...(startDate !== undefined && { startDate: startDate ? new Date(startDate) : null }),
+        ...(endDate !== undefined && { endDate: endDate ? new Date(endDate) : null }),
+        ...(isActive !== undefined && { isActive }),
+      },
+      include: {
+        constructionGroup: true,
+      },
+    });
+
+    return NextResponse.json(project);
   } catch (error) {
-    console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update project' },
-      { status: 500 }
-    );
+    console.error('Update project error:', error);
+    return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
   }
 }
 
+// DELETE /api/v1/projects/[id] - Soft delete project
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/projects/${params.id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    await prisma.project.update({
+      where: { id: params.id },
+      data: { isActive: false },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete project' },
-      { status: 500 }
-    );
+    console.error('Delete project error:', error);
+    return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
   }
 }
