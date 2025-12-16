@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { applyCGScope } from '@/lib/cg-scope';
+import { getCGScope } from '@/lib/cg-scope';
 
 // GET /api/v1/projects - List all projects (CG scoped)
 export async function GET(request: NextRequest) {
@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
     };
 
     // Apply CG scoping
-    const cgScope = await applyCGScope(session.user);
-    if (cgScope.constructionGroupId) {
+    const cgScope = await getCGScope();
+    if (cgScope?.constructionGroupId) {
       where.constructionGroupId = cgScope.constructionGroupId;
-    } else if (cgScope.constructionGroupIds) {
+    } else if (cgScope?.constructionGroupIds) {
       where.constructionGroupId = { in: cgScope.constructionGroupIds };
     }
 
@@ -84,11 +84,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Project name is required' }, { status: 400 });
     }
 
-    // Use provided CG or default to user's CG
-    const cgId = constructionGroupId || session.user.constructionGroupId;
+    // Get CG scope to determine the construction group
+    const cgScope = await getCGScope();
+    const cgId = constructionGroupId || cgScope?.constructionGroupId;
+    
     if (!cgId) {
       return NextResponse.json({ error: 'Construction Group is required' }, { status: 400 });
     }
+
+    // Get the CG to find its region
+    const cg = await prisma.constructionGroup.findUnique({
+      where: { id: cgId },
+      include: { region: true },
+    });
 
     const project = await prisma.project.create({
       data: {
@@ -98,7 +106,7 @@ export async function POST(request: NextRequest) {
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         constructionGroupId: cgId,
-        regionId: session.user.regionId || '01.12',
+        regionId: cg?.region?.id || cg?.regionId || 'default',
       },
       include: {
         constructionGroup: true,
