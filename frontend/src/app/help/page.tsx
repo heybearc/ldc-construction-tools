@@ -59,6 +59,13 @@ const helpTopics: HelpTopic[] = [
     icon: '⚙️'
   },
   {
+    id: 'organization',
+    title: 'Organization Hierarchy',
+    description: 'Understanding Branch, Zone, Region, and CG structure',
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
+    icon: '🏢'
+  },
+  {
     id: 'feedback',
     title: 'Send Feedback',
     description: 'Report bugs, suggest improvements, or request new features',

@@ -5,6 +5,46 @@ All notable changes to LDC Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2024-12-16
+
+### Added
+- **Multi-Tenant Organization Hierarchy**
+  - New Prisma models: Branch, Zone, Region, ConstructionGroup, ProjectStaffingRequest
+  - Added constructionGroupId to User, TradeTeam, Crew, Project models
+  - Seed script for initial hierarchy (US Branch, 5 Zones, Region 01.12, default CG)
+  - CG scope utilities (getCGScope, withCGFilter) for data isolation
+  - Organization admin page with expandable tree view
+  - Hierarchy API route (/api/v1/admin/hierarchy)
+  - Region creation API (/api/v1/admin/hierarchy/regions)
+  - Construction Group creation API (/api/v1/admin/hierarchy/construction-groups)
+
+- **Hierarchy Management UI**
+  - Organization page in Admin sidebar
+  - Access level indicator (Full Branch, Zone Level, CG Access)
+  - Add Region button for SUPER_ADMIN users
+  - Add Construction Group button for SUPER_ADMIN users
+  - Auto-expanding tree for zones/regions with data
+  - Stats overview (Branches, Zones, Regions, CGs counts)
+
+### Changed
+- **Simplified User Permissions Model**
+  - Removed adminLevel field from User interface
+  - Role now controls all access permissions
+  - Added SUPER_ADMIN to top of role dropdown
+  - Added READ_ONLY to bottom of role dropdown
+  - Removed Admin Level selector from Invite, Create, and Edit user modals
+
+- **Users API**
+  - Updated to apply CG scoping based on user role
+  - SUPER_ADMIN sees all users
+  - Zone Overseer sees users in their zone
+  - CG users see only users in their CG
+
+### Technical
+- Database schema updated with multi-tenant models
+- Used `prisma db push` for schema sync
+- CG naming convention: "CG 01.12" format
+
 ## [1.2.0] - 2024-12-16
 
 ### Added
