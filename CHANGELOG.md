@@ -1,3 +1,29 @@
+## [1.2.0] - 2024-12-16
+
+### Added
+- **Feedback System**
+  - User feedback submission page
+  - Admin feedback management page
+  - Feedback API routes for submission and management
+  - Prisma models: Feedback, FeedbackAttachment, FeedbackComment
+  - Feedback link in footer on all pages
+  - Feedback Management in Admin Control Center sidebar
+
+- **Comprehensive Help Center Documentation**
+  - Trade Teams help page with crew and member management guides
+  - Projects help page with status overview and team assignments
+  - Volunteers help page with search, import/export instructions
+  - Admin Panel help page covering all admin modules
+  - Troubleshooting help page with common issues and solutions
+  - FAQ sections on all help pages
+
+### Changed
+- Help Center now shows all topics to all users (removed role filtering)
+- Added Send Feedback button to Help Center footer section
+
+### Fixed
+- Help topics not displaying for users with non-standard roles
+
 # Changelog
 
 All notable changes to LDC Tools will be documented in this file.
