@@ -59,18 +59,30 @@ export async function GET(request: NextRequest) {
     });
     
     // Transform users to match expected format
-    const transformedUsers = users.map(user => ({
-      id: user.id,
-      name: user.name || 'Unknown',
-      email: user.email || '',
-      role: user.role || 'READ_ONLY',
-      adminLevel: user.adminLevel || undefined,
-      status: user.status || 'INVITED',
-      regionId: user.regionId || '',
-      zoneId: user.zoneId || '',
-      lastLogin: user.lastLogin?.toISOString(),
-      createdAt: user.createdAt.toISOString(),
-    }));
+    // Compute display status based on emailVerified to match stats logic
+    const transformedUsers = users.map(user => {
+      // Determine status: if emailVerified is null, user is "INVITED"
+      // Otherwise use the database status or default to ACTIVE
+      let displayStatus: 'ACTIVE' | 'INVITED' | 'INACTIVE' = 'ACTIVE';
+      if (!user.emailVerified) {
+        displayStatus = 'INVITED';
+      } else if (user.status === 'INACTIVE') {
+        displayStatus = 'INACTIVE';
+      }
+      
+      return {
+        id: user.id,
+        name: user.name || 'Unknown',
+        email: user.email || '',
+        role: user.role || 'READ_ONLY',
+        adminLevel: user.adminLevel || undefined,
+        status: displayStatus,
+        regionId: user.regionId || '',
+        zoneId: user.zoneId || '',
+        lastLogin: user.lastLogin?.toISOString(),
+        createdAt: user.createdAt.toISOString(),
+      };
+    });
     
     return NextResponse.json({
       users: transformedUsers,
