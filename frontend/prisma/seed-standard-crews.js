@@ -1,7 +1,10 @@
-// Standard LDC Trade Teams and Crews - per USLDC-2230-E Guidelines (October 2025)
-// Auto-created for each Construction Group
+// Seed script to add standard crews to existing Trade Teams
+// Per USLDC-2230-E Guidelines (October 2025)
+const { PrismaClient } = require('@prisma/client');
 
-export const STANDARD_TRADE_TEAMS = [
+const prisma = new PrismaClient();
+
+const STANDARD_TRADE_TEAMS = [
   {
     name: 'Electrical',
     description: 'Installation and commissioning of electrical systems including power distribution, lighting, low-voltage systems, audio/video, and utilities connections.',
@@ -99,5 +102,100 @@ export const STANDARD_TRADE_TEAMS = [
   }
 ];
 
-export type StandardTradeTeam = typeof STANDARD_TRADE_TEAMS[number];
-export type StandardCrew = StandardTradeTeam['crews'][number];
+// Map for matching trade team names (handle Site/Civil vs Sitework/Civil)
+const TRADE_TEAM_NAME_MAP = {
+  'Sitework/Civil': 'Site/Civil',
+  'Site/Civil': 'Site/Civil'
+};
+
+async function seedStandardCrews() {
+  console.log('🔧 Seeding standard crews for existing Trade Teams...\n');
+  console.log('Per USLDC-2230-E Guidelines (October 2025)\n');
+
+  // Get all trade teams
+  const tradeTeams = await prisma.tradeTeam.findMany({
+    include: {
+      crews: true,
+      constructionGroup: true
+    }
+  });
+
+  console.log(`Found ${tradeTeams.length} Trade Teams\n`);
+
+  let totalCrewsCreated = 0;
+  let teamsUpdated = 0;
+
+  for (const tradeTeam of tradeTeams) {
+    // Find matching standard trade team
+    const normalizedName = TRADE_TEAM_NAME_MAP[tradeTeam.name] || tradeTeam.name;
+    const standardTeam = STANDARD_TRADE_TEAMS.find(t => t.name === normalizedName);
+    
+    if (!standardTeam) {
+      console.log(`⚠️  No standard definition for: ${tradeTeam.name}`);
+      continue;
+    }
+
+    console.log(`\n📍 ${tradeTeam.name} (CG: ${tradeTeam.constructionGroup?.code || 'N/A'})`);
+    
+    // Update trade team description if empty or different
+    if (!tradeTeam.description || tradeTeam.description !== standardTeam.description) {
+      await prisma.tradeTeam.update({
+        where: { id: tradeTeam.id },
+        data: { description: standardTeam.description }
+      });
+      console.log(`   📝 Updated description`);
+    }
+
+    // Check which crews are missing
+    const existingCrewNames = tradeTeam.crews.map(c => c.name);
+    const missingCrews = standardTeam.crews.filter(c => !existingCrewNames.includes(c.name));
+
+    if (missingCrews.length === 0) {
+      console.log(`   ✅ All ${standardTeam.crews.length} standard crews exist`);
+      
+      // Update existing crews with scopeOfWork and isRequired if missing
+      for (const crew of tradeTeam.crews) {
+        const standardCrew = standardTeam.crews.find(c => c.name === crew.name);
+        if (standardCrew && (!crew.scopeOfWork || crew.isRequired === null)) {
+          await prisma.crew.update({
+            where: { id: crew.id },
+            data: {
+              scopeOfWork: standardCrew.scopeOfWork,
+              isRequired: standardCrew.isRequired
+            }
+          });
+        }
+      }
+      continue;
+    }
+
+    console.log(`   ⚠️  Missing ${missingCrews.length} crews`);
+    teamsUpdated++;
+
+    // Create missing crews
+    for (const crew of missingCrews) {
+      await prisma.crew.create({
+        data: {
+          name: crew.name,
+          scopeOfWork: crew.scopeOfWork,
+          isRequired: crew.isRequired,
+          tradeTeamId: tradeTeam.id,
+          constructionGroupId: tradeTeam.constructionGroupId,
+          isActive: true
+        }
+      });
+      const reqLabel = crew.isRequired ? '(Required)' : '(Optional)';
+      console.log(`   ➕ Created: ${crew.name} ${reqLabel}`);
+      totalCrewsCreated++;
+    }
+  }
+
+  console.log('\n' + '='.repeat(50));
+  console.log(`✅ Seeding complete!`);
+  console.log(`   Trade Teams updated: ${teamsUpdated}`);
+  console.log(`   Crews created: ${totalCrewsCreated}`);
+}
+
+seedStandardCrews()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

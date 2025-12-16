@@ -181,6 +181,8 @@ model Project {
   id                  String                   @id @default(cuid())
   name                String
   description         String?
+  scopeOfWork         String?
+  isRequired          Boolean            @default(true)
   status              ProjectStatus            @default(PLANNING)
   priority            ProjectPriority          @default(MEDIUM)
   // Multi-tenant: CG ownership
@@ -230,6 +232,8 @@ model TradeTeam {
   id                  String             @id @default(cuid())
   name                String
   description         String?
+  scopeOfWork         String?
+  isRequired          Boolean            @default(true)
   // Multi-tenant: CG scope
   constructionGroupId String?
   constructionGroup   ConstructionGroup? @relation(fields: [constructionGroupId], references: [id])
@@ -246,6 +250,8 @@ model Crew {
   id                  String             @id @default(cuid())
   name                String
   description         String?
+  scopeOfWork         String?
+  isRequired          Boolean            @default(true)
   tradeTeamId         String
   // Multi-tenant: CG scope (inherited from TradeTeam but explicit for queries)
   constructionGroupId String?

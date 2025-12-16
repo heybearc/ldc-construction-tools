@@ -52,32 +52,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the construction group with standard trade teams
+    // Create the construction group with standard trade teams and crews
     const constructionGroup = await prisma.constructionGroup.create({
       data: {
         code,
         name: name || code,
         regionId,
         isActive: true,
-        // Auto-create standard trade teams for this CG
+        // Auto-create standard trade teams with their crews
         tradeTeams: {
           create: STANDARD_TRADE_TEAMS.map(team => ({
             name: team.name,
             description: team.description,
-            isActive: true
+            isActive: true,
+            // Auto-create standard crews for each trade team
+            crews: {
+              create: team.crews.map(crew => ({
+                name: crew.name,
+                scopeOfWork: crew.scopeOfWork,
+                isRequired: crew.isRequired,
+                isActive: true
+              }))
+            }
           }))
         }
       },
       include: {
-        tradeTeams: true
+        tradeTeams: {
+          include: {
+            crews: true
+          }
+        }
       }
     });
 
-    console.log(`✅ Created CG "${code}" with ${constructionGroup.tradeTeams.length} standard trade teams`);
+    const totalCrews = constructionGroup.tradeTeams.reduce((sum, t) => sum + t.crews.length, 0);
+    console.log(`✅ Created CG "${code}" with ${constructionGroup.tradeTeams.length} trade teams and ${totalCrews} crews`);
 
     return NextResponse.json({ 
       constructionGroup,
-      message: `Created with ${constructionGroup.tradeTeams.length} standard trade teams`
+      message: `Created with ${constructionGroup.tradeTeams.length} trade teams and ${totalCrews} crews`
     }, { status: 201 });
 
   } catch (error) {
