@@ -243,13 +243,12 @@ export default function TradeTeamsOverviewPage() {
       {/* Content */}
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {viewMode === 'grid' ? (
-          /* Grid View - Similar to spreadsheet */
-          <div className="overflow-x-auto">
-            <div className="inline-flex gap-4 min-w-max pb-4">
+          /* Grid View - Vertical stack of team cards */
+          <div className="space-y-6">
               {tradeTeams.map((team, teamIdx) => {
                 const colors = teamColors[teamIdx % teamColors.length];
                 return (
-                  <div key={team.id} className="w-80 flex-shrink-0">
+                  <div key={team.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                     {/* Trade Team Header */}
                     <div className={`${colors.header} text-white p-3 rounded-t-lg`}>
                       <h2 className="font-bold text-lg text-center">{team.name}</h2>
@@ -317,7 +316,6 @@ export default function TradeTeamsOverviewPage() {
                   </div>
                 );
               })}
-            </div>
           </div>
         ) : (
           /* Table View */
