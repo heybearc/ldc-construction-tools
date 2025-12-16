@@ -1,3 +1,10 @@
+# Changelog
+
+All notable changes to LDC Tools will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [1.2.0] - 2024-12-16
 
 ### Added
@@ -17,19 +24,29 @@
   - Troubleshooting help page with common issues and solutions
   - FAQ sections on all help pages
 
+- **Redesigned Admin Dashboard**
+  - Overview stats cards (Users, Feedback, System Health)
+  - Recent Activity section with audit log preview
+  - Admin Modules navigation grid
+  - Environment indicator for GREEN/BLUE/PRODUCTION
+  - Removed redundant CSV import and role management (moved to proper locations)
+
+- **User Auto-Activation**
+  - Users automatically activated on first successful login
+  - INVITED users can now log in (only INACTIVE users blocked)
+  - emailVerified timestamp set on first login
+
 ### Changed
 - Help Center now shows all topics to all users (removed role filtering)
 - Added Send Feedback button to Help Center footer section
+- User status now computed from emailVerified field for consistency
+- Admin can change user status which properly updates emailVerified
 
 ### Fixed
 - Help topics not displaying for users with non-standard roles
-
-# Changelog
-
-All notable changes to LDC Tools will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+- User Management "Invited" filter not showing users
+- Admin unable to change user status to Active
+- Status display inconsistency between stats and user list
 
 ## [1.1.0] - 2025-12-15
 
