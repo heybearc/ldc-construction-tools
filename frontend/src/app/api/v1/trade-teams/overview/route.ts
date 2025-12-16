@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         name: 'asc'
       },
       include: {
-        TradeTeamOversight: {
+        oversight: {
           where: {
             isActive: true
           },
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
             name: 'asc'
           },
           include: {
-            TradeCrewOversight: {
+            oversight: {
               where: {
                 isActive: true
               },
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       id: team.id,
       name: team.name,
       description: team.description,
-      oversight: team.TradeTeamOversight.map(o => ({
+      oversight: team.oversight.map(o => ({
         id: o.id,
         role: o.role,
         user: o.user
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         scopeOfWork: crew.scopeOfWork,
         isRequired: crew.isRequired,
         status: crew.status,
-        oversight: crew.TradeCrewOversight.map(o => ({
+        oversight: crew.oversight.map(o => ({
           id: o.id,
           role: o.role,
           user: o.user
