@@ -67,6 +67,9 @@ model User {
   roleAssignments     RoleAssignment[]
   feedback            Feedback[]
   feedbackComments    FeedbackComment[]
+  tradeTeamOversight  TradeTeamOversight[]
+  tradeCrewOversight  TradeCrewOversight[]
+  personnelContacts   PersonnelContact[]
 }
 
 model VerificationToken {
@@ -242,6 +245,7 @@ model TradeTeam {
   updatedAt           DateTime           @updatedAt
   TradeTeamMembers    TradeTeamMembers[]
   crews               Crew[]
+  oversight           TradeTeamOversight[]
 
   @@map("trade_teams")
 }
@@ -262,6 +266,7 @@ model Crew {
   updatedAt           DateTime           @updatedAt
   CrewMembers         CrewMembers[]
   tradeTeam           TradeTeam          @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+  oversight           TradeCrewOversight[]
 
   @@map("crews")
 }
@@ -383,6 +388,7 @@ model ConstructionGroup {
   tradeTeams  TradeTeam[]
   crews       Crew[]
   projects    Project[]
+  personnelContacts PersonnelContact[]
 
   @@map("construction_groups")
 }
@@ -588,4 +594,87 @@ enum FeedbackStatus {
   IN_PROGRESS
   RESOLVED
   CLOSED
+}
+
+// ============================================
+// OVERSIGHT ROLES - Trade Team & Crew Leadership
+// Per USLDC-2230-E Guidelines
+// ============================================
+
+// Trade Team Oversight Roles
+enum TradeTeamOversightRole {
+  TTO        // Trade Team Overseer (1 per team)
+  TTOA       // Trade Team Overseer Assistant (up to 2)
+  TT_SUPPORT // Trade Team Support (multiple)
+}
+
+// Trade Crew Oversight Roles  
+enum TradeCrewOversightRole {
+  TCO        // Trade Crew Overseer (1 per crew)
+  TCOA       // Trade Crew Overseer Assistant (up to 3)
+  TC_SUPPORT // Trade Crew Support (multiple)
+}
+
+// Personnel Contact Roles (CG-level)
+enum PersonnelContactRole {
+  PC         // Personnel Contact (1 per CG)
+  PCA        // Personnel Contact Assistant (multiple)
+  PC_SUPPORT // Personnel Contact Support (multiple)
+}
+
+// Trade Team Oversight - assigns users to trade team leadership roles
+model TradeTeamOversight {
+  id          String                   @id @default(cuid())
+  tradeTeamId String
+  userId      String
+  role        TradeTeamOversightRole
+  isActive    Boolean                  @default(true)
+  startDate   DateTime                 @default(now())
+  endDate     DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  
+  tradeTeam   TradeTeam                @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tradeTeamId, userId, role])
+  @@map("trade_team_oversight")
+}
+
+// Trade Crew Oversight - assigns users to crew leadership roles
+model TradeCrewOversight {
+  id          String                   @id @default(cuid())
+  crewId      String
+  userId      String
+  role        TradeCrewOversightRole
+  isActive    Boolean                  @default(true)
+  startDate   DateTime                 @default(now())
+  endDate     DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  
+  crew        Crew                     @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([crewId, userId, role])
+  @@map("trade_crew_oversight")
+}
+
+// Personnel Contact - CG-level personnel management roles
+model PersonnelContact {
+  id                    String                @id @default(cuid())
+  constructionGroupId   String
+  userId                String
+  role                  PersonnelContactRole
+  isActive              Boolean               @default(true)
+  startDate             DateTime              @default(now())
+  endDate               DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  constructionGroup     ConstructionGroup     @relation(fields: [constructionGroupId], references: [id], onDelete: Cascade)
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([constructionGroupId, userId, role])
+  @@map("personnel_contacts")
 }
