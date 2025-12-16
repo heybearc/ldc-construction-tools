@@ -27,19 +27,33 @@ export async function PATCH(
     // Get current user data for audit log
     const currentUser = await prisma.user.findUnique({
       where: { id: params.id },
-      select: { name: true, email: true, role: true, adminLevel: true, status: true }
+      select: { name: true, email: true, role: true, adminLevel: true, status: true, emailVerified: true }
     });
+    
+    // Build update data
+    const updateData: any = {
+      name,
+      email,
+      role,
+      adminLevel: adminLevel === '' ? null : adminLevel,
+      status,
+    };
+    
+    // If status is being changed to ACTIVE and user is not yet verified,
+    // set emailVerified to activate them
+    if (status === 'ACTIVE' && !currentUser?.emailVerified) {
+      updateData.emailVerified = new Date();
+    }
+    
+    // If status is being changed to INVITED, clear emailVerified
+    if (status === 'INVITED') {
+      updateData.emailVerified = null;
+    }
     
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
-      data: {
-        name,
-        email,
-        role,
-        adminLevel: adminLevel === '' ? null : adminLevel,
-        status,
-      },
+      data: updateData,
     });
     
     // Log the update to audit trail
