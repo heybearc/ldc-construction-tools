@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, X, Edit, Trash2, Building2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, X, Edit, Trash2, ExternalLink, Building2, Hash, Layers } from 'lucide-react';
 
 interface Crew {
   id: string;
@@ -30,9 +30,15 @@ interface Project {
   id: string;
   name: string;
   description: string | null;
+  projectNumber: string | null;
+  location: string | null;
+  projectType: string | null;
+  currentPhase: string | null;
   status: string;
   startDate: string | null;
   endDate: string | null;
+  jwSharepointUrl: string | null;
+  builderAssistantUrl: string | null;
   constructionGroup: {
     id: string;
     name: string;
@@ -60,6 +66,25 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Cancelled',
 };
 
+const PROJECT_TYPES = [
+  'Kingdom Hall',
+  'Assembly Hall',
+  'Remote Translation Office',
+  'Branch Office',
+  'Bethel',
+  'Other'
+];
+
+const CONSTRUCTION_PHASES = [
+  'Site Preparation/Clearing',
+  'Construction Mobilization/Temp Services',
+  'Site Work',
+  'Structural',
+  'Rough-in',
+  'Finishes',
+  'Construction Final Prep'
+];
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -74,10 +99,16 @@ export default function ProjectDetailPage() {
   const [selectedCrewId, setSelectedCrewId] = useState('');
   const [editFormData, setEditFormData] = useState({
     name: '',
+    projectNumber: '',
     description: '',
+    location: '',
+    projectType: '',
+    currentPhase: '',
     status: '',
     startDate: '',
     endDate: '',
+    jwSharepointUrl: '',
+    builderAssistantUrl: '',
   });
 
   useEffect(() => {
@@ -94,10 +125,16 @@ export default function ProjectDetailPage() {
       setProject(data);
       setEditFormData({
         name: data.name || '',
+        projectNumber: data.projectNumber || '',
         description: data.description || '',
+        location: data.location || '',
+        projectType: data.projectType || '',
+        currentPhase: data.currentPhase || '',
         status: data.status || 'PLANNING',
         startDate: data.startDate ? data.startDate.split('T')[0] : '',
         endDate: data.endDate ? data.endDate.split('T')[0] : '',
+        jwSharepointUrl: data.jwSharepointUrl || '',
+        builderAssistantUrl: data.builderAssistantUrl || '',
       });
     } catch (err) {
       setError('Failed to load project');
@@ -193,7 +230,6 @@ export default function ProjectDetailPage() {
     return new Date(dateStr).toLocaleDateString();
   };
 
-  // Get crews not yet assigned
   const assignedCrewIds = project?.crewAssignments.map(a => a.crewId) || [];
   const unassignedCrews = availableCrews.filter(c => !assignedCrewIds.includes(c.id));
 
@@ -218,21 +254,21 @@ export default function ProjectDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link
-            href="/projects"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
+          <Link href="/projects" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+              {project.projectNumber && (
+                <span className="text-gray-500">#{project.projectNumber}</span>
+              )}
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[project.status] || 'bg-gray-100 text-gray-800'}`}>
                 {statusLabels[project.status] || project.status}
               </span>
             </div>
-            {project.description && (
-              <p className="mt-1 text-gray-600">{project.description}</p>
+            {project.projectType && (
+              <p className="mt-1 text-gray-600">{project.projectType}</p>
             )}
           </div>
         </div>
@@ -254,16 +290,27 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Project Info */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Project Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center gap-3">
             <MapPin className="h-5 w-5 text-gray-400" />
             <div>
-              <div className="text-sm text-gray-500">Construction Group</div>
-              <div className="font-medium">{project.constructionGroup?.code || '-'}</div>
+              <div className="text-sm text-gray-500">Location</div>
+              <div className="font-medium">{project.location || '-'}</div>
             </div>
           </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center gap-3">
+            <Layers className="h-5 w-5 text-gray-400" />
+            <div>
+              <div className="text-sm text-gray-500">Current Phase</div>
+              <div className="font-medium text-blue-600">{project.currentPhase || '-'}</div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-5 w-5 text-gray-400" />
             <div>
@@ -271,6 +318,8 @@ export default function ProjectDetailPage() {
               <div className="font-medium">{formatDate(project.startDate)} - {formatDate(project.endDate)}</div>
             </div>
           </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center gap-3">
             <Users className="h-5 w-5 text-gray-400" />
             <div>
@@ -280,6 +329,45 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Description */}
+      {project.description && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-2">Description</h2>
+          <p className="text-gray-600 whitespace-pre-wrap">{project.description}</p>
+        </div>
+      )}
+
+      {/* External Links */}
+      {(project.jwSharepointUrl || project.builderAssistantUrl) && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">External Links</h2>
+          <div className="flex flex-wrap gap-4">
+            {project.jwSharepointUrl && (
+              <a
+                href={project.jwSharepointUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                JW SharePoint
+              </a>
+            )}
+            {project.builderAssistantUrl && (
+              <a
+                href={project.builderAssistantUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Builder Assistant
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Crew Assignments */}
       <div className="bg-white rounded-lg shadow">
@@ -372,33 +460,91 @@ export default function ProjectDetailPage() {
 
       {/* Edit Project Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 my-8">
             <div className="px-6 py-4 border-b">
               <h2 className="text-lg font-medium">Edit Project</h2>
             </div>
             <form onSubmit={handleUpdateProject}>
-              <div className="px-6 py-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Project Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editFormData.name}
-                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+              <div className="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editFormData.name}
+                      onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Number</label>
+                    <input
+                      type="text"
+                      value={editFormData.projectNumber}
+                      onChange={(e) => setEditFormData({ ...editFormData, projectNumber: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                    value={editFormData.description}
-                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                    rows={3}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                      type="text"
+                      value={editFormData.location}
+                      onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Type</label>
+                    <select
+                      value={editFormData.projectType}
+                      onChange={(e) => setEditFormData({ ...editFormData, projectType: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select type</option>
+                      {PROJECT_TYPES.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <select
+                      value={editFormData.status}
+                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="PLANNING">Planning</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="ON_HOLD">On Hold</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Current Phase</label>
+                    <select
+                      value={editFormData.currentPhase}
+                      onChange={(e) => setEditFormData({ ...editFormData, currentPhase: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select phase</option>
+                      {CONSTRUCTION_PHASES.map((phase) => (
+                        <option key={phase} value={phase}>{phase}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Start Date</label>
                     <input
@@ -418,19 +564,41 @@ export default function ProjectDetailPage() {
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <select
-                    value={editFormData.status}
-                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    rows={3}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="PLANNING">Planning</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="ON_HOLD">On Hold</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </select>
+                  />
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">External Links</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">JW SharePoint URL</label>
+                      <input
+                        type="url"
+                        value={editFormData.jwSharepointUrl}
+                        onChange={(e) => setEditFormData({ ...editFormData, jwSharepointUrl: e.target.value })}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://sharepoint.jw.org/..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Builder Assistant URL</label>
+                      <input
+                        type="url"
+                        value={editFormData.builderAssistantUrl}
+                        onChange={(e) => setEditFormData({ ...editFormData, builderAssistantUrl: e.target.value })}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://ba.jw.org/..."
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t flex justify-end gap-3">

@@ -63,16 +63,35 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, description, status, startDate, endDate, isActive } = body;
+    const { 
+      name, 
+      description, 
+      projectNumber,
+      location,
+      projectType,
+      currentPhase,
+      status, 
+      startDate, 
+      endDate, 
+      jwSharepointUrl,
+      builderAssistantUrl,
+      isActive 
+    } = body;
 
     const project = await prisma.project.update({
       where: { id: params.id },
       data: {
         ...(name !== undefined && { name }),
         ...(description !== undefined && { description }),
+        ...(projectNumber !== undefined && { projectNumber }),
+        ...(location !== undefined && { location }),
+        ...(projectType !== undefined && { projectType }),
+        ...(currentPhase !== undefined && { currentPhase }),
         ...(status !== undefined && { status }),
         ...(startDate !== undefined && { startDate: startDate ? new Date(startDate) : null }),
         ...(endDate !== undefined && { endDate: endDate ? new Date(endDate) : null }),
+        ...(jwSharepointUrl !== undefined && { jwSharepointUrl }),
+        ...(builderAssistantUrl !== undefined && { builderAssistantUrl }),
         ...(isActive !== undefined && { isActive }),
       },
       include: {

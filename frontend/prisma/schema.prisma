@@ -201,6 +201,12 @@ model Project {
   budget              Decimal?                 @db.Decimal(10, 2)
   actualCost          Decimal?                 @db.Decimal(10, 2)
   projectManager      String?
+  projectNumber       String?
+  location            String?
+  projectType         String?
+  currentPhase        String?
+  jwSharepointUrl     String?
+  builderAssistantUrl String?
   isActive            Boolean                  @default(true)
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt

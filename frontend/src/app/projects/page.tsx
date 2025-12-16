@@ -2,15 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Building2, Calendar, Users, MapPin, ChevronRight, Filter } from 'lucide-react';
+import { Search, Plus, Building2, Calendar, Users, MapPin, ChevronRight, Filter, ExternalLink } from 'lucide-react';
 
 interface Project {
   id: string;
   name: string;
   description: string | null;
+  projectNumber: string | null;
+  location: string | null;
+  projectType: string | null;
+  currentPhase: string | null;
   status: string;
   startDate: string | null;
   endDate: string | null;
+  jwSharepointUrl: string | null;
+  builderAssistantUrl: string | null;
   constructionGroup: {
     id: string;
     name: string;
@@ -37,6 +43,25 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Cancelled',
 };
 
+const PROJECT_TYPES = [
+  'Kingdom Hall',
+  'Assembly Hall',
+  'Remote Translation Office',
+  'Branch Office',
+  'Bethel',
+  'Other'
+];
+
+const CONSTRUCTION_PHASES = [
+  'Site Preparation/Clearing',
+  'Construction Mobilization/Temp Services',
+  'Site Work',
+  'Structural',
+  'Rough-in',
+  'Finishes',
+  'Construction Final Prep'
+];
+
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,10 +71,16 @@ export default function ProjectsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    projectNumber: '',
     description: '',
+    location: '',
+    projectType: '',
+    currentPhase: '',
     status: 'PLANNING',
     startDate: '',
     endDate: '',
+    jwSharepointUrl: '',
+    builderAssistantUrl: '',
   });
 
   useEffect(() => {
@@ -90,7 +121,7 @@ export default function ProjectsPage() {
       });
       if (!res.ok) throw new Error('Failed to create project');
       setShowCreateModal(false);
-      setFormData({ name: '', description: '', status: 'PLANNING', startDate: '', endDate: '' });
+      setFormData({ name: '', projectNumber: '', description: '', location: '', projectType: '', currentPhase: '', status: 'PLANNING', startDate: '', endDate: '', jwSharepointUrl: '', builderAssistantUrl: '' });
       fetchProjects();
     } catch (err) {
       console.error(err);
@@ -103,7 +134,6 @@ export default function ProjectsPage() {
     return new Date(dateStr).toLocaleDateString();
   };
 
-  // Stats
   const stats = {
     total: projects.length,
     active: projects.filter(p => p.status === 'ACTIVE').length,
@@ -213,19 +243,25 @@ export default function ProjectsPage() {
                           <h3 className="text-lg font-medium text-gray-900 truncate">
                             {project.name}
                           </h3>
+                          {project.projectNumber && (
+                            <span className="text-sm text-gray-500">#{project.projectNumber}</span>
+                          )}
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[project.status] || 'bg-gray-100 text-gray-800'}`}>
                             {statusLabels[project.status] || project.status}
                           </span>
                         </div>
-                        {project.description && (
-                          <p className="mt-1 text-sm text-gray-500 truncate">{project.description}</p>
+                        {project.projectType && (
+                          <p className="mt-1 text-sm text-gray-600">{project.projectType}</p>
                         )}
                         <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
-                          {project.constructionGroup && (
+                          {project.location && (
                             <span className="flex items-center gap-1">
                               <MapPin className="h-4 w-4" />
-                              {project.constructionGroup.code}
+                              {project.location}
                             </span>
+                          )}
+                          {project.currentPhase && (
+                            <span className="text-blue-600 font-medium">{project.currentPhase}</span>
                           )}
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
@@ -249,33 +285,91 @@ export default function ProjectsPage() {
 
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 my-8">
             <div className="px-6 py-4 border-b">
               <h2 className="text-lg font-medium">Create New Project</h2>
             </div>
             <form onSubmit={handleCreateProject}>
-              <div className="px-6 py-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Project Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+              <div className="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Number</label>
+                    <input
+                      type="text"
+                      value={formData.projectNumber}
+                      onChange={(e) => setFormData({ ...formData, projectNumber: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g., KH-2024-001"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                      type="text"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="City, State"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Type</label>
+                    <select
+                      value={formData.projectType}
+                      onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select type</option>
+                      {PROJECT_TYPES.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="PLANNING">Planning</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="ON_HOLD">On Hold</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Current Phase</label>
+                    <select
+                      value={formData.currentPhase}
+                      onChange={(e) => setFormData({ ...formData, currentPhase: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select phase</option>
+                      {CONSTRUCTION_PHASES.map((phase) => (
+                        <option key={phase} value={phase}>{phase}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Start Date</label>
                     <input
@@ -295,17 +389,42 @@ export default function ProjectsPage() {
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="PLANNING">Planning</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="ON_HOLD">On Hold</option>
-                  </select>
+                    placeholder="Project description and notes..."
+                  />
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">External Links</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">JW SharePoint URL</label>
+                      <input
+                        type="url"
+                        value={formData.jwSharepointUrl}
+                        onChange={(e) => setFormData({ ...formData, jwSharepointUrl: e.target.value })}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://sharepoint.jw.org/..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Builder Assistant URL</label>
+                      <input
+                        type="url"
+                        value={formData.builderAssistantUrl}
+                        onChange={(e) => setFormData({ ...formData, builderAssistantUrl: e.target.value })}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://ba.jw.org/..."
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t flex justify-end gap-3">

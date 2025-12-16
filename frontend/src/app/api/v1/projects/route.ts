@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
+        { location: { contains: search, mode: 'insensitive' } },
+        { projectNumber: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -78,7 +80,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, status, startDate, endDate, constructionGroupId } = body;
+    const { 
+      name, 
+      description, 
+      projectNumber,
+      location,
+      projectType,
+      currentPhase,
+      status, 
+      startDate, 
+      endDate, 
+      jwSharepointUrl,
+      builderAssistantUrl,
+      constructionGroupId 
+    } = body;
 
     if (!name) {
       return NextResponse.json({ error: 'Project name is required' }, { status: 400 });
@@ -102,9 +117,15 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
+        projectNumber,
+        location,
+        projectType,
+        currentPhase,
         status: status || 'PLANNING',
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
+        jwSharepointUrl,
+        builderAssistantUrl,
         constructionGroupId: cgId,
         regionId: cg?.region?.id || cg?.regionId || 'default',
       },
