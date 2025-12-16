@@ -56,11 +56,11 @@ async function main() {
 
   // 4. Create default Construction Group for Region 01.12
   const defaultCG = await prisma.constructionGroup.upsert({
-    where: { code: 'CG-01.12-001' },
+    where: { code: 'CG 01.12' },
     update: {},
     create: {
-      code: 'CG-01.12-001',
-      name: 'Region 01.12 Construction Group',
+      code: 'CG 01.12',
+      name: 'CG 01.12',
       regionId: region0112.id,
       description: 'Primary Construction Group for Region 01.12',
       isActive: true,

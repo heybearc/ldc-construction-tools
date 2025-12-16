@@ -10,7 +10,13 @@ import {
   ChevronDown,
   RefreshCw,
   Globe,
-  Layers
+  Layers,
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Save,
+  AlertCircle
 } from 'lucide-react';
 
 interface Branch {
@@ -62,12 +68,24 @@ interface HierarchyData {
   };
 }
 
+type ModalType = 'region' | 'cg' | null;
+
 export default function OrganizationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<HierarchyData | null>(null);
   const [expandedZones, setExpandedZones] = useState<Set<string>>(new Set());
   const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set());
+  
+  // Modal state for adding/editing
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
+  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ code: '', name: '' });
+  const [saving, setSaving] = useState(false);
+
+  const canManage = data?.scope?.canViewAllBranches === true;
 
   const fetchHierarchy = async () => {
     setLoading(true);
@@ -78,10 +96,17 @@ export default function OrganizationPage() {
       const result = await response.json();
       setData(result);
       
-      // Auto-expand first zone if only one
-      if (result.zones?.length === 1) {
-        setExpandedZones(new Set([result.zones[0].id]));
-      }
+      // Auto-expand zones with regions
+      const zonesWithRegions = result.zones?.filter((z: Zone) => 
+        result.regions?.some((r: Region) => r.zoneId === z.id)
+      ).map((z: Zone) => z.id) || [];
+      setExpandedZones(new Set(zonesWithRegions));
+      
+      // Auto-expand regions with CGs
+      const regionsWithCGs = result.regions?.filter((r: Region) =>
+        result.constructionGroups?.some((cg: ConstructionGroup) => cg.regionId === r.id)
+      ).map((r: Region) => r.id) || [];
+      setExpandedRegions(new Set(regionsWithCGs));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -115,6 +140,60 @@ export default function OrganizationPage() {
       }
       return next;
     });
+  };
+
+  const openAddRegionModal = (zoneId: string) => {
+    const zone = data?.zones.find(z => z.id === zoneId);
+    setSelectedZoneId(zoneId);
+    setFormData({ code: zone ? `${zone.code}.` : '', name: '' });
+    setModalType('region');
+    setModalMode('add');
+  };
+
+  const openAddCGModal = (regionId: string) => {
+    const region = data?.regions.find(r => r.id === regionId);
+    setSelectedRegionId(regionId);
+    setFormData({ code: region ? `CG ${region.code}` : 'CG ', name: region ? `CG ${region.code}` : 'CG ' });
+    setModalType('cg');
+    setModalMode('add');
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setSelectedZoneId(null);
+    setSelectedRegionId(null);
+    setFormData({ code: '', name: '' });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const endpoint = modalType === 'region' 
+        ? '/api/v1/admin/hierarchy/regions'
+        : '/api/v1/admin/hierarchy/construction-groups';
+      
+      const body = modalType === 'region'
+        ? { code: formData.code, name: formData.name || `Region ${formData.code}`, zoneId: selectedZoneId }
+        : { code: formData.code, name: formData.name, regionId: selectedRegionId };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to save');
+      }
+
+      closeModal();
+      fetchHierarchy();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -177,18 +256,54 @@ export default function OrganizationPage() {
 
       {/* Scope Info */}
       {data?.scope && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-2 text-blue-700">
-            <Globe className="w-5 h-5" />
+        <div className={`border rounded-lg p-4 ${
+          data.scope.canViewAllBranches 
+            ? 'bg-purple-50 border-purple-200' 
+            : data.scope.canViewZoneRegions 
+              ? 'bg-blue-50 border-blue-200'
+              : 'bg-green-50 border-green-200'
+        }`}>
+          <div className="flex items-center gap-2">
+            <Globe className={`w-5 h-5 ${
+              data.scope.canViewAllBranches ? 'text-purple-700' : 
+              data.scope.canViewZoneRegions ? 'text-blue-700' : 'text-green-700'
+            }`} />
             <span className="font-medium">Your Access Level:</span>
             {data.scope.canViewAllBranches ? (
-              <span className="bg-blue-100 px-2 py-1 rounded text-sm">Full Branch Access</span>
+              <>
+                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-medium">
+                  Full Branch Access (SUPER_ADMIN)
+                </span>
+                <span className="text-sm text-purple-600 ml-2">
+                  You can manage all hierarchy items
+                </span>
+              </>
             ) : data.scope.canViewZoneRegions ? (
-              <span className="bg-blue-100 px-2 py-1 rounded text-sm">Zone Level Access</span>
+              <>
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">
+                  Zone Level Access
+                </span>
+                <span className="text-sm text-blue-600 ml-2">
+                  View all regions in your zone
+                </span>
+              </>
             ) : (
-              <span className="bg-blue-100 px-2 py-1 rounded text-sm">Construction Group Access</span>
+              <>
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
+                  Construction Group Access
+                </span>
+                <span className="text-sm text-green-600 ml-2">
+                  View your assigned CG only
+                </span>
+              </>
             )}
           </div>
+          {!canManage && (
+            <p className="text-sm text-gray-600 mt-2 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              Contact a SUPER_ADMIN to add or modify hierarchy items
+            </p>
+          )}
         </div>
       )}
 
@@ -262,24 +377,35 @@ export default function OrganizationPage() {
                 {getZonesForBranch(branch.id).map(zone => (
                   <div key={zone.id}>
                     {/* Zone Level */}
-                    <button
-                      onClick={() => toggleZone(zone.id)}
-                      className="w-full flex items-center gap-2 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                    >
-                      {expandedZones.has(zone.id) ? (
-                        <ChevronDown className="w-4 h-4 text-blue-600" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleZone(zone.id)}
+                        className="flex-1 flex items-center gap-2 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        {expandedZones.has(zone.id) ? (
+                          <ChevronDown className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-blue-600" />
+                        )}
+                        <Layers className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium text-blue-900">{zone.name}</span>
+                        <span className="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded">
+                          {zone.code}
+                        </span>
+                        <span className="ml-auto text-sm text-blue-600">
+                          {getRegionsForZone(zone.id).length} regions
+                        </span>
+                      </button>
+                      {canManage && (
+                        <button
+                          onClick={() => openAddRegionModal(zone.id)}
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
+                          title="Add Region"
+                        >
+                          <Plus className="w-5 h-5" />
+                        </button>
                       )}
-                      <Layers className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium text-blue-900">{zone.name}</span>
-                      <span className="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded">
-                        {zone.code}
-                      </span>
-                      <span className="ml-auto text-sm text-blue-600">
-                        {getRegionsForZone(zone.id).length} regions
-                      </span>
-                    </button>
+                    </div>
 
                     {/* Regions */}
                     {expandedZones.has(zone.id) && (
@@ -287,24 +413,35 @@ export default function OrganizationPage() {
                         {getRegionsForZone(zone.id).map(region => (
                           <div key={region.id}>
                             {/* Region Level */}
-                            <button
-                              onClick={() => toggleRegion(region.id)}
-                              className="w-full flex items-center gap-2 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-                            >
-                              {expandedRegions.has(region.id) ? (
-                                <ChevronDown className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <ChevronRight className="w-4 h-4 text-green-600" />
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => toggleRegion(region.id)}
+                                className="flex-1 flex items-center gap-2 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                              >
+                                {expandedRegions.has(region.id) ? (
+                                  <ChevronDown className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4 text-green-600" />
+                                )}
+                                <MapPin className="w-5 h-5 text-green-600" />
+                                <span className="font-medium text-green-900">{region.name}</span>
+                                <span className="text-sm text-green-600 bg-green-100 px-2 py-0.5 rounded">
+                                  {region.code}
+                                </span>
+                                <span className="ml-auto text-sm text-green-600">
+                                  {getCGsForRegion(region.id).length} CGs
+                                </span>
+                              </button>
+                              {canManage && (
+                                <button
+                                  onClick={() => openAddCGModal(region.id)}
+                                  className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
+                                  title="Add Construction Group"
+                                >
+                                  <Plus className="w-5 h-5" />
+                                </button>
                               )}
-                              <MapPin className="w-5 h-5 text-green-600" />
-                              <span className="font-medium text-green-900">{region.name}</span>
-                              <span className="text-sm text-green-600 bg-green-100 px-2 py-0.5 rounded">
-                                {region.code}
-                              </span>
-                              <span className="ml-auto text-sm text-green-600">
-                                {getCGsForRegion(region.id).length} CGs
-                              </span>
-                            </button>
+                            </div>
 
                             {/* Construction Groups */}
                             {expandedRegions.has(region.id) && (
@@ -334,6 +471,14 @@ export default function OrganizationPage() {
                                 {getCGsForRegion(region.id).length === 0 && (
                                   <p className="text-sm text-gray-500 italic p-3">
                                     No construction groups in this region
+                                    {canManage && (
+                                      <button
+                                        onClick={() => openAddCGModal(region.id)}
+                                        className="ml-2 text-orange-600 hover:underline"
+                                      >
+                                        Add one
+                                      </button>
+                                    )}
                                   </p>
                                 )}
                               </div>
@@ -343,6 +488,14 @@ export default function OrganizationPage() {
                         {getRegionsForZone(zone.id).length === 0 && (
                           <p className="text-sm text-gray-500 italic p-3">
                             No regions in this zone
+                            {canManage && (
+                              <button
+                                onClick={() => openAddRegionModal(zone.id)}
+                                className="ml-2 text-green-600 hover:underline"
+                              >
+                                Add one
+                              </button>
+                            )}
                           </p>
                         )}
                       </div>
@@ -360,6 +513,76 @@ export default function OrganizationPage() {
           )}
         </div>
       </div>
+
+      {/* Add/Edit Modal */}
+      {modalType && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {modalMode === 'add' ? 'Add' : 'Edit'} {modalType === 'region' ? 'Region' : 'Construction Group'}
+              </h3>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Code
+                </label>
+                <input
+                  type="text"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={modalType === 'region' ? '01.12' : 'CG 01.12'}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {modalType === 'region' 
+                    ? 'Format: ZZ.RR (e.g., 01.12 for Zone 1, Region 12)'
+                    : 'Format: CG ZZ.RR (e.g., CG 01.12)'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={modalType === 'region' ? 'Region 01.12' : 'CG 01.12'}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !formData.code}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
