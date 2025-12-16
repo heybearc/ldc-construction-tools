@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   Building2, 
   MapPin, 
@@ -447,9 +448,10 @@ export default function OrganizationPage() {
                             {expandedRegions.has(region.id) && (
                               <div className="ml-6 mt-2 space-y-2">
                                 {getCGsForRegion(region.id).map(cg => (
-                                  <div
+                                  <Link
                                     key={cg.id}
-                                    className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg"
+                                    href={`/admin/organization/${cg.id}`}
+                                    className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
                                   >
                                     <Building2 className="w-5 h-5 text-orange-600" />
                                     <span className="font-medium text-orange-900">{cg.name}</span>
@@ -466,7 +468,7 @@ export default function OrganizationPage() {
                                         <span>{cg._count.projects} projects</span>
                                       </div>
                                     )}
-                                  </div>
+                                  </Link>
                                 ))}
                                 {getCGsForRegion(region.id).length === 0 && (
                                   <p className="text-sm text-gray-500 italic p-3">

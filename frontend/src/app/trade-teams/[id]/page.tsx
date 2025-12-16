@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import OversightSection from '@/components/oversight/OversightSection';
+import { TRADE_TEAM_OVERSIGHT_CONFIG } from '@/lib/oversight-types';
 import { 
   Wrench, Users, ArrowLeft, Edit, Trash2, Plus, X, 
-  CheckCircle, AlertCircle, UserPlus, Settings
+  CheckCircle, AlertCircle, UserPlus, Settings, Eye
 } from 'lucide-react';
 
 interface Crew {
@@ -43,6 +45,7 @@ export default function TradeTeamDetailPage() {
   const [team, setTeam] = useState<TradeTeam | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableUsers, setAvailableUsers] = useState<Array<{id: string; name: string | null; email: string}>>([]);
 
   // Edit team modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -63,8 +66,21 @@ export default function TradeTeamDetailPage() {
   useEffect(() => {
     if (teamId) {
       fetchTeam();
+      fetchUsers();
     }
   }, [teamId]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('/api/v1/volunteers');
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableUsers(data.volunteers || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  };
 
   const fetchTeam = async () => {
     try {
@@ -343,6 +359,16 @@ export default function TradeTeamDetailPage() {
           </div>
         </div>
 
+        {/* Trade Team Oversight Section */}
+        <OversightSection
+          title="Trade Team Leadership"
+          entityId={teamId}
+          apiBasePath={`/api/v1/trade-teams/${teamId}/oversight`}
+          roleConfig={TRADE_TEAM_OVERSIGHT_CONFIG}
+          roleOrder={['TTO', 'TTOA', 'TT_SUPPORT']}
+          availableUsers={availableUsers}
+        />
+
         {/* Crews Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -393,6 +419,13 @@ export default function TradeTeamDetailPage() {
                     <p className="text-xs text-gray-400 mt-1">{crew.member_count} members</p>
                   </div>
                   <div className="flex space-x-2">
+                    <Link
+                      href={`/trade-teams/${teamId}/crews/${crew.id}`}
+                      className="p-2 text-gray-400 hover:text-blue-600 rounded"
+                      title="View Crew Details"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
                     <button
                       onClick={() => openCrewModal(crew)}
                       className="p-2 text-gray-400 hover:text-blue-600 rounded"
