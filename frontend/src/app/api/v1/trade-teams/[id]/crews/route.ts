@@ -1,46 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';;
+import { prisma } from '@/lib/prisma';
 
-
+// GET all crews for a trade team
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
-  
   try {
-    console.log(`WMACS: Fetching crews for trade team ${id} via Prisma`);
-    
-    // Direct Prisma query instead of FastAPI backend call
     const crews = await prisma.crew.findMany({
       where: {
-        tradeTeamId: id,
-        isActive: true
+        tradeTeamId: params.id
       },
       include: {
         tradeTeam: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        members: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
+          select: { id: true, name: true }
         },
         _count: {
-          select: {
-            members: true
-          }
+          select: { CrewMembers: true }
         }
       },
       orderBy: { name: 'asc' }
     });
 
-    // Transform data to match expected format
     const transformedCrews = crews.map(crew => ({
       id: crew.id,
       name: crew.name,
@@ -48,17 +29,63 @@ export async function GET(
       trade_team_id: crew.tradeTeamId,
       trade_team_name: crew.tradeTeam.name,
       status: crew.status.toLowerCase(),
-      member_count: crew._count.members,
-      members: crew.members,
+      member_count: crew._count.CrewMembers,
+      is_active: crew.isActive,
       created_at: crew.createdAt.toISOString(),
       updated_at: crew.updatedAt.toISOString()
     }));
-    console.log(`✅ WMACS: Retrieved ${transformedCrews.length} crews for trade team ${id}`);
+
     return NextResponse.json(transformedCrews);
   } catch (error) {
-    console.error('WMACS Trade Team Crews API Error:', error);
+    console.error('Get crews error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch trade team crews', details: error.message },
+      { error: 'Failed to fetch crews' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Create a new crew
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json();
+
+    // Check if trade team exists
+    const tradeTeam = await prisma.tradeTeam.findUnique({
+      where: { id: params.id }
+    });
+
+    if (!tradeTeam) {
+      return NextResponse.json(
+        { error: 'Trade team not found' },
+        { status: 404 }
+      );
+    }
+
+    const crew = await prisma.crew.create({
+      data: {
+        name: body.name,
+        description: body.description || null,
+        tradeTeamId: params.id,
+        status: body.status || 'ACTIVE',
+        isActive: body.status !== 'INACTIVE'
+      }
+    });
+
+    return NextResponse.json({
+      id: crew.id,
+      name: crew.name,
+      description: crew.description,
+      status: crew.status.toLowerCase(),
+      is_active: crew.isActive
+    }, { status: 201 });
+  } catch (error) {
+    console.error('Create crew error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create crew' },
       { status: 500 }
     );
   }
