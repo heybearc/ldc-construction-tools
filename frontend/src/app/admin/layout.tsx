@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Shield, Users, Mail, Activity, BarChart, FileText, Settings, MessageSquare } from 'lucide-react';
+import { Shield, Users, Mail, Activity, BarChart, FileText, Settings, MessageSquare, FolderTree } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -75,6 +75,12 @@ export default function AdminLayout({
       href: '/admin/system',
       icon: Settings,
       description: 'Backup, restore, and maintenance'
+    },
+    {
+      name: 'Organization',
+      href: '/admin/organization',
+      icon: FolderTree,
+      description: 'Zone, Region, and CG hierarchy'
     }
   ];
 

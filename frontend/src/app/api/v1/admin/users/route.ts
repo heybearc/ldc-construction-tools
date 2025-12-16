@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { isAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +16,9 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Get CG scope for data filtering
+    const cgScope = await getCGScope();
     
     // Get query parameters for filtering
     const { searchParams } = request.nextUrl;
@@ -22,8 +26,9 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role') || '';
     const status = searchParams.get('status') || '';
     
-    // Build where clause
-    const where: any = {};
+    // Build where clause with CG scoping
+    const cgFilter = cgScope ? withCGFilter(cgScope) : {};
+    const where: any = { ...cgFilter };
     
     if (search) {
       where.OR = [
@@ -36,7 +41,7 @@ export async function GET(request: NextRequest) {
       where.role = role;
     }
     
-    // Fetch users from database
+    // Fetch users from database with CG scope
     const users = await prisma.user.findMany({
       where,
       select: {
@@ -52,6 +57,26 @@ export async function GET(request: NextRequest) {
         updatedAt: true,
         emailVerified: true,
         lastLogin: true,
+        constructionGroupId: true,
+        constructionGroup: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            region: {
+              select: {
+                code: true,
+                name: true,
+                zone: {
+                  select: {
+                    code: true,
+                    name: true,
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -81,12 +106,29 @@ export async function GET(request: NextRequest) {
         zoneId: user.zoneId || '',
         lastLogin: user.lastLogin?.toISOString(),
         createdAt: user.createdAt.toISOString(),
+        // Multi-tenant fields
+        constructionGroupId: user.constructionGroupId,
+        constructionGroup: user.constructionGroup ? {
+          id: user.constructionGroup.id,
+          code: user.constructionGroup.code,
+          name: user.constructionGroup.name,
+          regionCode: user.constructionGroup.region?.code,
+          regionName: user.constructionGroup.region?.name,
+          zoneCode: user.constructionGroup.region?.zone?.code,
+          zoneName: user.constructionGroup.region?.zone?.name,
+        } : null,
       };
     });
     
     return NextResponse.json({
       users: transformedUsers,
-      total: transformedUsers.length
+      total: transformedUsers.length,
+      // Include scope info for UI
+      scope: cgScope ? {
+        constructionGroupId: cgScope.constructionGroupId,
+        canViewAllBranches: cgScope.canViewAllBranches,
+        canViewZoneRegions: cgScope.canViewZoneRegions,
+      } : null,
     });
     
   } catch (error) {

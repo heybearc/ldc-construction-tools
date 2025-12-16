@@ -34,35 +34,39 @@ model Session {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  name               String?
-  email              String              @unique
-  emailVerified      DateTime?
-  image              String?
-  firstName          String?
-  lastName           String?
-  role               UserRole            @default(READ_ONLY)
-  adminLevel         AdminLevel?         // Optional admin access level
-  status             UserStatus          @default(INVITED)
-  regionId           String              @default("01.12")
-  zoneId             String              @default("01")
-  passwordHash       String?
-  lastLogin          DateTime?
-  loginCount         Int                 @default(0)
-  invitedBy          String?
-  invitedAt          DateTime?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  accounts           Account[]
-  sessions           Session[]
-  sentInvitations    UserInvitation[]    @relation("InvitedBy")
-  CrewMembers        CrewMembers[]
-  TradeTeamMembers   TradeTeamMembers[]
-  auditLogs          AuditLog[]
-  projectAssignments ProjectAssignment[]
-  roleAssignments    RoleAssignment[]
-  feedback           Feedback[]
-  feedbackComments   FeedbackComment[]
+  id                  String              @id @default(cuid())
+  name                String?
+  email               String              @unique
+  emailVerified       DateTime?
+  image               String?
+  firstName           String?
+  lastName            String?
+  role                UserRole            @default(READ_ONLY)
+  adminLevel          AdminLevel?         // Optional admin access level
+  status              UserStatus          @default(INVITED)
+  // Multi-tenant: Primary CG assignment
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup?  @relation(fields: [constructionGroupId], references: [id])
+  // Legacy fields (will be derived from CG relationship)
+  regionId            String              @default("01.12")
+  zoneId              String              @default("01")
+  passwordHash        String?
+  lastLogin           DateTime?
+  loginCount          Int                 @default(0)
+  invitedBy           String?
+  invitedAt           DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  accounts            Account[]
+  sessions            Session[]
+  sentInvitations     UserInvitation[]    @relation("InvitedBy")
+  CrewMembers         CrewMembers[]
+  TradeTeamMembers    TradeTeamMembers[]
+  auditLogs           AuditLog[]
+  projectAssignments  ProjectAssignment[]
+  roleAssignments     RoleAssignment[]
+  feedback            Feedback[]
+  feedbackComments    FeedbackComment[]
 }
 
 model VerificationToken {
@@ -174,24 +178,29 @@ model RoleChangeLog {
 }
 
 model Project {
-  id                String              @id @default(cuid())
-  name              String
-  description       String?
-  status            ProjectStatus       @default(PLANNING)
-  priority          ProjectPriority     @default(MEDIUM)
-  regionId          String
-  zoneId            String?
-  startDate         DateTime?
-  endDate           DateTime?
-  estimatedDuration Int?
-  actualDuration    Int?
-  budget            Decimal?            @db.Decimal(10, 2)
-  actualCost        Decimal?            @db.Decimal(10, 2)
-  projectManager    String?
-  isActive          Boolean             @default(true)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  assignments       ProjectAssignment[]
+  id                  String                   @id @default(cuid())
+  name                String
+  description         String?
+  status              ProjectStatus            @default(PLANNING)
+  priority            ProjectPriority          @default(MEDIUM)
+  // Multi-tenant: CG ownership
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup?       @relation(fields: [constructionGroupId], references: [id])
+  // Legacy fields
+  regionId            String
+  zoneId              String?
+  startDate           DateTime?
+  endDate             DateTime?
+  estimatedDuration   Int?
+  actualDuration      Int?
+  budget              Decimal?                 @db.Decimal(10, 2)
+  actualCost          Decimal?                 @db.Decimal(10, 2)
+  projectManager      String?
+  isActive            Boolean                  @default(true)
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  assignments         ProjectAssignment[]
+  staffingRequests    ProjectStaffingRequest[]
 
   @@map("projects")
 }
@@ -218,29 +227,35 @@ model ProjectAssignment {
 }
 
 model TradeTeam {
-  id               String             @id @default(cuid())
-  name             String             @unique
-  description      String?
-  isActive         Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  TradeTeamMembers TradeTeamMembers[]
-  crews            Crew[]
+  id                  String             @id @default(cuid())
+  name                String             @unique
+  description         String?
+  // Multi-tenant: CG scope
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup? @relation(fields: [constructionGroupId], references: [id])
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  TradeTeamMembers    TradeTeamMembers[]
+  crews               Crew[]
 
   @@map("trade_teams")
 }
 
 model Crew {
-  id          String        @id @default(cuid())
-  name        String
-  description String?
-  tradeTeamId String
-  status      CrewStatus    @default(ACTIVE)
-  isActive    Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  CrewMembers CrewMembers[]
-  tradeTeam   TradeTeam     @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+  id                  String             @id @default(cuid())
+  name                String
+  description         String?
+  tradeTeamId         String
+  // Multi-tenant: CG scope (inherited from TradeTeam but explicit for queries)
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup? @relation(fields: [constructionGroupId], references: [id])
+  status              CrewStatus         @default(ACTIVE)
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  CrewMembers         CrewMembers[]
+  tradeTeam           TradeTeam          @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
 
   @@map("crews")
 }
@@ -296,6 +311,103 @@ model TradeTeamMembers {
   @@id([A, B], map: "_TradeTeamMembers_AB_pkey")
   @@index([B], map: "_TradeTeamMembers_B_index")
   @@map("_TradeTeamMembers")
+}
+
+// ============================================
+// MULTI-TENANT HIERARCHY MODELS
+// Branch -> Zone -> Region -> ConstructionGroup
+// ============================================
+
+model Branch {
+  id          String   @id @default(cuid())
+  code        String   @unique  // "US", "CA", "MX", etc.
+  name        String            // "United States Branch"
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  zones       Zone[]
+
+  @@map("branches")
+}
+
+model Zone {
+  id          String   @id @default(cuid())
+  code        String   @unique  // "01", "02", "03", "04", "05"
+  name        String            // "Zone 1"
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  regions     Region[]
+
+  @@map("zones")
+}
+
+model Region {
+  id                 String              @id @default(cuid())
+  code               String              @unique  // "01.12", "02.05", etc.
+  name               String                       // "Region 01.12"
+  zoneId             String
+  zone               Zone                @relation(fields: [zoneId], references: [id])
+  description        String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  constructionGroups ConstructionGroup[]
+
+  @@map("regions")
+}
+
+model ConstructionGroup {
+  id          String      @id @default(cuid())
+  code        String      @unique  // "CG-01.12-001"
+  name        String               // "Region 01.12 Construction Group"
+  regionId    String
+  region      Region      @relation(fields: [regionId], references: [id])
+  description String?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // All scoped data
+  users       User[]
+  tradeTeams  TradeTeam[]
+  crews       Crew[]
+  projects    Project[]
+
+  @@map("construction_groups")
+}
+
+// Cross-CG staffing for large projects / disaster relief
+model ProjectStaffingRequest {
+  id               String                @id @default(cuid())
+  projectId        String
+  project          Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestingCGId   String                // CG that owns the project
+  targetCGId       String                // CG being asked for help
+  requestedRoles   String[]              // Roles/trades needed
+  requestedCount   Int                   // Number of volunteers needed
+  status           StaffingRequestStatus @default(PENDING)
+  requestedBy      String                // User who made request
+  respondedBy      String?               // User who approved/declined
+  responseNotes    String?
+  startDate        DateTime?
+  endDate          DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@map("project_staffing_requests")
+}
+
+enum StaffingRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  COMPLETED
+  CANCELLED
 }
 
 enum UserRole {
