@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         _count: {
           select: {
             crews: true,
-            members: true
+            TradeTeamMembers: true
           }
         }
       }

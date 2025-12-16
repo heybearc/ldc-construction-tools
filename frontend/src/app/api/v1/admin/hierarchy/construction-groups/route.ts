@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
+import { STANDARD_TRADE_TEAMS } from '@/lib/standard-trade-teams';
 
 // POST: Create a new construction group (SUPER_ADMIN only)
 export async function POST(request: NextRequest) {
@@ -51,17 +52,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the construction group
+    // Create the construction group with standard trade teams
     const constructionGroup = await prisma.constructionGroup.create({
       data: {
         code,
         name: name || code,
         regionId,
         isActive: true,
+        // Auto-create standard trade teams for this CG
+        tradeTeams: {
+          create: STANDARD_TRADE_TEAMS.map(team => ({
+            name: team.name,
+            description: team.description,
+            isActive: true
+          }))
+        }
       },
+      include: {
+        tradeTeams: true
+      }
     });
 
-    return NextResponse.json({ constructionGroup }, { status: 201 });
+    console.log(`✅ Created CG "${code}" with ${constructionGroup.tradeTeams.length} standard trade teams`);
+
+    return NextResponse.json({ 
+      constructionGroup,
+      message: `Created with ${constructionGroup.tradeTeams.length} standard trade teams`
+    }, { status: 201 });
 
   } catch (error) {
     console.error('Create construction group error:', error);

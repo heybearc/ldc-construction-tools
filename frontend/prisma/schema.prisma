@@ -228,7 +228,7 @@ model ProjectAssignment {
 
 model TradeTeam {
   id                  String             @id @default(cuid())
-  name                String             @unique
+  name                String
   description         String?
   // Multi-tenant: CG scope
   constructionGroupId String?
