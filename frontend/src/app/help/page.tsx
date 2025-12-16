@@ -81,8 +81,8 @@ export default async function HelpPage() {
     redirect('/auth/signin')
   }
 
-  const userRole = session.user?.role || 'READ_ONLY'
-  const userTopics = helpTopics.filter(topic => topic.roles.includes(userRole))
+  // Show all help topics to all users - help documentation should be accessible to everyone
+  const userTopics = helpTopics
 
   return (
     <HelpLayout>
