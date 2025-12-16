@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Wrench, Users, Settings, AlertCircle, Plus } from 'lucide-react';
+import { Search, Wrench, Users, Settings, AlertCircle, Plus, X, Edit, Trash2, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 interface TradeTeam {
-  id: number;
+  id: string;
   name: string;
+  description?: string;
   crew_count: number;
   total_members: number;
   active_crews: number;
@@ -13,10 +15,10 @@ interface TradeTeam {
 }
 
 interface TradeCrew {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  trade_team_id: number;
+  trade_team_id: string;
   trade_team_name: string;
   status: 'active' | 'inactive' | 'pending';
   created_at: string;
@@ -30,12 +32,29 @@ interface TradeTeamsStats {
   inactive_crews: number;
 }
 
+interface TradeTeamFormData {
+  name: string;
+  description: string;
+  isActive: boolean;
+}
+
 export default function TradeTeamsPage() {
   const [teams, setTeams] = useState<TradeTeam[]>([]);
   const [stats, setStats] = useState<TradeTeamsStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<TradeTeam | null>(null);
+  const [formData, setFormData] = useState<TradeTeamFormData>({
+    name: '',
+    description: '',
+    isActive: true
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -46,7 +65,6 @@ export default function TradeTeamsPage() {
       setLoading(true);
       setError(null);
       
-      // Fetch trade teams data
       const response = await fetch('/api/v1/trade-teams');
       if (!response.ok) {
         throw new Error(`Failed to fetch trade teams: ${response.statusText}`);
@@ -55,7 +73,6 @@ export default function TradeTeamsPage() {
       const teamsData = await response.json();
       setTeams(teamsData);
       
-      // Calculate stats from the data
       const calculatedStats: TradeTeamsStats = {
         total_teams: teamsData.length,
         total_crews: teamsData.reduce((sum: number, team: TradeTeam) => sum + team.crew_count, 0),
@@ -71,25 +88,84 @@ export default function TradeTeamsPage() {
     }
   };
 
-  const getTeamIcon = (teamName: string): string => {
-    const iconMap: { [key: string]: string } = {
-      'Electrical': '⚡',
-      'Exteriors': '🏠',
-      'Interiors': '🏡',
-      'Mechanical': '⚙️',
-      'Plumbing': '🔧',
-      'Site Support': '🏗️',
-      'Sitework/Civil': '🚧',
-      'Structural': '🏗️'
-    };
-    return iconMap[teamName] || '👷';
+  const openCreateModal = () => {
+    setEditingTeam(null);
+    setFormData({ name: '', description: '', isActive: true });
+    setFormError(null);
+    setIsModalOpen(true);
   };
 
-  const getStatusColor = (isActive: boolean): string => {
-    return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  const openEditModal = (team: TradeTeam) => {
+    setEditingTeam(team);
+    setFormData({
+      name: team.name,
+      description: team.description || '',
+      isActive: team.is_active
+    });
+    setFormError(null);
+    setIsModalOpen(true);
   };
 
-  // Filter teams based on search term
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingTeam(null);
+    setFormData({ name: '', description: '', isActive: true });
+    setFormError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormError(null);
+
+    try {
+      const url = editingTeam 
+        ? `/api/v1/trade-teams/${editingTeam.id}`
+        : '/api/v1/trade-teams';
+      
+      const method = editingTeam ? 'PATCH' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to save trade team');
+      }
+
+      closeModal();
+      fetchData();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to save trade team');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (team: TradeTeam) => {
+    if (!confirm(`Are you sure you want to delete "${team.name}"? This will also delete all crews in this team.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/trade-teams/${team.id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete trade team');
+      }
+
+      fetchData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete trade team');
+    }
+  };
+
   const filteredTeams = teams.filter(team =>
     team.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -135,7 +211,10 @@ export default function TradeTeamsPage() {
                 <p className="text-sm text-gray-600">Construction trade team management and crew organization</p>
               </div>
             </div>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <button 
+              onClick={openCreateModal}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Trade Team
             </button>
@@ -205,7 +284,12 @@ export default function TradeTeamsPage() {
         {/* Trade Teams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredTeams.map((team) => (
-            <TradeTeamCard key={team.id} team={team} />
+            <TradeTeamCard 
+              key={team.id} 
+              team={team} 
+              onEdit={() => openEditModal(team)}
+              onDelete={() => handleDelete(team)}
+            />
           ))}
         </div>
 
@@ -214,20 +298,122 @@ export default function TradeTeamsPage() {
             <Wrench className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No trade teams found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Try adjusting your search criteria.' : 'No trade teams are currently configured.'}
+              {searchTerm ? 'Try adjusting your search criteria.' : 'Get started by creating a new trade team.'}
             </p>
+            {!searchTerm && (
+              <button
+                onClick={openCreateModal}
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Trade Team
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Create/Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                {editingTeam ? 'Edit Trade Team' : 'Create Trade Team'}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-sm">
+                {formError}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Team Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Electrical, Plumbing, Structural"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Optional description of this trade team"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                  Active
+                </label>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    editingTeam ? 'Update Team' : 'Create Team'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 interface TradeTeamCardProps {
   team: TradeTeam;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-const TradeTeamCard: React.FC<TradeTeamCardProps> = ({ team }) => {
+const TradeTeamCard: React.FC<TradeTeamCardProps> = ({ team, onEdit, onDelete }) => {
   const [showCrews, setShowCrews] = useState(false);
   const [crews, setCrews] = useState<TradeCrew[]>([]);
   const [loading, setLoading] = useState(false);
@@ -267,15 +453,40 @@ const TradeTeamCard: React.FC<TradeTeamCardProps> = ({ team }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
       <div className="p-6">
-        <div className="flex items-center mb-4">
-          <span className="text-3xl mr-3">{getTeamIcon(team.name)}</span>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              team.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
-              {team.is_active ? 'Active' : 'Inactive'}
-            </span>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center">
+            <span className="text-3xl mr-3">{getTeamIcon(team.name)}</span>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                team.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
+                {team.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
+          <div className="flex space-x-1">
+            <Link
+              href={`/trade-teams/${team.id}`}
+              className="p-1 text-gray-400 hover:text-blue-600 rounded"
+              title="View Details"
+            >
+              <Eye className="h-4 w-4" />
+            </Link>
+            <button
+              onClick={onEdit}
+              className="p-1 text-gray-400 hover:text-blue-600 rounded"
+              title="Edit"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-1 text-gray-400 hover:text-red-600 rounded"
+              title="Delete"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
           </div>
         </div>
         
@@ -319,6 +530,12 @@ const TradeTeamCard: React.FC<TradeTeamCardProps> = ({ team }) => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {showCrews && crews.length === 0 && !loading && (
+          <div className="mt-4 pt-4 border-t border-gray-200 text-center text-sm text-gray-500">
+            No crews in this team yet
           </div>
         )}
       </div>
