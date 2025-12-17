@@ -115,7 +115,7 @@ export default function VolunteersPage() {
     }
   };
 
-  const handleAddVolunteer = async (newVolunteer: any) => {
+  const handleAddVolunteer = async (newVolunteer: any): Promise<void> => {
     try {
       const response = await fetch('/api/v1/volunteers', {
         method: 'POST',

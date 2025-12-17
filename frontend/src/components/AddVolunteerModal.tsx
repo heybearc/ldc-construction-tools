@@ -17,7 +17,7 @@ interface Crew {
 interface AddVolunteerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (volunteer: any) => void;
+  onSave: (volunteer: any) => Promise<void>;
 }
 
 const SERVING_ROLES = ['Elder', 'Ministerial Servant', 'Regular Pioneer', 'Publisher'];
@@ -136,9 +136,11 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
         is_assistant: formData.role.includes('Assistant'),
       };
 
-      onSave(volunteerData);
+      await onSave(volunteerData);
+      resetForm();
     } catch (err) {
-      setError('Failed to create volunteer');
+      console.error('Error creating volunteer:', err);
+      setError('Failed to create volunteer. Please try again.');
     } finally {
       setLoading(false);
     }
