@@ -70,6 +70,7 @@ model User {
   tradeTeamOversight  TradeTeamOversight[]
   tradeCrewOversight  TradeCrewOversight[]
   personnelContacts   PersonnelContact[]
+  volunteer           Volunteer?
 }
 
 model VerificationToken {
@@ -278,6 +279,7 @@ model Crew {
   oversight           TradeCrewOversight[]
   projectAssignments  ProjectCrewAssignment[]
   scheduleEntries     ProjectScheduleEntry[]
+  volunteers          Volunteer[]
 
   @@map("crews")
 }
@@ -400,6 +402,7 @@ model ConstructionGroup {
   crews       Crew[]
   projects    Project[]
   personnelContacts PersonnelContact[]
+  volunteers    Volunteer[]
 
   @@map("construction_groups")
 }
@@ -750,4 +753,40 @@ model ProjectScheduleEntry {
   updatedAt       DateTime @updatedAt
   
   @@map("project_schedule_entries")
+}
+
+// Phase 5: Volunteer Management (migrated from FastAPI)
+// Volunteers are personnel who can be assigned to Trade Teams/Crews
+// Some volunteers may also have platform User accounts (linked via userId)
+model Volunteer {
+  id                  String              @id @default(cuid())
+  firstName           String
+  lastName            String
+  baId                String?             // Builder Assistant ID
+  phone               String?
+  emailPersonal       String?
+  emailJw             String?             // JW.org email
+  congregation        String?
+  servingAs           String[]            // Elder, Ministerial Servant, Regular Pioneer, Publisher
+  role                String              @default("Trade Crew Volunteer") // Trade Team Overseer, Crew Support, etc.
+  
+  // Optional link to platform User account
+  userId              String?             @unique
+  user                User?               @relation(fields: [userId], references: [id])
+  
+  // Trade Team/Crew assignment
+  crewId              String?
+  crew                Crew?               @relation(fields: [crewId], references: [id])
+  
+  // Multi-tenant: CG scope
+  constructionGroupId String
+  constructionGroup   ConstructionGroup   @relation(fields: [constructionGroupId], references: [id])
+  
+  isOverseer          Boolean             @default(false)
+  isAssistant         Boolean             @default(false)
+  isActive            Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  @@map("volunteers")
 }

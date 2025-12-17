@@ -1,86 +1,180 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { getCGScope } from '@/lib/cg-scope';
 
-const BACKEND_URL = 'http://10.92.3.25:8000';
-
+// GET /api/v1/volunteers/[id] - Get a single volunteer
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/volunteers/${params.id}/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const cgScope = await getCGScope();
+
+    const volunteer = await prisma.volunteer.findFirst({
+      where: {
+        id: params.id,
+        constructionGroupId: cgScope.constructionGroupId,
+      },
+      include: {
+        crew: {
+          include: {
+            tradeTeam: true,
+          },
+        },
+        user: {
+          select: { id: true, email: true, name: true },
+        },
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
+    if (!volunteer) {
+      return NextResponse.json({ error: 'Volunteer not found' }, { status: 404 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json({
+      id: volunteer.id,
+      first_name: volunteer.firstName,
+      last_name: volunteer.lastName,
+      ba_id: volunteer.baId,
+      role: volunteer.role,
+      phone: volunteer.phone,
+      email_personal: volunteer.emailPersonal,
+      email_jw: volunteer.emailJw,
+      congregation: volunteer.congregation,
+      serving_as: volunteer.servingAs,
+      is_overseer: volunteer.isOverseer,
+      is_assistant: volunteer.isAssistant,
+      is_active: volunteer.isActive,
+      trade_crew_id: volunteer.crewId,
+      trade_crew_name: volunteer.crew?.name,
+      trade_team_name: volunteer.crew?.tradeTeam?.name,
+      user_id: volunteer.userId,
+      has_user_account: !!volunteer.userId,
+    });
   } catch (error) {
-    console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch volunteer' },
-      { status: 500 }
-    );
+    console.error('Error fetching volunteer:', error);
+    return NextResponse.json({ error: 'Failed to fetch volunteer' }, { status: 500 });
   }
 }
 
-export async function PUT(
+// PATCH /api/v1/volunteers/[id] - Update a volunteer
+export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json();
-    
-    const response = await fetch(`${BACKEND_URL}/api/v1/volunteers/${params.id}/`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const cgScope = await getCGScope();
+    const body = await request.json();
+
+    // Verify volunteer exists and belongs to CG
+    const existing = await prisma.volunteer.findFirst({
+      where: {
+        id: params.id,
+        constructionGroupId: cgScope.constructionGroupId,
+      },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Volunteer not found' }, { status: 404 });
+    }
+
+    const updateData: any = {};
+    if (body.first_name !== undefined) updateData.firstName = body.first_name;
+    if (body.last_name !== undefined) updateData.lastName = body.last_name;
+    if (body.ba_id !== undefined) updateData.baId = body.ba_id || null;
+    if (body.phone !== undefined) updateData.phone = body.phone || null;
+    if (body.email_personal !== undefined) updateData.emailPersonal = body.email_personal || null;
+    if (body.email_jw !== undefined) updateData.emailJw = body.email_jw || null;
+    if (body.congregation !== undefined) updateData.congregation = body.congregation || null;
+    if (body.serving_as !== undefined) updateData.servingAs = body.serving_as;
+    if (body.role !== undefined) updateData.role = body.role;
+    if (body.trade_crew_id !== undefined) updateData.crewId = body.trade_crew_id || null;
+    if (body.is_overseer !== undefined) updateData.isOverseer = body.is_overseer;
+    if (body.is_assistant !== undefined) updateData.isAssistant = body.is_assistant;
+    if (body.is_active !== undefined) updateData.isActive = body.is_active;
+
+    const volunteer = await prisma.volunteer.update({
+      where: { id: params.id },
+      data: updateData,
+      include: {
+        crew: {
+          include: {
+            tradeTeam: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      id: volunteer.id,
+      first_name: volunteer.firstName,
+      last_name: volunteer.lastName,
+      ba_id: volunteer.baId,
+      role: volunteer.role,
+      phone: volunteer.phone,
+      email_personal: volunteer.emailPersonal,
+      email_jw: volunteer.emailJw,
+      congregation: volunteer.congregation,
+      serving_as: volunteer.servingAs,
+      is_overseer: volunteer.isOverseer,
+      is_assistant: volunteer.isAssistant,
+      is_active: volunteer.isActive,
+      trade_crew_id: volunteer.crewId,
+      trade_crew_name: volunteer.crew?.name,
+      trade_team_name: volunteer.crew?.tradeTeam?.name,
+    });
   } catch (error) {
-    console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update volunteer' },
-      { status: 500 }
-    );
+    console.error('Error updating volunteer:', error);
+    return NextResponse.json({ error: 'Failed to update volunteer' }, { status: 500 });
   }
 }
 
+// DELETE /api/v1/volunteers/[id] - Soft delete a volunteer
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/volunteers/${params.id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const cgScope = await getCGScope();
+
+    // Verify volunteer exists and belongs to CG
+    const existing = await prisma.volunteer.findFirst({
+      where: {
+        id: params.id,
+        constructionGroupId: cgScope.constructionGroupId,
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`);
+    if (!existing) {
+      return NextResponse.json({ error: 'Volunteer not found' }, { status: 404 });
     }
+
+    // Soft delete
+    await prisma.volunteer.update({
+      where: { id: params.id },
+      data: { isActive: false },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete volunteer' },
-      { status: 500 }
-    );
+    console.error('Error deleting volunteer:', error);
+    return NextResponse.json({ error: 'Failed to delete volunteer' }, { status: 500 });
   }
 }

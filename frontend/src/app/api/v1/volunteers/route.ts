@@ -1,48 +1,150 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';;
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { getCGScope } from '@/lib/cg-scope';
 
-
+// GET /api/v1/volunteers - List volunteers with optional filters
 export async function GET(request: NextRequest) {
-  console.log('Volunteers API route called:', request.url);
-  
   try {
-    const users = await prisma.user.findMany({
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const cgScope = await getCGScope();
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') || '';
+    const role = searchParams.get('role') || '';
+    const congregation = searchParams.get('congregation') || '';
+    const crewId = searchParams.get('crewId') || '';
+
+    const where: any = {
+      constructionGroupId: cgScope.constructionGroupId,
+      isActive: true,
+    };
+
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { baId: { contains: search, mode: 'insensitive' } },
+        { congregation: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (congregation) {
+      where.congregation = congregation;
+    }
+
+    if (crewId) {
+      where.crewId = crewId;
+    }
+
+    const volunteers = await prisma.volunteer.findMany({
+      where,
       include: {
-        accounts: true,
-        sessions: true
-      }
+        crew: {
+          include: {
+            tradeTeam: true,
+          },
+        },
+        user: {
+          select: { id: true, email: true, name: true },
+        },
+      },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
 
-    console.log('Users fetched from database:', users.length);
-    return NextResponse.json(users);
+    // Transform to match expected frontend format
+    const transformed = volunteers.map(v => ({
+      id: v.id,
+      first_name: v.firstName,
+      last_name: v.lastName,
+      ba_id: v.baId,
+      role: v.role,
+      phone: v.phone,
+      email_personal: v.emailPersonal,
+      email_jw: v.emailJw,
+      congregation: v.congregation,
+      serving_as: v.servingAs,
+      is_overseer: v.isOverseer,
+      is_assistant: v.isAssistant,
+      is_active: v.isActive,
+      trade_crew_id: v.crewId,
+      trade_crew_name: v.crew?.name,
+      trade_team_name: v.crew?.tradeTeam?.name,
+      user_id: v.userId,
+      has_user_account: !!v.userId,
+    }));
+
+    return NextResponse.json(transformed);
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch volunteers', details: error instanceof Error ? error.message : 'Database error' },
-      { status: 500 }
-    );
+    console.error('Error fetching volunteers:', error);
+    return NextResponse.json({ error: 'Failed to fetch volunteers' }, { status: 500 });
   }
 }
 
+// POST /api/v1/volunteers - Create a new volunteer
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const cgScope = await getCGScope();
     const body = await request.json();
-    
-    const user = await prisma.user.create({
+
+    const volunteer = await prisma.volunteer.create({
       data: {
-        name: body.name,
-        email: body.email,
-        role: body.role || 'READ_ONLY'
-      }
+        firstName: body.first_name,
+        lastName: body.last_name,
+        baId: body.ba_id || null,
+        phone: body.phone || null,
+        emailPersonal: body.email_personal || null,
+        emailJw: body.email_jw || null,
+        congregation: body.congregation || null,
+        servingAs: body.serving_as || [],
+        role: body.role || 'Trade Crew Volunteer',
+        crewId: body.trade_crew_id || null,
+        isOverseer: body.is_overseer || false,
+        isAssistant: body.is_assistant || false,
+        constructionGroupId: cgScope.constructionGroupId,
+      },
+      include: {
+        crew: {
+          include: {
+            tradeTeam: true,
+          },
+        },
+      },
     });
 
-    console.log('User created:', user);
-    return NextResponse.json(user);
+    return NextResponse.json({
+      id: volunteer.id,
+      first_name: volunteer.firstName,
+      last_name: volunteer.lastName,
+      ba_id: volunteer.baId,
+      role: volunteer.role,
+      phone: volunteer.phone,
+      email_personal: volunteer.emailPersonal,
+      email_jw: volunteer.emailJw,
+      congregation: volunteer.congregation,
+      serving_as: volunteer.servingAs,
+      is_overseer: volunteer.isOverseer,
+      is_assistant: volunteer.isAssistant,
+      is_active: volunteer.isActive,
+      trade_crew_id: volunteer.crewId,
+      trade_crew_name: volunteer.crew?.name,
+      trade_team_name: volunteer.crew?.tradeTeam?.name,
+    }, { status: 201 });
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create user', details: error instanceof Error ? error.message : 'Database error' },
-      { status: 500 }
-    );
+    console.error('Error creating volunteer:', error);
+    return NextResponse.json({ error: 'Failed to create volunteer' }, { status: 500 });
   }
 }

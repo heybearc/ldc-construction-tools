@@ -1,25 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = 'http://10.92.3.25:8000';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { isAdmin } from '@/lib/auth-helpers';
 
 export async function POST(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/admin/reset/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Backend responded with ${response.status}: ${errorText}`);
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !(await isAdmin(session))) {
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    // Reset volunteers table (soft delete all)
+    const result = await prisma.volunteer.updateMany({
+      where: { isActive: true },
+      data: { isActive: false },
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: `Reset complete. ${result.count} volunteers deactivated.` 
+    });
   } catch (error) {
-    console.error('Reset API proxy error:', error);
+    console.error('Reset API error:', error);
     return NextResponse.json(
       { error: 'Failed to reset database', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

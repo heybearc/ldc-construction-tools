@@ -1,47 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = 'http://10.92.3.25:8000';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { getCGScope } from '@/lib/cg-scope';
+import * as XLSX from 'xlsx';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const cgScope = await getCGScope();
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || 'contacts';
-    
-    // Map frontend type to backend endpoint
-    let endpoint = type;
+    const type = searchParams.get('type') || 'volunteers';
+
     if (type === 'volunteers') {
-      endpoint = 'contacts'; // Backend uses 'contacts' for volunteer export
+      const volunteers = await prisma.volunteer.findMany({
+        where: {
+          constructionGroupId: cgScope.constructionGroupId,
+          isActive: true,
+        },
+        include: {
+          crew: {
+            include: {
+              tradeTeam: true,
+            },
+          },
+        },
+        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+      });
+
+      const data = volunteers.map(v => ({
+        'First Name': v.firstName,
+        'Last Name': v.lastName,
+        'BA ID': v.baId || '',
+        'Role': v.role,
+        'Trade Team': v.crew?.tradeTeam?.name || '',
+        'Trade Crew': v.crew?.name || '',
+        'Phone': v.phone || '',
+        'Personal Email': v.emailPersonal || '',
+        'JW Email': v.emailJw || '',
+        'Congregation': v.congregation || '',
+        'Serving As': v.servingAs?.join(', ') || '',
+        'Is Overseer': v.isOverseer ? 'Yes' : 'No',
+        'Is Assistant': v.isAssistant ? 'Yes' : 'No',
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(data);
+      
+      ws['!cols'] = [
+        { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 25 },
+        { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 25 },
+        { wch: 25 }, { wch: 20 }, { wch: 30 }, { wch: 10 }, { wch: 10 },
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Volunteers');
+      const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+      return new NextResponse(buf, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': 'attachment; filename="volunteers-export.xlsx"',
+        },
+      });
     }
-    
-    console.log(`Export request: type=${type}, endpoint=${endpoint}`);
-    
-    const response = await fetch(`${BACKEND_URL}/api/v1/export/${endpoint}/`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      },
-    });
 
-    console.log(`Backend export response status: ${response.status}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Backend export error:', errorText);
-      throw new Error(`Backend responded with ${response.status}: ${errorText}`);
-    }
-
-    const buffer = await response.arrayBuffer();
-    console.log(`Export file size: ${buffer.byteLength} bytes`);
-    
-    return new NextResponse(buffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="${type}-export.xlsx"`,
-      },
-    });
+    return NextResponse.json({ error: 'Unknown export type' }, { status: 400 });
   } catch (error) {
-    console.error('Export API proxy error:', error);
+    console.error('Export API error:', error);
     return NextResponse.json(
       { error: 'Failed to export data', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
