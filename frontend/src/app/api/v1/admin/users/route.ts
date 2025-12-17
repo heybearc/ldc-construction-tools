@@ -142,3 +142,92 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// POST - Create a new user
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!isAdmin(session)) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, email, password, role, zoneId, regionId } = body;
+
+    // Validate required fields
+    if (!name || !email || !password || !role) {
+      return NextResponse.json(
+        { error: 'Name, email, password, and role are required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'A user with this email already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Get CG scope for the new user
+    const cgScope = await getCGScope();
+
+    // Hash the password
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the user
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash: hashedPassword,
+        role,
+        status: 'ACTIVE',
+        zoneId: zoneId || null,
+        regionId: regionId || null,
+        constructionGroupId: cgScope?.constructionGroupId || null,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        zoneId: true,
+        regionId: true,
+        createdAt: true,
+      }
+    });
+
+    return NextResponse.json({
+      message: 'User created successfully',
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        status: newUser.status,
+        zoneId: newUser.zoneId,
+        regionId: newUser.regionId,
+        createdAt: newUser.createdAt.toISOString(),
+      }
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Create user error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create user', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
+}

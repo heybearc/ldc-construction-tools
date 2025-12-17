@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
             tradeTeam: true,
           },
         },
+        tradeTeam: true,
         user: {
           select: { id: true, email: true, name: true },
         },
@@ -77,7 +78,8 @@ export async function GET(request: NextRequest) {
       is_active: v.isActive,
       trade_crew_id: v.crewId,
       trade_crew_name: v.crew?.name,
-      trade_team_name: v.crew?.tradeTeam?.name,
+      trade_team_id: v.tradeTeamId,
+      trade_team_name: v.tradeTeam?.name || v.crew?.tradeTeam?.name,
       user_id: v.userId,
       has_user_account: !!v.userId,
     }));
@@ -112,6 +114,7 @@ export async function POST(request: NextRequest) {
         servingAs: body.serving_as || [],
         role: body.role || 'Trade Crew Volunteer',
         crewId: body.trade_crew_id || null,
+        tradeTeamId: body.trade_team_id || null,
         isOverseer: body.is_overseer || false,
         isAssistant: body.is_assistant || false,
         constructionGroupId: cgScope.constructionGroupId,
@@ -122,6 +125,7 @@ export async function POST(request: NextRequest) {
             tradeTeam: true,
           },
         },
+        tradeTeam: true,
       },
     });
 
@@ -141,7 +145,8 @@ export async function POST(request: NextRequest) {
       is_active: volunteer.isActive,
       trade_crew_id: volunteer.crewId,
       trade_crew_name: volunteer.crew?.name,
-      trade_team_name: volunteer.crew?.tradeTeam?.name,
+      trade_team_id: volunteer.tradeTeamId,
+      trade_team_name: volunteer.tradeTeam?.name || volunteer.crew?.tradeTeam?.name,
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating volunteer:', error);

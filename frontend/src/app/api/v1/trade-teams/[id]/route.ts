@@ -13,14 +13,13 @@ export async function GET(
         crews: {
           include: {
             _count: {
-              select: { CrewMembers: true }
+              select: { volunteers: true }
             }
           }
         },
         _count: {
           select: {
-            crews: true,
-            TradeTeamMembers: true
+            crews: true
           }
         }
       }
@@ -33,19 +32,25 @@ export async function GET(
       );
     }
 
+    // Calculate total volunteers across all crews
+    const totalVolunteers = tradeTeam.crews.reduce(
+      (sum, crew) => sum + crew._count.volunteers, 
+      0
+    );
+
     return NextResponse.json({
       id: tradeTeam.id,
       name: tradeTeam.name,
       description: tradeTeam.description,
       is_active: tradeTeam.isActive,
       crew_count: tradeTeam._count.crews,
-      total_members: tradeTeam._count.TradeTeamMembers,
+      total_members: totalVolunteers,
       crews: tradeTeam.crews.map(crew => ({
         id: crew.id,
         name: crew.name,
         description: crew.description,
         status: crew.status.toLowerCase(),
-        member_count: crew._count.CrewMembers,
+        member_count: crew._count.volunteers,
         is_active: crew.isActive
       })),
       created_at: tradeTeam.createdAt,
@@ -68,7 +73,6 @@ export async function PATCH(
   try {
     const body = await request.json();
     
-    // Check if trade team exists
     const existing = await prisma.tradeTeam.findUnique({
       where: { id: params.id }
     });
@@ -80,7 +84,6 @@ export async function PATCH(
       );
     }
 
-    // Check for duplicate name if name is being changed
     if (body.name && body.name !== existing.name) {
       const duplicate = await prisma.tradeTeam.findUnique({
         where: { name: body.name }
@@ -123,7 +126,6 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if trade team exists
     const existing = await prisma.tradeTeam.findUnique({
       where: { id: params.id },
       include: {
@@ -138,7 +140,6 @@ export async function DELETE(
       );
     }
 
-    // Delete the trade team (cascades to crews due to schema)
     await prisma.tradeTeam.delete({
       where: { id: params.id }
     });

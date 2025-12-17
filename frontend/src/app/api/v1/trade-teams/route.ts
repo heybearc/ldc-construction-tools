@@ -1,41 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';;
-
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
-  console.log('Trade teams API route called:', request.url);
-  
   try {
-    // Direct Prisma query instead of FastAPI backend call
     const tradeTeams = await prisma.tradeTeam.findMany({
       include: {
         crews: {
-          where: { isActive: true }
+          where: { isActive: true },
+          include: {
+            _count: {
+              select: { volunteers: true }
+            },
+            volunteers: {
+              select: { role: true }
+            }
+          }
+        },
+        volunteers: {
+          select: { id: true, firstName: true, lastName: true, role: true }
         },
         _count: {
           select: {
-            crews: true
+            crews: true,
+            volunteers: true
           }
         }
       },
       orderBy: { name: 'asc' }
     });
 
-    // Transform data to match expected format
-    const transformedTeams = tradeTeams.map(team => ({
-      id: team.id,
-      name: team.name,
-      crew_count: team._count.crews,
-      total_members: 0, // TODO: Count members from TradeTeamMembers join table
-      active_crews: team.crews.length,
-      is_active: team.isActive
-    }));
+    // Transform data to match expected format with oversight counts
+    const transformedTeams = tradeTeams.map(team => {
+      // Count volunteers assigned directly to trade team + volunteers in crews
+      const directVolunteers = team._count.volunteers;
+      const crewVolunteers = team.crews.reduce((sum, crew) => sum + crew._count.volunteers, 0);
+      const totalMembers = directVolunteers + crewVolunteers;
 
-    console.log(`✅ WMACS: Retrieved ${transformedTeams.length} trade teams via Prisma`);
+      // Count trade team oversight roles
+      const ttoCount = team.volunteers.filter(v => v.role === 'Trade Team Overseer').length;
+      const ttoaCount = team.volunteers.filter(v => v.role === 'Trade Team Overseer Assistant').length;
+      const ttsCount = team.volunteers.filter(v => v.role === 'Trade Team Support').length;
+
+      // Count crews needing oversight
+      const crewsNeedingTCO = team.crews.filter(crew => 
+        !crew.volunteers.some(v => v.role === 'Trade Crew Overseer')
+      ).length;
+
+      return {
+        id: team.id,
+        name: team.name,
+        crew_count: team._count.crews,
+        total_members: totalMembers,
+        active_crews: team.crews.length,
+        is_active: team.isActive,
+        oversight: {
+          tto: { filled: ttoCount, required: 1 },
+          ttoa: { filled: ttoaCount, required: 2 },
+          tts: { filled: ttsCount, required: 0 },
+          crews_needing_tco: crewsNeedingTCO
+        }
+      };
+    });
+
     return NextResponse.json(transformedTeams);
     
   } catch (error) {
-    console.error('WMACS Trade Teams API Error:', error);
+    console.error('Trade Teams API Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch trade teams', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -57,17 +87,16 @@ export async function POST(request: NextRequest) {
         _count: {
           select: {
             crews: true,
-            TradeTeamMembers: true
+            volunteers: true
           }
         }
       }
     });
 
-    console.log(`✅ WMACS: Created trade team ${tradeTeam.name} via Prisma`);
     return NextResponse.json(tradeTeam);
     
   } catch (error) {
-    console.error('WMACS Trade Teams Create Error:', error);
+    console.error('Trade Teams Create Error:', error);
     return NextResponse.json(
       { error: 'Failed to create trade team', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

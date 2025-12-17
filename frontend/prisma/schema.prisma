@@ -256,6 +256,7 @@ model TradeTeam {
   crews               Crew[]
   scheduleEntries     ProjectScheduleEntry[]
   oversight           TradeTeamOversight[]
+  volunteers          Volunteer[]
 
   @@map("trade_teams")
 }
@@ -776,6 +777,8 @@ model Volunteer {
   
   // Trade Team/Crew assignment
   crewId              String?
+  tradeTeamId         String?
+  tradeTeam           TradeTeam?          @relation(fields: [tradeTeamId], references: [id])
   crew                Crew?               @relation(fields: [crewId], references: [id])
   
   // Multi-tenant: CG scope

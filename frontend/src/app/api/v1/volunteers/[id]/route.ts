@@ -53,6 +53,7 @@ export async function GET(
       is_assistant: volunteer.isAssistant,
       is_active: volunteer.isActive,
       trade_crew_id: volunteer.crewId,
+      trade_team_id: volunteer.tradeTeamId,
       trade_crew_name: volunteer.crew?.name,
       trade_team_name: volunteer.crew?.tradeTeam?.name,
       user_id: volunteer.userId,
@@ -77,6 +78,7 @@ export async function PATCH(
 
     const cgScope = await getCGScope();
     const body = await request.json();
+    console.log("PATCH volunteer body:", JSON.stringify(body));
 
     // Verify volunteer exists and belongs to CG
     const existing = await prisma.volunteer.findFirst({
@@ -101,9 +103,11 @@ export async function PATCH(
     if (body.serving_as !== undefined) updateData.servingAs = body.serving_as;
     if (body.role !== undefined) updateData.role = body.role;
     if (body.trade_crew_id !== undefined) updateData.crewId = body.trade_crew_id || null;
+    if (body.trade_team_id !== undefined) updateData.tradeTeamId = body.trade_team_id || null;
     if (body.is_overseer !== undefined) updateData.isOverseer = body.is_overseer;
     if (body.is_assistant !== undefined) updateData.isAssistant = body.is_assistant;
     if (body.is_active !== undefined) updateData.isActive = body.is_active;
+    if (body.user_id !== undefined) updateData.userId = body.user_id || null;
 
     const volunteer = await prisma.volunteer.update({
       where: { id: params.id },
@@ -132,6 +136,7 @@ export async function PATCH(
       is_assistant: volunteer.isAssistant,
       is_active: volunteer.isActive,
       trade_crew_id: volunteer.crewId,
+      trade_team_id: volunteer.tradeTeamId,
       trade_crew_name: volunteer.crew?.name,
       trade_team_name: volunteer.crew?.tradeTeam?.name,
     });

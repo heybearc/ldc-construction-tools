@@ -1,25 +1,27 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Phone, Mail, Building2, Trash2 } from 'lucide-react';
+import { X, Save, User, Phone, Mail, Building2, Trash2, Link2 } from 'lucide-react';
 
 interface Volunteer {
   id: string;
   first_name: string;
   last_name: string;
-  ba_id?: string;
+  ba_id?: string | null;
   role: string;
-  phone?: string;
-  email_personal?: string;
-  email_jw?: string;
-  congregation?: string;
+  phone?: string | null;
+  email_personal?: string | null;
+  email_jw?: string | null;
+  congregation?: string | null;
   serving_as?: string[];
   is_overseer: boolean;
   is_assistant: boolean;
   is_active: boolean;
-  trade_crew_id?: string;
-  trade_crew_name?: string;
-  trade_team_name?: string;
+  trade_crew_id?: string | null;
+  trade_crew_name?: string | null;
+  trade_team_id?: string | null;
+  trade_team_name?: string | null;
+  user_id?: string | null;
 }
 
 interface TradeTeam {
@@ -33,11 +35,17 @@ interface Crew {
   tradeTeamId: string;
 }
 
+interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+}
+
 interface EditVolunteerModalProps {
   volunteer: Volunteer | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (volunteer: Volunteer) => void;
+  onSave: (volunteer: Volunteer) => Promise<void>;
 }
 
 const SERVING_ROLES = ['Elder', 'Ministerial Servant', 'Regular Pioneer', 'Publisher'];
@@ -52,7 +60,6 @@ const VOLUNTEER_ROLES = [
   'Trade Crew Volunteer',
 ];
 
-// Roles that are at the Trade Team level (don't need crew assignment)
 const TRADE_TEAM_LEVEL_ROLES = [
   'Trade Team Overseer',
   'Trade Team Overseer Assistant',
@@ -63,39 +70,34 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
   const [formData, setFormData] = useState<Volunteer | null>(null);
   const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
   const [crews, setCrews] = useState<Crew[]>([]);
+  const [users, setUsers] = useState<UserAccount[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
+  const [selectedCrewId, setSelectedCrewId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Check if selected role is a Trade Team level role
   const isTradeTeamLevelRole = formData ? TRADE_TEAM_LEVEL_ROLES.includes(formData.role) : false;
 
   useEffect(() => {
     if (isOpen && volunteer) {
       setFormData({ ...volunteer });
+      setSelectedCrewId(volunteer.trade_crew_id || null);
+      setSelectedTeamId(volunteer.trade_team_id || "");
+      setSelectedUserId(volunteer.user_id || null);
       fetchTradeTeams();
+      fetchUsers();
       setError('');
     }
   }, [isOpen, volunteer]);
 
   useEffect(() => {
-    if (selectedTeamId && !isTradeTeamLevelRole) {
+    if (selectedTeamId) {
       fetchCrews(selectedTeamId);
-    } else if (isTradeTeamLevelRole) {
-      setCrews([]);
-      if (formData) {
-        setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
-      }
-    }
-  }, [selectedTeamId, isTradeTeamLevelRole]);
-
-  // Clear crew when role changes to Trade Team level
-  useEffect(() => {
-    if (isTradeTeamLevelRole && formData?.trade_crew_id) {
-      setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
+    } else {
       setCrews([]);
     }
-  }, [formData?.role]);
+  }, [selectedTeamId]);
 
   const fetchTradeTeams = async () => {
     try {
@@ -103,23 +105,23 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
       if (response.ok) {
         const data = await response.json();
         setTradeTeams(data);
-        // Find the team that contains the volunteer's crew
+        
         if (volunteer?.trade_crew_id) {
           for (const team of data) {
             const crewsRes = await fetch(`/api/v1/trade-teams/${team.id}/crews`);
             if (crewsRes.ok) {
               const crewsData = await crewsRes.json();
-              if (crewsData.some((c: Crew) => c.id === volunteer.trade_crew_id)) {
+              const foundCrew = crewsData.find((c: Crew) => c.id === volunteer.trade_crew_id);
+              if (foundCrew) {
                 setSelectedTeamId(team.id);
-                setCrews(crewsData);
                 break;
               }
             }
           }
         }
       }
-    } catch (error) {
-      console.error('Error fetching trade teams:', error);
+    } catch (err) {
+      console.error('Failed to fetch trade teams:', err);
     }
   };
 
@@ -130,14 +132,27 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
         const data = await response.json();
         setCrews(data);
       }
-    } catch (error) {
-      console.error('Error fetching crews:', error);
+    } catch (err) {
+      console.error('Failed to fetch crews:', err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (!formData) return;
     const { name, value } = e.target;
-    setFormData(prev => prev ? { ...prev, [name]: value } : null);
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleServingAsChange = (role: string) => {
@@ -157,13 +172,20 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
     setError('');
 
     try {
-      const updatedData = {
+      const finalCrewId = isTradeTeamLevelRole ? null : selectedCrewId;
+      
+      const updatedData: Volunteer = {
         ...formData,
+        trade_crew_id: finalCrewId,
+        trade_team_id: selectedTeamId || null,
+        user_id: selectedUserId,
         is_overseer: formData.role.includes('Overseer') && !formData.role.includes('Assistant'),
         is_assistant: formData.role.includes('Assistant'),
       };
-      onSave(updatedData);
+      
+      await onSave(updatedData);
     } catch (err) {
+      console.error('Error saving volunteer:', err);
       setError('Failed to update volunteer');
     } finally {
       setLoading(false);
@@ -181,26 +203,26 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
         onClose();
         window.location.reload();
       }
-    } catch (error) {
-      console.error('Error deleting volunteer:', error);
+    } catch (err) {
+      setError('Failed to delete volunteer');
     }
   };
 
   if (!isOpen || !formData) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Edit Volunteer</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
@@ -217,32 +239,27 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
                 <input
                   type="text"
                   name="first_name"
+                  required
                   value={formData.first_name}
                   onChange={handleInputChange}
-                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <User className="h-4 w-4 inline mr-1" />
-                  Last Name *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
                 <input
                   type="text"
                   name="last_name"
+                  required
                   value={formData.last_name}
                   onChange={handleInputChange}
-                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Builder Assistant ID
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">BA ID</label>
                 <input
                   type="text"
                   name="ba_id"
@@ -318,9 +335,7 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
             <h3 className="text-lg font-medium text-gray-900">Role and Assignment</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
                   name="role"
                   value={formData.role}
@@ -340,38 +355,29 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
                   value={selectedTeamId}
                   onChange={(e) => {
                     setSelectedTeamId(e.target.value);
-                    if (!e.target.value || isTradeTeamLevelRole) {
-                      setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
-                    }
+                    setSelectedCrewId(null);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Trade Team</option>
                   {tradeTeams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
+                    <option key={team.id} value={team.id}>{team.name}</option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Only show crew selection for crew-level roles */}
             {!isTradeTeamLevelRole && crews.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade Crew
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Trade Crew</label>
                 <select
-                  value={formData.trade_crew_id || ''}
-                  onChange={(e) => setFormData(prev => prev ? { ...prev, trade_crew_id: e.target.value || undefined } : null)}
+                  value={selectedCrewId || ''}
+                  onChange={(e) => setSelectedCrewId(e.target.value || null)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Trade Crew (optional)</option>
                   {crews.map((crew) => (
-                    <option key={crew.id} value={crew.id}>
-                      {crew.name}
-                    </option>
+                    <option key={crew.id} value={crew.id}>{crew.name}</option>
                   ))}
                 </select>
               </div>
@@ -380,6 +386,34 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
             {isTradeTeamLevelRole && selectedTeamId && (
               <p className="text-sm text-gray-500 italic">
                 As a {formData.role}, this volunteer oversees all crews under the selected Trade Team.
+              </p>
+            )}
+          </div>
+
+          {/* Link User Account */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+              <Link2 className="h-5 w-5 mr-2" />
+              Link User Account
+            </h3>
+            <p className="text-sm text-gray-500">
+              Optionally link this volunteer to a platform user account for login access.
+            </p>
+            <select
+              value={selectedUserId || ''}
+              onChange={(e) => setSelectedUserId(e.target.value || null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">No linked user account</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.email})
+                </option>
+              ))}
+            </select>
+            {selectedUserId && (
+              <p className="text-sm text-green-600">
+                ✓ This volunteer is linked to a user account and can log in to the platform.
               </p>
             )}
           </div>

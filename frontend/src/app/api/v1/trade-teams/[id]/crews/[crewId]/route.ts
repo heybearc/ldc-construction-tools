@@ -11,7 +11,7 @@ export async function GET(
       where: { id: params.crewId },
       include: {
         tradeTeam: { select: { id: true, name: true } },
-        _count: { select: { CrewMembers: true } }
+        _count: { select: { volunteers: true } }
       }
     });
 
@@ -23,9 +23,14 @@ export async function GET(
       id: crew.id,
       name: crew.name,
       description: crew.description,
-      status: crew.status.toLowerCase(),
-      member_count: crew._count.CrewMembers,
-      is_active: crew.isActive
+      scopeOfWork: crew.scopeOfWork,
+      status: crew.status,
+      isActive: crew.isActive,
+      isRequired: crew.isRequired,
+      tradeTeam: crew.tradeTeam,
+      member_count: crew._count.volunteers,
+      createdAt: crew.createdAt,
+      updatedAt: crew.updatedAt
     });
   } catch (error) {
     console.error('Get crew error:', error);
@@ -55,7 +60,8 @@ export async function PATCH(
         name: body.name ?? existing.name,
         description: body.description ?? existing.description,
         status: body.status ?? existing.status,
-        isActive: body.status ? body.status !== 'INACTIVE' : existing.isActive
+        isActive: body.isActive ?? existing.isActive,
+        isRequired: body.isRequired ?? existing.isRequired
       }
     });
 
@@ -63,8 +69,9 @@ export async function PATCH(
       id: updated.id,
       name: updated.name,
       description: updated.description,
-      status: updated.status.toLowerCase(),
-      is_active: updated.isActive
+      status: updated.status,
+      isActive: updated.isActive,
+      isRequired: updated.isRequired
     });
   } catch (error) {
     console.error('Update crew error:', error);
