@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Phone, Mail, MapPin, Trash2 } from 'lucide-react';
+import { X, Save, User, Phone, Mail, Building2, Trash2 } from 'lucide-react';
 
 interface Volunteer {
   id: string;
@@ -52,6 +52,13 @@ const VOLUNTEER_ROLES = [
   'Trade Crew Volunteer',
 ];
 
+// Roles that are at the Trade Team level (don't need crew assignment)
+const TRADE_TEAM_LEVEL_ROLES = [
+  'Trade Team Overseer',
+  'Trade Team Overseer Assistant',
+  'Trade Team Support',
+];
+
 export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave }: EditVolunteerModalProps) {
   const [formData, setFormData] = useState<Volunteer | null>(null);
   const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
@@ -59,6 +66,9 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Check if selected role is a Trade Team level role
+  const isTradeTeamLevelRole = formData ? TRADE_TEAM_LEVEL_ROLES.includes(formData.role) : false;
 
   useEffect(() => {
     if (isOpen && volunteer) {
@@ -69,12 +79,23 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
   }, [isOpen, volunteer]);
 
   useEffect(() => {
-    if (selectedTeamId) {
+    if (selectedTeamId && !isTradeTeamLevelRole) {
       fetchCrews(selectedTeamId);
-    } else {
+    } else if (isTradeTeamLevelRole) {
+      setCrews([]);
+      if (formData) {
+        setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
+      }
+    }
+  }, [selectedTeamId, isTradeTeamLevelRole]);
+
+  // Clear crew when role changes to Trade Team level
+  useEffect(() => {
+    if (isTradeTeamLevelRole && formData?.trade_crew_id) {
+      setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
       setCrews([]);
     }
-  }, [selectedTeamId]);
+  }, [formData?.role]);
 
   const fetchTradeTeams = async () => {
     try {
@@ -232,7 +253,7 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <MapPin className="h-4 w-4 inline mr-1" />
+                  <Building2 className="h-4 w-4 inline mr-1" />
                   Congregation
                 </label>
                 <input
@@ -313,13 +334,15 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade Team
+                  Trade Team {isTradeTeamLevelRole && <span className="text-gray-500">(Oversees all crews)</span>}
                 </label>
                 <select
                   value={selectedTeamId}
                   onChange={(e) => {
                     setSelectedTeamId(e.target.value);
-                    setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
+                    if (!e.target.value || isTradeTeamLevelRole) {
+                      setFormData(prev => prev ? { ...prev, trade_crew_id: undefined } : null);
+                    }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -333,7 +356,8 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
               </div>
             </div>
 
-            {crews.length > 0 && (
+            {/* Only show crew selection for crew-level roles */}
+            {!isTradeTeamLevelRole && crews.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Trade Crew
@@ -343,7 +367,7 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
                   onChange={(e) => setFormData(prev => prev ? { ...prev, trade_crew_id: e.target.value || undefined } : null)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Trade Crew</option>
+                  <option value="">Select Trade Crew (optional)</option>
                   {crews.map((crew) => (
                     <option key={crew.id} value={crew.id}>
                       {crew.name}
@@ -351,6 +375,12 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
                   ))}
                 </select>
               </div>
+            )}
+
+            {isTradeTeamLevelRole && selectedTeamId && (
+              <p className="text-sm text-gray-500 italic">
+                As a {formData.role}, this volunteer oversees all crews under the selected Trade Team.
+              </p>
             )}
           </div>
 

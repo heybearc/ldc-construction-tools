@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Phone, Mail, MapPin, Users } from 'lucide-react';
+import { X, Save, User, Phone, Mail, Building2 } from 'lucide-react';
 
 interface TradeTeam {
   id: string;
@@ -32,6 +32,13 @@ const VOLUNTEER_ROLES = [
   'Trade Crew Volunteer',
 ];
 
+// Roles that are at the Trade Team level (don't need crew assignment)
+const TRADE_TEAM_LEVEL_ROLES = [
+  'Trade Team Overseer',
+  'Trade Team Overseer Assistant',
+  'Trade Team Support',
+];
+
 export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunteerModalProps) {
   const [formData, setFormData] = useState({
     first_name: '',
@@ -52,6 +59,9 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Check if selected role is a Trade Team level role
+  const isTradeTeamLevelRole = TRADE_TEAM_LEVEL_ROLES.includes(formData.role);
+
   useEffect(() => {
     if (isOpen) {
       fetchTradeTeams();
@@ -60,13 +70,21 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
   }, [isOpen]);
 
   useEffect(() => {
-    if (selectedTeamId) {
+    if (selectedTeamId && !isTradeTeamLevelRole) {
       fetchCrews(selectedTeamId);
     } else {
       setCrews([]);
       setFormData(prev => ({ ...prev, trade_crew_id: null }));
     }
-  }, [selectedTeamId]);
+  }, [selectedTeamId, isTradeTeamLevelRole]);
+
+  // Clear crew selection when switching to a Trade Team level role
+  useEffect(() => {
+    if (isTradeTeamLevelRole) {
+      setFormData(prev => ({ ...prev, trade_crew_id: null }));
+      setCrews([]);
+    }
+  }, [formData.role]);
 
   const fetchTradeTeams = async () => {
     try {
@@ -218,7 +236,7 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <MapPin className="h-4 w-4 inline mr-1" />
+                  <Building2 className="h-4 w-4 inline mr-1" />
                   Congregation
                 </label>
                 <input
@@ -299,7 +317,7 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade Team
+                  Trade Team {isTradeTeamLevelRole && <span className="text-gray-500">(Oversees all crews)</span>}
                 </label>
                 <select
                   value={selectedTeamId}
@@ -316,7 +334,8 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
               </div>
             </div>
 
-            {crews.length > 0 && (
+            {/* Only show crew selection for crew-level roles */}
+            {!isTradeTeamLevelRole && crews.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Trade Crew
@@ -326,7 +345,7 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
                   onChange={(e) => setFormData(prev => ({ ...prev, trade_crew_id: e.target.value || null }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Trade Crew</option>
+                  <option value="">Select Trade Crew (optional)</option>
                   {crews.map((crew) => (
                     <option key={crew.id} value={crew.id}>
                       {crew.name}
@@ -334,6 +353,12 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
                   ))}
                 </select>
               </div>
+            )}
+
+            {isTradeTeamLevelRole && selectedTeamId && (
+              <p className="text-sm text-gray-500 italic">
+                As a {formData.role}, this volunteer will oversee all crews under the selected Trade Team.
+              </p>
             )}
           </div>
 

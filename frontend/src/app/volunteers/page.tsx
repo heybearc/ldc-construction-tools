@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Users, Phone, Mail, MapPin, UserCheck, UserX, Edit, Plus } from 'lucide-react';
+import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus } from 'lucide-react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 
@@ -302,7 +302,7 @@ export default function VolunteersPage() {
                       )}
                       {volunteer.congregation && (
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
+                          <Building2 className="h-4 w-4 mr-1" />
                           {volunteer.congregation}
                         </div>
                       )}
