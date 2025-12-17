@@ -213,6 +213,7 @@ model Project {
   assignments         ProjectAssignment[]
   staffingRequests    ProjectStaffingRequest[]
   crewAssignments     ProjectCrewAssignment[]
+  scheduleVersions    ProjectScheduleVersion[]
 
   @@map("projects")
 }
@@ -252,6 +253,7 @@ model TradeTeam {
   updatedAt           DateTime           @updatedAt
   TradeTeamMembers    TradeTeamMembers[]
   crews               Crew[]
+  scheduleEntries     ProjectScheduleEntry[]
   oversight           TradeTeamOversight[]
 
   @@map("trade_teams")
@@ -275,6 +277,7 @@ model Crew {
   tradeTeam           TradeTeam          @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
   oversight           TradeCrewOversight[]
   projectAssignments  ProjectCrewAssignment[]
+  scheduleEntries     ProjectScheduleEntry[]
 
   @@map("crews")
 }
@@ -704,4 +707,47 @@ model ProjectCrewAssignment {
 
   @@unique([projectId, crewId])
   @@map("project_crew_assignments")
+}
+
+// Phase 4: Project Schedule Management
+model ProjectScheduleVersion {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  versionNumber Int
+  name        String   // e.g., "December 2025", "Revised Jan 2026"
+  notes       String?  // Why this version was created
+  isActive    Boolean  @default(true)  // Current active version
+  isCurrent   Boolean  @default(false) // The version being used
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  entries     ProjectScheduleEntry[]
+  
+  @@unique([projectId, versionNumber])
+  @@map("project_schedule_versions")
+}
+
+model ProjectScheduleEntry {
+  id              String   @id @default(cuid())
+  scheduleVersionId String
+  scheduleVersion ProjectScheduleVersion @relation(fields: [scheduleVersionId], references: [id], onDelete: Cascade)
+  
+  tradeTeamId     String?
+  tradeTeam       TradeTeam? @relation(fields: [tradeTeamId], references: [id])
+  crewId          String?
+  crew            Crew?    @relation(fields: [crewId], references: [id])
+  
+  eventName       String   // e.g., "Drywall - Texture", "Rough-In"
+  category        String?  // e.g., "Interiors", "Exteriors", "Site Support"
+  startDate       DateTime
+  endDate         DateTime
+  volunteerCount  Int?     // Expected volunteer/crew count
+  notes           String?
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("project_schedule_entries")
 }

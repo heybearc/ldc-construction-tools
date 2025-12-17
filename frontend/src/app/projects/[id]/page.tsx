@@ -372,7 +372,7 @@ export default function ProjectDetailPage() {
       {/* Crew Assignments */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-medium text-gray-900">Assigned Crews</h2>
+          <div className="flex items-center justify-between"><h2 className="text-lg font-medium text-gray-900">Assigned Crews</h2><Link href={`/calendar?project=${projectId}`} className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"><Calendar className="h-4 w-4 mr-2" />View Schedule</Link></div>
           <button
             onClick={() => setShowAssignModal(true)}
             className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
