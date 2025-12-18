@@ -215,6 +215,7 @@ model Project {
   staffingRequests    ProjectStaffingRequest[]
   crewAssignments     ProjectCrewAssignment[]
   scheduleVersions    ProjectScheduleVersion[]
+  congregationAssignments ProjectCongregationAssignment[]
 
   @@map("projects")
 }
@@ -404,6 +405,7 @@ model ConstructionGroup {
   projects    Project[]
   personnelContacts PersonnelContact[]
   volunteers    Volunteer[]
+  congregations   Congregation[]
 
   @@map("construction_groups")
 }
@@ -792,4 +794,59 @@ model Volunteer {
   updatedAt           DateTime            @updatedAt
   
   @@map("volunteers")
+}
+
+// Phase 6: Supporting Congregations
+model Congregation {
+  id                  String   @id @default(cuid())
+  name                String
+  state               String?
+  congregationNumber  String?  // e.g., "130682"
+  coordinatorName     String?
+  coordinatorPhone    String?
+  coordinatorEmail    String?  // W/ Pub Email
+  congregationEmail   String?
+  
+  // Multi-tenant: CG scope
+  constructionGroupId String
+  constructionGroup   ConstructionGroup @relation(fields: [constructionGroupId], references: [id])
+  
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  projectAssignments  ProjectCongregationAssignment[]
+  
+  @@map("congregations")
+}
+
+model ProjectCongregationAssignment {
+  id              String   @id @default(cuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  congregationId  String
+  congregation    Congregation @relation(fields: [congregationId], references: [id], onDelete: Cascade)
+  
+  // Food Contact for this project
+  foodContactName   String?
+  foodContactPhone  String?
+  foodContactEmail  String?
+  
+  // Volunteer Contact for this project
+  volunteerContactName   String?
+  volunteerContactPhone  String?
+  volunteerContactEmail  String?
+  
+  // Security Contact for this project
+  securityContactName   String?
+  securityContactPhone  String?
+  securityContactEmail  String?
+  
+  notes           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([projectId, congregationId])
+  @@map("project_congregation_assignments")
 }

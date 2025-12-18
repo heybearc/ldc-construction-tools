@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, MapPin, Users, Plus, X, Edit, Trash2, ExternalLink, Building2, Hash, Layers } from 'lucide-react';
+import ProjectCongregations from '@/components/ProjectCongregations';
 
 interface Crew {
   id: string;
@@ -408,6 +409,9 @@ export default function ProjectDetailPage() {
           </ul>
         )}
       </div>
+
+      {/* Supporting Congregations */}
+      <ProjectCongregations projectId={projectId} />
 
       {/* Assign Crew Modal */}
       {showAssignModal && (
