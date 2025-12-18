@@ -15,11 +15,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   const isHelpPage = pathname?.startsWith('/help') || pathname?.startsWith('/release-notes');
 
   if (isAuthPage || isHelpPage) {
-    // For auth and help pages, just return children (they have their own layouts)
     return <>{children}</>;
   }
 
-  // For all other pages, show the full layout with navigation
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b border-gray-200">
@@ -46,9 +44,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                 </Link>
                 <Link href="/volunteers" className="text-gray-700 hover:text-blue-600 font-medium">
                   Volunteers
+                </Link>
                 <Link href="/congregations" className="text-gray-700 hover:text-blue-600 font-medium">
                   Congregations
-                </Link>
                 </Link>
                 <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
                   Admin

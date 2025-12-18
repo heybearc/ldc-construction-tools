@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Church, Plus, X, Edit, Trash2, Phone, Mail, User, Utensils, Shield, Users } from 'lucide-react';
 
 interface Congregation {
@@ -32,9 +32,23 @@ interface CongregationAssignment {
   is_active: boolean;
 }
 
+interface FormData {
+  food_contact: { name: string; phone: string; email: string };
+  volunteer_contact: { name: string; phone: string; email: string };
+  security_contact: { name: string; phone: string; email: string };
+  notes: string;
+}
+
 interface Props {
   projectId: string;
 }
+
+const initialFormData: FormData = {
+  food_contact: { name: '', phone: '', email: '' },
+  volunteer_contact: { name: '', phone: '', email: '' },
+  security_contact: { name: '', phone: '', email: '' },
+  notes: '',
+};
 
 export default function ProjectCongregations({ projectId }: Props) {
   const [assignments, setAssignments] = useState<CongregationAssignment[]>([]);
@@ -44,12 +58,7 @@ export default function ProjectCongregations({ projectId }: Props) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<CongregationAssignment | null>(null);
   const [selectedCongregationId, setSelectedCongregationId] = useState('');
-  const [formData, setFormData] = useState({
-    food_contact: { name: '', phone: '', email: '' },
-    volunteer_contact: { name: '', phone: '', email: '' },
-    security_contact: { name: '', phone: '', email: '' },
-    notes: '',
-  });
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -85,12 +94,7 @@ export default function ProjectCongregations({ projectId }: Props) {
 
   const openAddModal = () => {
     setSelectedCongregationId('');
-    setFormData({
-      food_contact: { name: '', phone: '', email: '' },
-      volunteer_contact: { name: '', phone: '', email: '' },
-      security_contact: { name: '', phone: '', email: '' },
-      notes: '',
-    });
+    setFormData(initialFormData);
     setShowAddModal(true);
   };
 
@@ -116,6 +120,24 @@ export default function ProjectCongregations({ projectId }: Props) {
     });
     setShowEditModal(true);
   };
+
+  const handleContactChange = useCallback((
+    contactType: 'food_contact' | 'volunteer_contact' | 'security_contact',
+    field: 'name' | 'phone' | 'email',
+    value: string
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      [contactType]: {
+        ...prev[contactType],
+        [field]: value
+      }
+    }));
+  }, []);
+
+  const handleNotesChange = useCallback((value: string) => {
+    setFormData(prev => ({ ...prev, notes: value }));
+  }, []);
 
   const handleAdd = async () => {
     if (!selectedCongregationId) return;
@@ -183,75 +205,6 @@ export default function ProjectCongregations({ projectId }: Props) {
 
   const unassignedCongregations = availableCongregations.filter(
     c => !assignments.some(a => a.congregation_id === c.id)
-  );
-
-  const ContactCard = ({ title, icon: Icon, contact, color }: { title: string; icon: any; contact: ContactInfo; color: string }) => (
-    <div className={`p-3 rounded-lg ${color}`}>
-      <div className="flex items-center mb-2">
-        <Icon className="h-4 w-4 mr-2" />
-        <span className="font-medium text-sm">{title}</span>
-      </div>
-      {contact.name ? (
-        <div className="text-sm space-y-1">
-          <div className="font-medium">{contact.name}</div>
-          {contact.phone && (
-            <div className="flex items-center text-gray-600">
-              <Phone className="h-3 w-3 mr-1" />
-              {contact.phone}
-            </div>
-          )}
-          {contact.email && (
-            <div className="flex items-center text-gray-600 truncate">
-              <Mail className="h-3 w-3 mr-1" />
-              {contact.email}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-sm text-gray-400 italic">Not assigned</div>
-      )}
-    </div>
-  );
-
-  const ContactFormSection = ({ title, icon: Icon, contactKey, color }: { title: string; icon: any; contactKey: 'food_contact' | 'volunteer_contact' | 'security_contact'; color: string }) => (
-    <div className={`p-4 rounded-lg ${color}`}>
-      <div className="flex items-center mb-3">
-        <Icon className="h-5 w-5 mr-2" />
-        <span className="font-medium">{title}</span>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData[contactKey].name}
-          onChange={(e) => setFormData({
-            ...formData,
-            [contactKey]: { ...formData[contactKey], name: e.target.value }
-          })}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-        />
-        <input
-          type="text"
-          placeholder="Phone"
-          value={formData[contactKey].phone}
-          onChange={(e) => setFormData({
-            ...formData,
-            [contactKey]: { ...formData[contactKey], phone: e.target.value }
-          })}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData[contactKey].email}
-          onChange={(e) => setFormData({
-            ...formData,
-            [contactKey]: { ...formData[contactKey], email: e.target.value }
-          })}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-        />
-      </div>
-    </div>
   );
 
   if (loading) {
@@ -323,24 +276,9 @@ export default function ProjectCongregations({ projectId }: Props) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <ContactCard
-                  title="Food Contact"
-                  icon={Utensils}
-                  contact={assignment.food_contact}
-                  color="bg-green-50"
-                />
-                <ContactCard
-                  title="Volunteer Contact"
-                  icon={Users}
-                  contact={assignment.volunteer_contact}
-                  color="bg-blue-50"
-                />
-                <ContactCard
-                  title="Security Contact"
-                  icon={Shield}
-                  contact={assignment.security_contact}
-                  color="bg-amber-50"
-                />
+                <ContactCard title="Food Contact" icon={Utensils} contact={assignment.food_contact} color="bg-green-50" />
+                <ContactCard title="Volunteer Contact" icon={Users} contact={assignment.volunteer_contact} color="bg-blue-50" />
+                <ContactCard title="Security Contact" icon={Shield} contact={assignment.security_contact} color="bg-amber-50" />
               </div>
 
               {assignment.notes && (
@@ -381,15 +319,33 @@ export default function ProjectCongregations({ projectId }: Props) {
                 </select>
               </div>
 
-              <ContactFormSection title="Food Contact" icon={Utensils} contactKey="food_contact" color="bg-green-50" />
-              <ContactFormSection title="Volunteer Contact" icon={Users} contactKey="volunteer_contact" color="bg-blue-50" />
-              <ContactFormSection title="Security Contact" icon={Shield} contactKey="security_contact" color="bg-amber-50" />
+              <ContactFormSection
+                title="Food Contact"
+                icon={Utensils}
+                color="bg-green-50"
+                contact={formData.food_contact}
+                onChange={(field, value) => handleContactChange('food_contact', field, value)}
+              />
+              <ContactFormSection
+                title="Volunteer Contact"
+                icon={Users}
+                color="bg-blue-50"
+                contact={formData.volunteer_contact}
+                onChange={(field, value) => handleContactChange('volunteer_contact', field, value)}
+              />
+              <ContactFormSection
+                title="Security Contact"
+                icon={Shield}
+                color="bg-amber-50"
+                contact={formData.security_contact}
+                onChange={(field, value) => handleContactChange('security_contact', field, value)}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={(e) => handleNotesChange(e.target.value)}
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   placeholder="Optional notes..."
@@ -430,15 +386,33 @@ export default function ProjectCongregations({ projectId }: Props) {
             </div>
 
             <div className="space-y-4">
-              <ContactFormSection title="Food Contact" icon={Utensils} contactKey="food_contact" color="bg-green-50" />
-              <ContactFormSection title="Volunteer Contact" icon={Users} contactKey="volunteer_contact" color="bg-blue-50" />
-              <ContactFormSection title="Security Contact" icon={Shield} contactKey="security_contact" color="bg-amber-50" />
+              <ContactFormSection
+                title="Food Contact"
+                icon={Utensils}
+                color="bg-green-50"
+                contact={formData.food_contact}
+                onChange={(field, value) => handleContactChange('food_contact', field, value)}
+              />
+              <ContactFormSection
+                title="Volunteer Contact"
+                icon={Users}
+                color="bg-blue-50"
+                contact={formData.volunteer_contact}
+                onChange={(field, value) => handleContactChange('volunteer_contact', field, value)}
+              />
+              <ContactFormSection
+                title="Security Contact"
+                icon={Shield}
+                color="bg-amber-50"
+                contact={formData.security_contact}
+                onChange={(field, value) => handleContactChange('security_contact', field, value)}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={(e) => handleNotesChange(e.target.value)}
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   placeholder="Optional notes..."
@@ -464,6 +438,89 @@ export default function ProjectCongregations({ projectId }: Props) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Separate component to avoid re-render issues
+function ContactCard({ title, icon: Icon, contact, color }: { 
+  title: string; 
+  icon: React.ComponentType<{ className?: string }>; 
+  contact: ContactInfo; 
+  color: string 
+}) {
+  return (
+    <div className={`p-3 rounded-lg ${color}`}>
+      <div className="flex items-center mb-2">
+        <Icon className="h-4 w-4 mr-2" />
+        <span className="font-medium text-sm">{title}</span>
+      </div>
+      {contact.name ? (
+        <div className="text-sm space-y-1">
+          <div className="font-medium">{contact.name}</div>
+          {contact.phone && (
+            <div className="flex items-center text-gray-600">
+              <Phone className="h-3 w-3 mr-1" />
+              {contact.phone}
+            </div>
+          )}
+          {contact.email && (
+            <div className="flex items-center text-gray-600 truncate">
+              <Mail className="h-3 w-3 mr-1" />
+              {contact.email}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-sm text-gray-400 italic">Not assigned</div>
+      )}
+    </div>
+  );
+}
+
+// Separate component for form sections - defined outside main component
+function ContactFormSection({ 
+  title, 
+  icon: Icon, 
+  color,
+  contact,
+  onChange
+}: { 
+  title: string; 
+  icon: React.ComponentType<{ className?: string }>; 
+  color: string;
+  contact: { name: string; phone: string; email: string };
+  onChange: (field: 'name' | 'phone' | 'email', value: string) => void;
+}) {
+  return (
+    <div className={`p-4 rounded-lg ${color}`}>
+      <div className="flex items-center mb-3">
+        <Icon className="h-5 w-5 mr-2" />
+        <span className="font-medium">{title}</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input
+          type="text"
+          placeholder="Name"
+          value={contact.name}
+          onChange={(e) => onChange('name', e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+        />
+        <input
+          type="text"
+          placeholder="Phone"
+          value={contact.phone}
+          onChange={(e) => onChange('phone', e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={contact.email}
+          onChange={(e) => onChange('email', e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+        />
+      </div>
     </div>
   );
 }

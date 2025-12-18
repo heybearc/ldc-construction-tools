@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Church, Plus, X, Edit, Trash2, Phone, Mail, User, MapPin } from 'lucide-react';
 
 interface Congregation {
@@ -25,6 +25,16 @@ interface CongregationFormData {
   congregation_email: string;
 }
 
+const initialFormData: CongregationFormData = {
+  name: '',
+  state: '',
+  congregation_number: '',
+  coordinator_name: '',
+  coordinator_phone: '',
+  coordinator_email: '',
+  congregation_email: '',
+};
+
 export default function CongregationsPage() {
   const [congregations, setCongregations] = useState<Congregation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,15 +43,7 @@ export default function CongregationsPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCongregation, setEditingCongregation] = useState<Congregation | null>(null);
-  const [formData, setFormData] = useState<CongregationFormData>({
-    name: '',
-    state: '',
-    congregation_number: '',
-    coordinator_name: '',
-    coordinator_phone: '',
-    coordinator_email: '',
-    congregation_email: '',
-  });
+  const [formData, setFormData] = useState<CongregationFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -65,15 +67,7 @@ export default function CongregationsPage() {
 
   const openCreateModal = () => {
     setEditingCongregation(null);
-    setFormData({
-      name: '',
-      state: '',
-      congregation_number: '',
-      coordinator_name: '',
-      coordinator_phone: '',
-      coordinator_email: '',
-      congregation_email: '',
-    });
+    setFormData(initialFormData);
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -98,6 +92,10 @@ export default function CongregationsPage() {
     setEditingCongregation(null);
     setFormError(null);
   };
+
+  const handleInputChange = useCallback((field: keyof CongregationFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [field]: e.target.value }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -339,7 +337,7 @@ export default function CongregationsPage() {
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={handleInputChange('name')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Akron Spanish"
                   />
@@ -349,7 +347,7 @@ export default function CongregationsPage() {
                   <input
                     type="text"
                     value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    onChange={handleInputChange('state')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Ohio"
                   />
@@ -359,7 +357,7 @@ export default function CongregationsPage() {
                   <input
                     type="text"
                     value={formData.congregation_number}
-                    onChange={(e) => setFormData({ ...formData, congregation_number: e.target.value })}
+                    onChange={handleInputChange('congregation_number')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., 130682"
                   />
@@ -375,7 +373,7 @@ export default function CongregationsPage() {
                   <input
                     type="text"
                     value={formData.coordinator_name}
-                    onChange={(e) => setFormData({ ...formData, coordinator_name: e.target.value })}
+                    onChange={handleInputChange('coordinator_name')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Joel Aaron Stoy"
                   />
@@ -385,7 +383,7 @@ export default function CongregationsPage() {
                   <input
                     type="text"
                     value={formData.coordinator_phone}
-                    onChange={(e) => setFormData({ ...formData, coordinator_phone: e.target.value })}
+                    onChange={handleInputChange('coordinator_phone')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., (330) 280-8261"
                   />
@@ -395,7 +393,7 @@ export default function CongregationsPage() {
                   <input
                     type="email"
                     value={formData.coordinator_email}
-                    onChange={(e) => setFormData({ ...formData, coordinator_email: e.target.value })}
+                    onChange={handleInputChange('coordinator_email')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., coordinator@jw.org"
                   />
@@ -405,7 +403,7 @@ export default function CongregationsPage() {
                   <input
                     type="email"
                     value={formData.congregation_email}
-                    onChange={(e) => setFormData({ ...formData, congregation_email: e.target.value })}
+                    onChange={handleInputChange('congregation_email')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., congregation@jw.org"
                   />
