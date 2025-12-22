@@ -1,8 +1,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
+import ReleaseBanner from './ReleaseBanner';
 import { APP_VERSION } from '@/lib/version';
 
 interface ConditionalLayoutProps {
@@ -11,8 +14,24 @@ interface ConditionalLayoutProps {
 
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const [userLastSeenVersion, setUserLastSeenVersion] = useState<string | null>(null);
   const isAuthPage = pathname?.startsWith('/auth');
   const isHelpPage = pathname?.startsWith('/help') || pathname?.startsWith('/release-notes');
+
+  // Fetch user's last seen release version
+  useEffect(() => {
+    if (session?.user?.email && !isAuthPage && !isHelpPage) {
+      fetch('/api/v1/user/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.user) {
+            setUserLastSeenVersion(data.user.lastSeenReleaseVersion || null);
+          }
+        })
+        .catch(err => console.error('Failed to fetch user profile:', err));
+    }
+  }, [session, isAuthPage, isHelpPage]);
 
   if (isAuthPage || isHelpPage) {
     // For auth and help pages, just return children (they have their own layouts)
@@ -22,6 +41,10 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   // For all other pages, show the full layout with navigation
   return (
     <div className="min-h-screen bg-gray-50">
+      <ReleaseBanner 
+        currentVersion={APP_VERSION}
+        userLastSeenVersion={userLastSeenVersion}
+      />
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">

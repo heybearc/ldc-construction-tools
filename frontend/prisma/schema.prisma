@@ -55,6 +55,7 @@ model User {
   loginCount          Int                 @default(0)
   invitedBy           String?
   invitedAt           DateTime?
+  lastSeenReleaseVersion String?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   accounts            Account[]
