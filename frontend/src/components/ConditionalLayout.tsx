@@ -51,6 +51,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                   Admin
                 </Link>
                 <span className="text-gray-300">|</span>
+                <Link href="/help/my-feedback" className="text-gray-600 hover:text-blue-600 font-medium">
+                  My Feedback
+                </Link>
                 <Link href="/help" className="text-gray-600 hover:text-blue-600 font-medium">
                   Help
                 </Link>
