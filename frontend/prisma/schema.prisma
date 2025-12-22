@@ -34,7 +34,6 @@ model Session {
 }
 
 model User {
-<<<<<<< HEAD
   id                  String              @id @default(cuid())
   name                String?
   email               String              @unique
@@ -68,37 +67,6 @@ model User {
   roleAssignments     RoleAssignment[]
   feedback            Feedback[]
   feedbackComments    FeedbackComment[]
-=======
-  id                 String              @id @default(cuid())
-  name               String?
-  email              String              @unique
-  emailVerified      DateTime?
-  image              String?
-  firstName          String?
-  lastName           String?
-  role               UserRole            @default(READ_ONLY)
-  adminLevel         AdminLevel?         // Optional admin access level
-  status             UserStatus          @default(INVITED)
-  regionId           String              @default("01.12")
-  zoneId             String              @default("01")
-  passwordHash       String?
-  lastLogin          DateTime?
-  loginCount         Int                 @default(0)
-  invitedBy          String?
-  invitedAt          DateTime?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  accounts           Account[]
-  sessions           Session[]
-  sentInvitations    UserInvitation[]    @relation("InvitedBy")
-  CrewMembers        CrewMembers[]
-  TradeTeamMembers   TradeTeamMembers[]
-  auditLogs          AuditLog[]
-  projectAssignments ProjectAssignment[]
-  roleAssignments    RoleAssignment[]
-  feedback           Feedback[]
-  feedbackComments   FeedbackComment[]
->>>>>>> bd595d5 (feat: Add My Feedback feature and remove Admin from footer)
 }
 
 model VerificationToken {
