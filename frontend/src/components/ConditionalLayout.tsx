@@ -23,15 +23,17 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   useEffect(() => {
     if (session?.user?.email && !isAuthPage && !isHelpPage) {
       fetch('/api/v1/user/profile')
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
-          if (data.success && data.user) {
+          if (data?.success && data.user) {
             setUserLastSeenVersion(data.user.lastSeenReleaseVersion || null);
           }
         })
-        .catch(err => console.error('Failed to fetch user profile:', err));
+        .catch(() => {
+          // Silently fail - banner just won't show
+        });
     }
-  }, [session, isAuthPage, isHelpPage]);
+  }, [session?.user?.email, isAuthPage, isHelpPage]);
 
   if (isAuthPage || isHelpPage) {
     // For auth and help pages, just return children (they have their own layouts)
