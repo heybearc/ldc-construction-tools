@@ -19,6 +19,9 @@ export async function GET(request: NextRequest) {
       where: { email: session.user.email }
     })
 
+    console.log('My Feedback API - Session email:', session.user.email)
+    console.log('My Feedback API - Found user:', user?.id, user?.email)
+
     if (!user) {
       return NextResponse.json({
         success: true,

@@ -134,6 +134,19 @@ export default function MyFeedbackPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {/* Breadcrumb Navigation */}
+      <nav className="mb-6 flex items-center text-sm text-gray-600">
+        <Link href="/" className="hover:text-blue-600">
+          Dashboard
+        </Link>
+        <span className="mx-2">/</span>
+        <Link href="/help" className="hover:text-blue-600">
+          Help Center
+        </Link>
+        <span className="mx-2">/</span>
+        <span className="text-gray-900 font-medium">My Feedback</span>
+      </nav>
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">📋 My Feedback</h1>
         <p className="text-gray-600">
