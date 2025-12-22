@@ -12,8 +12,9 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [environment, setEnvironment] = useState<string>('');
-  
+
   useEffect(() => {
+    // Detect environment from hostname
     const hostname = window.location.hostname;
     if (hostname.includes('green')) {
       setEnvironment('GREEN');
@@ -67,78 +68,118 @@ export default function AdminLayout({
       name: 'Audit Logs',
       href: '/admin/audit',
       icon: FileText,
-      description: 'View system audit logs'
+      description: 'Activity logs and compliance reports'
     },
     {
-      name: 'System Settings',
-      href: '/admin/system',
-      icon: Settings,
-      description: 'System configuration and settings'
-    },
-    {
-      name: 'Feedback',
+      name: 'Feedback Management',
       href: '/admin/feedback',
       icon: MessageSquare,
-      description: 'User feedback and suggestions'
+      description: 'User feedback and bug reports'
     },
     {
       name: 'Organization',
       href: '/admin/organization',
       icon: FolderTree,
       description: 'Manage organizational hierarchy'
+    },
+    {
+      name: 'System Operations',
+      href: '/admin/system',
+      icon: Settings,
+      description: 'Backup, restore, and maintenance'
     }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-              <p className="mt-1 text-sm text-gray-500">
-                System administration and configuration
-              </p>
-            </div>
-            {environment && (
-              <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                environment === 'PRODUCTION' ? 'bg-green-100 text-green-800' :
-                environment === 'BLUE' ? 'bg-blue-100 text-blue-800' :
-                environment === 'GREEN' ? 'bg-emerald-100 text-emerald-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {environment}
+      {/* Admin Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <Shield className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Admin Control Center</h1>
+                <p className="text-sm text-gray-600">LDC Tools Administration</p>
               </div>
-            )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {environment && (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  environment === 'GREEN' ? 'bg-green-100 text-green-800' :
+                  environment === 'BLUE' ? 'bg-blue-100 text-blue-800' :
+                  environment === 'PRODUCTION' ? 'bg-purple-100 text-purple-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {environment} Environment
+                </span>
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
-        {pathname === '/admin' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {adminModules.map((module) => {
-              const Icon = module.icon;
-              return (
-                <Link
-                  key={module.href}
-                  href={module.href}
-                  className="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Admin Navigation Sidebar */}
+          <div className="w-64 flex-shrink-0">
+            <nav className="space-y-2">
+              {adminModules.map((module) => {
+                const Icon = module.icon;
+                const isActive = pathname === module.href;
+                
+                return (
+                  <Link
+                    key={module.name}
+                    href={module.href}
+                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      isActive
+                        ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon
+                      className={`mr-3 h-5 w-5 ${
+                        isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                      }`}
+                    />
+                    <div>
+                      <div className="font-medium">{module.name}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{module.description}</div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Quick Links */}
+            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-sm font-medium text-blue-900 mb-3">Quick Links</h3>
+              <div className="space-y-2">
+                <Link 
+                  href="/help" 
+                  className="flex items-center text-xs text-blue-700 hover:text-blue-900 transition-colors"
                 >
-                  <div className="flex items-center mb-3">
-                    <Icon className="h-6 w-6 text-blue-600 mr-3" />
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {module.name}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-gray-600">{module.description}</p>
+                  <span className="mr-2">📚</span>
+                  Help Center
                 </Link>
-              );
-            })}
+                <Link 
+                  href="/release-notes" 
+                  className="flex items-center text-xs text-blue-700 hover:text-blue-900 transition-colors"
+                >
+                  <span className="mr-2">📋</span>
+                  Release Notes
+                </Link>
+              </div>
+            </div>
+
           </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow">
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
             {children}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
