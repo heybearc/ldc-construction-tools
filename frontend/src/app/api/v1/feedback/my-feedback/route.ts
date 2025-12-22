@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         attachments: true,
         comments: {
           include: {
-            user: {
+            author: {
               select: {
                 firstName: true,
                 lastName: true,
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       comments: (item.comments || []).map((comment: any) => ({
         id: comment.id,
         content: comment.content,
-        author: comment.user ? `${comment.user.firstName} ${comment.user.lastName}` : 'Unknown',
+        author: comment.author ? `${comment.author.firstName} ${comment.author.lastName}` : 'Unknown',
         createdAt: comment.createdAt.toISOString()
       })),
       attachments: (item.attachments || []).map((attachment: any) => ({
