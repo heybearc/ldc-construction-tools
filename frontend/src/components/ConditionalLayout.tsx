@@ -81,9 +81,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
               <Link href="/release-notes" className="text-gray-600 hover:text-blue-600">
                 Release Notes
               </Link>
-              <Link href="/admin" className="text-gray-600 hover:text-blue-600">
-                Admin Panel
-              </Link>
             </div>
           </div>
         </div>
