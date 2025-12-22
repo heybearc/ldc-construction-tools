@@ -3,6 +3,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Plus, Calendar, Copy, Check, Trash2, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { getTradeTeamConfig } from '@/lib/trade-team-config';
 
 interface Project {
@@ -245,6 +247,61 @@ function CalendarContent() {
   const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
 
+
+  const exportToPDF = () => {
+    if (!selectedProject || !selectedVersion || entries.length === 0) return;
+    const doc = new jsPDF('l');
+    doc.setFontSize(16);
+    doc.text(`Project Schedule: ${selectedProject.name}`, 148, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Version: ${selectedVersion.name} | Generated: ${new Date().toLocaleDateString()}`, 148, 22, { align: 'center' });
+    const tableData = entries.map(e => [
+      e.tradeTeam?.name || '—',
+      e.crew?.name || '—',
+      e.startDate ? new Date(e.startDate).toLocaleDateString() : '—',
+      e.endDate ? new Date(e.endDate).toLocaleDateString() : '—',
+      e.notes || '—'
+    ]);
+    autoTable(doc, {
+      startY: 28,
+      head: [['Trade Team', 'Crew', 'Start Date', 'End Date', 'Notes']],
+      body: tableData,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
+      margin: { left: 10, right: 10, top: 28 }
+    });
+    const cleanName = selectedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    doc.save(`${cleanName}_list_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
+  const exportToCalendarPDF = () => {
+    if (!selectedProject || !selectedVersion || entries.length === 0) return;
+    const doc = new jsPDF('l');
+    doc.setFontSize(16);
+    doc.text(`Project Schedule: ${selectedProject.name}`, 148, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Version: ${selectedVersion.name} | Generated: ${new Date().toLocaleDateString()}`, 148, 22, { align: 'center' });
+    const calendarData: any[] = [];
+    entries.forEach(e => {
+      const teamName = e.tradeTeam?.name || 'Unassigned';
+      const crewName = e.crew?.name || '—';
+      const start = new Date(e.startDate).toLocaleDateString();
+      const end = new Date(e.endDate).toLocaleDateString();
+      const duration = Math.ceil((new Date(e.endDate).getTime() - new Date(e.startDate).getTime()) / (1000 * 60 * 60 * 24));
+      calendarData.push([teamName, crewName, start, end, `${duration} days`, e.notes || '—']);
+    });
+    autoTable(doc, {
+      startY: 28,
+      head: [['Trade Team', 'Crew', 'Start Date', 'End Date', 'Duration', 'Notes']],
+      body: calendarData,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
+      margin: { left: 10, right: 10, top: 28 }
+    });
+    const cleanName = selectedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    doc.save(`${cleanName}_calendar_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
   const getEntryBarStyle = (entry: ScheduleEntry, weekDays: Date[]) => {
     const start = new Date(entry.startDate); start.setHours(0, 0, 0, 0);
     const end = new Date(entry.endDate); end.setHours(23, 59, 59, 999);
@@ -313,7 +370,7 @@ function CalendarContent() {
               {selectedVersion && !selectedVersion.isCurrent && (
                 <button onClick={() => handleDeleteVersion(selectedVersion.id)} className="inline-flex items-center text-sm text-red-600 hover:text-red-800"><Trash2 className="h-4 w-4 mr-1" />Delete</button>
               )}
-              <button onClick={() => setShowNewVersionModal(true)} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"><Copy className="h-4 w-4 mr-2" />New Version</button>{selectedVersion && entries.length > 0 && (<a href={`/api/v1/projects/${selectedProject?.id}/schedule/${selectedVersion?.id}/export`} className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm hover:bg-green-100"><Download className="h-4 w-4 mr-2" />Export Excel</a>)}
+              <button onClick={() => setShowNewVersionModal(true)} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"><Copy className="h-4 w-4 mr-2" />New Version</button>{selectedVersion && entries.length > 0 && (<><a href={`/api/v1/projects/${selectedProject?.id}/schedule/${selectedVersion?.id}/export`} className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm hover:bg-green-100"><Download className="h-4 w-4 mr-2" />Export Excel</a><button onClick={exportToPDF} className="inline-flex items-center px-3 py-2 border border-red-300 bg-red-50 text-red-700 rounded-md text-sm hover:bg-red-100 ml-2"><Download className="h-4 w-4 mr-2" />PDF: Simple List</button><button onClick={exportToCalendarPDF} className="inline-flex items-center px-3 py-2 border border-purple-300 bg-purple-50 text-purple-700 rounded-md text-sm hover:bg-purple-100 ml-2"><Download className="h-4 w-4 mr-2" />PDF: With Duration</button></>)}
             </>
           )}
         </div>

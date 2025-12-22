@@ -3,56 +3,48 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 
-// GET - Fetch construction group details
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { cgId: string } }
-) {
+// GET - Get construction group settings
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { constructionGroupId: true }
+    });
+
+    if (!user?.constructionGroupId) {
+      return NextResponse.json({ error: 'No construction group assigned' }, { status: 403 });
+    }
+
     const cg = await prisma.constructionGroup.findUnique({
-      where: { id: params.cgId },
-      include: {
-        region: {
-          include: {
-            zone: {
-              include: {
-                branch: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: {
-            users: true,
-            tradeTeams: true,
-            crews: true,
-            projects: true
-          }
-        }
+      where: { id: user.constructionGroupId },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        description: true,
+        cgProjectUrl: true,
+        isActive: true
       }
     });
 
     if (!cg) {
-      return NextResponse.json({ error: 'Construction Group not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Construction group not found' }, { status: 404 });
     }
 
     return NextResponse.json(cg);
   } catch (error) {
-    console.error('Get CG error:', error);
-    return NextResponse.json({ error: 'Failed to fetch Construction Group' }, { status: 500 });
+    console.error('Get CG settings error:', error);
+    return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
 }
 
 // PATCH - Update construction group settings
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { cgId: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -77,28 +69,17 @@ export async function PATCH(
     const { cgProjectUrl } = body;
 
     const updated = await prisma.constructionGroup.update({
-      where: { id: params.cgId },
+      where: { id: user.constructionGroupId },
       data: {
         cgProjectUrl: cgProjectUrl || null
       },
-      include: {
-        region: {
-          include: {
-            zone: {
-              include: {
-                branch: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: {
-            users: true,
-            tradeTeams: true,
-            crews: true,
-            projects: true
-          }
-        }
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        description: true,
+        cgProjectUrl: true,
+        isActive: true
       }
     });
 

@@ -1,0 +1,7 @@
+first_name,last_name,ba_id,email_personal,email_jw,phone,congregation,role,serving_as,trade_team,trade_crew,is_overseer,is_assistant,is_active,notes
+John,Smith,BA12345,john.smith@email.com,jsmith@jw.org,555-0101,Central Congregation,VOLUNTEER,"Elder, Regular Pioneer",Electrical,Electrical Rough-in,FALSE,FALSE,TRUE,Elder serving on Electrical crew
+Jane,Doe,BA67890,jane.doe@email.com,jdoe@jw.org,555-0102,North Congregation,PERSONNEL_CONTACT,Elder,,,TRUE,FALSE,TRUE,Personnel Contact for CG
+Bob,Johnson,BA11223,bob.j@email.com,bjohnson@jw.org,555-0103,South Congregation,TRADE_TEAM_OVERSEER,"Elder, Ministerial Servant",Plumbing,,TRUE,FALSE,TRUE,Plumbing Team Overseer
+Alice,Williams,BA44556,alice.w@email.com,awilliams@jw.org,555-0104,East Congregation,TRADE_CREW_OVERSEER,Ministerial Servant,Interiors,Drywall,TRUE,FALSE,TRUE,Drywall Crew Overseer
+Mike,Brown,BA77889,mike.b@email.com,mbrown@jw.org,555-0105,West Congregation,VOLUNTEER,Regular Pioneer,Structural,Framing,FALSE,TRUE,TRUE,Regular Pioneer on Framing crew
+Sarah,Davis,BA99001,sarah.d@email.com,sdavis@jw.org,555-0106,Central Congregation,VOLUNTEER,,Electrical,Electrical Finish,FALSE,FALSE,TRUE,Volunteer with no special privileges

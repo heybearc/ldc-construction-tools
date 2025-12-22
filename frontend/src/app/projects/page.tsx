@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Plus, Building2, Calendar, Users, MapPin, ChevronRight, Filter, ExternalLink } from 'lucide-react';
+import { Upload, Download, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface Project {
   id: string;
@@ -69,6 +72,7 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     projectNumber: '',
@@ -129,6 +133,142 @@ export default function ProjectsPage() {
     }
   };
 
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        alert('CSV file is empty or invalid');
+        return;
+      }
+
+      const headers = parseCSVLine(lines[0]);
+      const projects = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseCSVLine(lines[i]);
+        const project: any = {};
+        
+        headers.forEach((header, index) => {
+          project[header] = values[index] || '';
+        });
+        
+        projects.push(project);
+      }
+
+      const res = await fetch('/api/v1/projects/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects }),
+      });
+
+      const result = await res.json();
+      
+      if (res.ok) {
+        alert(`Import completed: ${result.results.success} successful, ${result.results.failed} failed`);
+        if (result.results.errors.length > 0) {
+          console.error('Import errors:', result.results.errors);
+        }
+        fetchProjects();
+      } else {
+        alert(`Import failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      alert('Failed to import projects');
+    }
+    
+    e.target.value = '';
+  };
+
+  const handleExport = async (format: 'excel' | 'pdf') => {
+    try {
+      const params = new URLSearchParams();
+      params.append('format', format);
+      if (statusFilter) params.append('status', statusFilter);
+      
+      const res = await fetch(`/api/v1/projects/export?${params}`);
+      
+      if (!res.ok) throw new Error('Export failed');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `projects_export_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export projects');
+    }
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Projects List', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+    
+    const tableData = filteredProjects.map(p => [
+      p.name,
+      p.projectNumber || '—',
+      statusLabels[p.status] || p.status,
+      p.location || '—',
+      p.projectType || '—',
+      p.currentPhase || '—'
+    ]);
+
+    autoTable(doc, {
+      startY: 28,
+      head: [['Project Name', 'Number', 'Status', 'Location', 'Type', 'Phase']],
+      body: tableData,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
+      margin: { left: 10, right: 10, top: 28 }
+    });
+
+    doc.save(`projects-${new Date().toISOString().split('T')[0]}.pdf`);
+    setShowExportMenu(false);
+  };
+
+  const downloadTemplate = () => {
+    const a = document.createElement('a');
+    a.href = '/templates/projects_import_template.csv';
+    a.download = 'projects_import_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString();
@@ -157,13 +297,85 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
           <p className="mt-1 text-gray-600">Construction projects and crew assignments</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </button>
+        <div className="flex gap-2">
+          <a
+            href="/templates/projects_import_template.csv"
+            download
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Template
+          </a>
+          <label className="inline-flex items-center px-3 py-2 border border-blue-300 bg-blue-50 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-100 cursor-pointer">
+            <Upload className="h-4 w-4 mr-2" />
+            Import CSV
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </label>
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                <div className="p-3 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900">Export Options</h3>
+                </div>
+                <div className="p-3 border-b border-gray-200 space-y-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Filter by Status</label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full text-sm border border-gray-300 rounded-md px-2 py-1"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="PLANNING">Planning</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="ON_HOLD">On Hold</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="p-2">
+                  <button
+                    onClick={() => {
+                      handleExport('excel');
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2 text-green-600" />
+                    Export to Excel
+                  </button>
+                </div>
+                  <button
+                    onClick={exportToPDF}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2 text-red-600" />
+                    Export to PDF
+                  </button>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

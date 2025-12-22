@@ -71,6 +71,7 @@ model User {
   tradeCrewOversight  TradeCrewOversight[]
   personnelContacts   PersonnelContact[]
   volunteer           Volunteer?
+  announcements       Announcement[]
 }
 
 model VerificationToken {
@@ -406,6 +407,7 @@ model ConstructionGroup {
   personnelContacts PersonnelContact[]
   volunteers    Volunteer[]
   congregations   Congregation[]
+  announcements   Announcement[]
 
   @@map("construction_groups")
 }
@@ -849,4 +851,33 @@ model ProjectCongregationAssignment {
   
   @@unique([projectId, congregationId])
   @@map("project_congregation_assignments")
+}
+
+model Announcement {
+  id                    String              @id @default(cuid())
+  title                 String
+  message               String              @db.Text
+  type                  AnnouncementType    @default(INFO)
+  isActive              Boolean             @default(true)
+  startDate             DateTime?
+  endDate               DateTime?
+  constructionGroupId   String?
+  targetRoles           String[]            @default([])
+  createdBy             String
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  constructionGroup     ConstructionGroup?  @relation(fields: [constructionGroupId], references: [id], onDelete: Cascade)
+  creator               User                @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  @@index([isActive])
+  @@index([constructionGroupId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+enum AnnouncementType {
+  INFO
+  WARNING
+  URGENT
 }

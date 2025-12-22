@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus, Upload, Download, FileText } from 'lucide-react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 
@@ -41,6 +43,10 @@ export default function VolunteersPage() {
   const [selectedVolunteer, setSelectedVolunteer] = useState<Volunteer | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exportFilters, setExportFilters] = useState({ trade_team: '', trade_crew: '', role: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchVolunteers();
@@ -79,7 +85,114 @@ export default function VolunteersPage() {
     }
   };
 
-  // Filter volunteers on the frontend for immediate response
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, ''));
+      
+      const data = lines.slice(1).map(line => {
+        const values = parseCSVLine(line).map(v => v.replace(/"/g, ''));
+        const obj: any = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index] || '';
+        });
+        return obj;
+      });
+
+      const response = await fetch('/api/v1/volunteers/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ volunteers: data }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Successfully imported ${result.results.success} volunteers. Failed: ${result.results.failed}`);
+        if (result.results.errors.length > 0) {
+          console.error('Import errors:', result.results.errors);
+        }
+        fetchVolunteers();
+        fetchStats();
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Import failed');
+      }
+    } catch (error: any) {
+      alert(`Import failed: ${error.message}`);
+      console.error('Import error:', error);
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleExport = (format: string) => {
+    const params = new URLSearchParams({ format });
+    if (exportFilters.trade_team) params.append('trade_team', exportFilters.trade_team);
+    if (exportFilters.trade_crew) params.append('trade_crew', exportFilters.trade_crew);
+    if (exportFilters.role) params.append('role', exportFilters.role);
+    
+    window.location.href = `/api/v1/volunteers/export?${params.toString()}`;
+    setShowExportMenu(false);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Volunteers List', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+    
+    const tableData = filteredVolunteers.map(v => [
+      `${v.first_name} ${v.last_name}`,
+      v.ba_id || '—',
+      v.congregation || '—',
+      v.role || '—',
+      v.phone || '—',
+      v.email || '—'
+    ]);
+
+    autoTable(doc, {
+      startY: 28,
+      head: [['Name', 'BA ID', 'Congregation', 'Role', 'Phone', 'Email']],
+      body: tableData,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
+      margin: { left: 10, right: 10, top: 28 }
+    });
+
+    doc.save(`volunteers-${new Date().toISOString().split('T')[0]}.pdf`);
+    setShowExportMenu(false);
+  };
+
   const filteredVolunteers = volunteers.filter(volunteer => {
     const matchesSearch = !searchTerm || 
       `${volunteer.first_name} ${volunteer.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -176,16 +289,87 @@ export default function VolunteersPage() {
             {stats?.total_volunteers || 0} volunteers in your Construction Group
           </p>
         </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Volunteer
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {importing ? 'Importing...' : 'Import CSV'}
+          </button>
+          <a
+            href="/templates/volunteers_import_template.csv"
+            download
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Template
+          </a>
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                <div className="p-3 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900">Export Options</h3>
+                </div>
+                <div className="p-3 border-b border-gray-200 space-y-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Filter by Role</label>
+                    <select
+                      value={exportFilters.role}
+                      onChange={(e) => setExportFilters({ ...exportFilters, role: e.target.value })}
+                      className="w-full text-sm border border-gray-300 rounded-md px-2 py-1"
+                    >
+                      <option value="">All Roles</option>
+                      <option value="VOLUNTEER">Volunteer</option>
+                      <option value="TRADE_TEAM_OVERSEER">Trade Team Overseer</option>
+                      <option value="TRADE_CREW_OVERSEER">Trade Crew Overseer</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="p-2">
+                  <button
+                    onClick={() => handleExport('excel')}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2 text-green-600" />
+                    Export to Excel
+                  </button>
+                </div>
+                  <button
+                    onClick={exportToPDF}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2 text-red-600" />
+                    Export to PDF
+                  </button>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Volunteer
+          </button>
+        </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -202,166 +386,133 @@ export default function VolunteersPage() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Roles</option>
-              {stats?.role_breakdown?.map((role) => (
+              {stats?.role_breakdown.map((role) => (
                 <option key={role.name} value={role.name}>
                   {role.name} ({role.count})
                 </option>
-              )) || []}
+              ))}
             </select>
             <select
               value={congregationFilter}
               onChange={(e) => setCongregationFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Congregations</option>
-              {stats?.congregation_breakdown?.map((cong) => (
+              {stats?.congregation_breakdown.map((cong) => (
                 <option key={cong.name} value={cong.name}>
                   {cong.name} ({cong.count})
                 </option>
-              )) || []}
+              ))}
             </select>
           </div>
         </div>
       </div>
 
-      {/* Volunteers List */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Volunteer Directory</h2>
-          <p className="text-sm text-gray-600">{filteredVolunteers?.length || 0} volunteers found</p>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {filteredVolunteers?.map((volunteer) => (
-            <div key={volunteer.id} className="p-6 hover:bg-gray-50">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    {getRoleIcon(volunteer)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {volunteer.first_name} {volunteer.last_name}
-                      </h3>
-                      {getRoleBadge(volunteer)}
-                      {volunteer.has_user_account && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                          Has Account
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Assignment Info */}
-                    {volunteer.trade_team_name && (
-                      <div className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">{volunteer.trade_team_name}</span>
-                        {volunteer.trade_crew_name && (
-                          <span> • {volunteer.trade_crew_name}</span>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Serving As */}
-                    {volunteer.serving_as && volunteer.serving_as.length > 0 && (
-                      <div className="mt-2">
-                        <div className="flex flex-wrap gap-1">
-                          {volunteer.serving_as.map((role) => (
-                            <span
-                              key={role}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                            >
-                              {role}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Contact Info */}
-                    <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
-                      {volunteer.ba_id && (
-                        <div className="flex items-center">
-                          <span className="font-medium text-blue-600">BA ID#:</span>
-                          <span className="ml-1">{volunteer.ba_id}</span>
-                        </div>
-                      )}
-                      {volunteer.phone && (
-                        <div className="flex items-center">
-                          <Phone className="h-4 w-4 mr-1" />
-                          {volunteer.phone}
-                        </div>
-                      )}
-                      {volunteer.email_personal && (
-                        <div className="flex items-center">
-                          <Mail className="h-4 w-4 mr-1" />
-                          {volunteer.email_personal}
-                        </div>
-                      )}
-                      {volunteer.congregation && (
-                        <div className="flex items-center">
-                          <Building2 className="h-4 w-4 mr-1" />
-                          {volunteer.congregation}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={() => handleEditVolunteer(volunteer)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredVolunteers.map((volunteer) => (
+          <div key={volunteer.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center">
+                {getRoleIcon(volunteer)}
+                <div className="ml-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {volunteer.first_name} {volunteer.last_name}
+                  </h3>
+                  {volunteer.ba_id && (
+                    <p className="text-sm text-gray-500">BA ID: {volunteer.ba_id}</p>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        
-        {filteredVolunteers.length === 0 && (
-          <div className="p-12 text-center">
-            <Users className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No volunteers found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {volunteers.length === 0 
-                ? 'Get started by adding your first volunteer.'
-                : 'Try adjusting your search or filter criteria.'}
-            </p>
-            {volunteers.length === 0 && (
               <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                onClick={() => handleEditVolunteer(volunteer)}
+                className="p-2 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Volunteer
+                <Edit className="h-5 w-5" />
               </button>
-            )}
+            </div>
+
+            <div className="space-y-2 mb-4">
+              {getRoleBadge(volunteer)}
+              {volunteer.trade_team_name && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  {volunteer.trade_team_name}
+                  {volunteer.trade_crew_name && ` - ${volunteer.trade_crew_name}`}
+                </div>
+              )}
+              {volunteer.congregation && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  {volunteer.congregation}
+                </div>
+              )}
+              {volunteer.phone && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <Phone className="h-4 w-4 mr-2" />
+                  {volunteer.phone}
+                </div>
+              )}
+              {(volunteer.email_personal || volunteer.email_jw) && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <Mail className="h-4 w-4 mr-2" />
+                  {volunteer.email_jw || volunteer.email_personal}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div className="flex gap-2">
+                {volunteer.is_overseer && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Overseer
+                  </span>
+                )}
+                {volunteer.is_assistant && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Assistant
+                  </span>
+                )}
+              </div>
+              {volunteer.is_active ? (
+                <UserCheck className="h-5 w-5 text-green-600" />
+              ) : (
+                <UserX className="h-5 w-5 text-red-600" />
+              )}
+            </div>
           </div>
-        )}
+        ))}
       </div>
 
-      {/* Edit Modal */}
-      <EditVolunteerModal
-        volunteer={selectedVolunteer}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedVolunteer(null);
-        }}
-        onSave={handleSaveVolunteer}
-      />
+      {filteredVolunteers.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <Users className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No volunteers found</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Try adjusting your search or filters
+          </p>
+        </div>
+      )}
 
-      {/* Add Volunteer Modal */}
-      <AddVolunteerModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSave={handleAddVolunteer}
-      />
+      {isEditModalOpen && selectedVolunteer && (
+        <EditVolunteerModal
+          volunteer={selectedVolunteer}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedVolunteer(null);
+          }}
+          onSave={handleSaveVolunteer}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <AddVolunteerModal
+          onClose={() => setIsAddModalOpen(false)}
+          onSave={handleAddVolunteer}
+        />
+      )}
     </div>
   );
 }

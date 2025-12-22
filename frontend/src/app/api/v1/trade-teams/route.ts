@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const includeCrews = searchParams.get('include_crews') === 'true';
+
     const tradeTeams = await prisma.tradeTeam.findMany({
       include: {
         crews: {
@@ -17,6 +20,7 @@ export async function GET(request: NextRequest) {
           }
         },
         volunteers: {
+          where: { isActive: true },
           select: { id: true, firstName: true, lastName: true, role: true }
         },
         _count: {
@@ -31,10 +35,14 @@ export async function GET(request: NextRequest) {
 
     // Transform data to match expected format with oversight counts
     const transformedTeams = tradeTeams.map(team => {
-      // Count volunteers assigned directly to trade team + volunteers in crews
-      const directVolunteers = team._count.volunteers;
+      // Count only non-oversight volunteers assigned directly to trade team
+      const directNonOversightVolunteers = team.volunteers.filter(v => 
+        !v.role?.includes('Overseer') && !v.role?.includes('Support')
+      ).length;
+      
+      // Count volunteers in crews
       const crewVolunteers = team.crews.reduce((sum, crew) => sum + crew._count.volunteers, 0);
-      const totalMembers = directVolunteers + crewVolunteers;
+      const totalMembers = directNonOversightVolunteers + crewVolunteers;
 
       // Count trade team oversight roles
       const ttoCount = team.volunteers.filter(v => v.role === 'Trade Team Overseer').length;
@@ -42,11 +50,11 @@ export async function GET(request: NextRequest) {
       const ttsCount = team.volunteers.filter(v => v.role === 'Trade Team Support').length;
 
       // Count crews needing oversight
-      const crewsNeedingTCO = team.crews.filter(crew => 
+      const crewsNeedingTCO = team.crews.filter(crew =>
         !crew.volunteers.some(v => v.role === 'Trade Crew Overseer')
       ).length;
 
-      return {
+      const result: any = {
         id: team.id,
         name: team.name,
         crew_count: team._count.crews,
@@ -60,10 +68,20 @@ export async function GET(request: NextRequest) {
           crews_needing_tco: crewsNeedingTCO
         }
       };
+
+      // Include crews array if requested
+      if (includeCrews) {
+        result.crews = team.crews.map(crew => ({
+          id: crew.id,
+          name: crew.name
+        }));
+      }
+
+      return result;
     });
 
     return NextResponse.json(transformedTeams);
-    
+
   } catch (error) {
     console.error('Trade Teams API Error:', error);
     return NextResponse.json(
@@ -76,7 +94,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     const tradeTeam = await prisma.tradeTeam.create({
       data: {
         name: body.name,
@@ -94,7 +112,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(tradeTeam);
-    
+
   } catch (error) {
     console.error('Trade Teams Create Error:', error);
     return NextResponse.json(

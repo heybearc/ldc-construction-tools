@@ -1,5 +1,6 @@
 'use client';
 
+import AnnouncementBanner from '@/components/AnnouncementBanner';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
@@ -64,6 +65,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AnnouncementBanner />
         {children}
       </main>
       <footer className="bg-white border-t border-gray-200 mt-auto">

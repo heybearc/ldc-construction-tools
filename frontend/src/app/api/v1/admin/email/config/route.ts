@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';;
-import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
+import { encryptPassword } from '@/lib/email-crypto';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -31,30 +31,19 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      config: config || {
-        provider: 'gmail',
-        displayName: 'Gmail Configuration',
-        smtpHost: 'smtp.gmail.com',
-        smtpPort: 587,
-        encryption: 'tls',
-        fromEmail: '',
-        fromName: 'LDC Tools',
-        username: '',
-        isActive: false,
-        testStatus: 'untested'
-      }
+      config: config || null
     });
   } catch (error) {
-    console.error('Error fetching email configuration:', error);
+    console.error('Get email config error:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch email configuration' },
+      { success: false, message: 'Failed to load email configuration' },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/v1/admin/email/config - Update email configuration
-export async function PUT(request: NextRequest) {
+// POST /api/v1/admin/email/config - Save email configuration
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
@@ -70,26 +59,16 @@ export async function PUT(request: NextRequest) {
       isActive
     } = body;
 
-    // Validate required fields
     if (!fromEmail || !username || !password) {
       return NextResponse.json(
-        { success: false, message: 'From email, username, and password are required' },
+        { success: false, message: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(fromEmail)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
-
-    // Encrypt password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Encrypt password with reversible encryption
+    const encryptedPassword = encryptPassword(password);
+    
     // Deactivate existing configurations
     await prisma.emailConfiguration.updateMany({
       where: { isActive: true },
@@ -99,16 +78,16 @@ export async function PUT(request: NextRequest) {
     // Create or update configuration
     const config = await prisma.emailConfiguration.create({
       data: {
-        provider: provider || 'gmail',
+        provider: provider || 'GMAIL',
         displayName: displayName || 'Gmail Configuration',
         smtpHost: smtpHost || 'smtp.gmail.com',
         smtpPort: smtpPort || 587,
         encryption: encryption || 'tls',
         fromEmail,
-        fromName: fromName || 'LDC Construction Tools',
+        fromName: fromName || 'LDC Tools',
         username,
-        appPasswordEncrypted: hashedPassword,
-        isActive: isActive !== false, // Default to true unless explicitly false
+        appPasswordEncrypted: encryptedPassword,
+        isActive: isActive !== false,
         testStatus: 'untested'
       },
       select: {
@@ -129,19 +108,23 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    // Log configuration change for audit
     console.log(`Email configuration updated: ${fromEmail} (${provider})`);
-
+    
     return NextResponse.json({
       success: true,
       message: 'Email configuration saved successfully',
       config
     });
   } catch (error) {
-    console.error('Error saving email configuration:', error);
+    console.error('Save email config error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to save email configuration' },
       { status: 500 }
     );
   }
+}
+
+// PUT /api/v1/admin/email/config - Update email configuration (same as POST)
+export async function PUT(request: NextRequest) {
+  return POST(request);
 }

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { 
   Download, RefreshCw, Grid3X3, Table, ArrowLeft,
   Users, ChevronDown, ChevronRight, Printer
@@ -142,6 +144,38 @@ export default function TradeTeamsOverviewPage() {
     window.print();
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Trade Teams & Crews Overview', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+    const tableData: any[] = [];
+    tradeTeams.forEach((team: TradeTeam) => {
+      const tto = getOversightByRole(team.oversight, 'TRADE_TEAM_OVERSEER');
+      const ttoa = getOversightByRole(team.oversight, 'TRADE_TEAM_OVERSEER_ASSISTANT');
+      const support = getOversightByRole(team.oversight, 'TRADE_TEAM_SUPPORT');
+      tableData.push([{ content: team.name, colSpan: 5, styles: { fillColor: [219, 234, 254], fontStyle: 'bold' } }]);
+      tableData.push(['Team Level', formatUserList(tto), formatUserList(ttoa), formatUserList(support), team.description || '—']);
+      team.crews.forEach((crew: Crew) => {
+        const tco = getOversightByRole(crew.oversight, 'TRADE_CREW_OVERSEER');
+        const tcoa = getOversightByRole(crew.oversight, 'TRADE_CREW_OVERSEER_ASSISTANT');
+        const crewSupport = getOversightByRole(crew.oversight, 'TRADE_CREW_SUPPORT');
+        tableData.push([`  ${crew.name}`, formatUserList(tco), formatUserList(tcoa), formatUserList(crewSupport), crew.description || '—']);
+      });
+    });
+    autoTable(doc, {
+      startY: 28,
+      head: [['Trade Team / Crew', 'Overseer', 'Assistants', 'Support', 'Description']],
+      body: tableData,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
+      
+      margin: { left: 10, right: 10, top: 28 }
+    });
+    doc.save(`trade-teams-overview-${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -221,6 +255,13 @@ export default function TradeTeamsOverviewPage() {
               >
                 <Printer className="h-4 w-4 mr-2" />
                 Print
+              </button>
+              <button
+                onClick={exportToPDF}
+                className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 text-sm font-medium rounded-md hover:bg-green-100"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
               </button>
               <button
                 onClick={exportToCSV}
