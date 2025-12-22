@@ -574,7 +574,6 @@ enum FeedbackStatus {
   CLOSED
 }
 
-<<<<<<< HEAD
 // ============================================
 // OVERSIGHT ROLES - Trade Team & Crew Leadership
 // Per USLDC-2230-E Guidelines
