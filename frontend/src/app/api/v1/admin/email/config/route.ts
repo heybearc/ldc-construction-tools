@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest) {
         smtpPort: smtpPort || 587,
         encryption: encryption || 'tls',
         fromEmail,
-        fromName: fromName || 'LDC Construction Tools',
+        fromName: fromName || 'LDC Tools',
         username,
         appPasswordEncrypted: hashedPassword,
         isActive: isActive !== false, // Default to true unless explicitly false
