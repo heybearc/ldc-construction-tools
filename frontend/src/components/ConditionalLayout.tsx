@@ -2,8 +2,11 @@
 
 import AnnouncementBanner from '@/components/AnnouncementBanner';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SignOutButton from './SignOutButton';
+import ReleaseBanner from './ReleaseBanner';
 import { APP_VERSION } from '@/lib/version';
 
 interface ConditionalLayoutProps {
@@ -12,8 +15,26 @@ interface ConditionalLayoutProps {
 
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const [userLastSeenVersion, setUserLastSeenVersion] = useState<string | null>(null);
   const isAuthPage = pathname?.startsWith('/auth');
   const isHelpPage = pathname?.startsWith('/help') || pathname?.startsWith('/release-notes');
+
+  // Fetch user's last seen release version
+  useEffect(() => {
+    if (session?.user?.email && !isAuthPage && !isHelpPage) {
+      fetch('/api/v1/user/profile')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.success && data.user) {
+            setUserLastSeenVersion(data.user.lastSeenReleaseVersion || null);
+          }
+        })
+        .catch(() => {
+          // Silently fail - banner just won't show
+        });
+    }
+  }, [session?.user?.email, isAuthPage, isHelpPage]);
 
   if (isAuthPage || isHelpPage) {
     return <>{children}</>;
@@ -21,6 +42,10 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ReleaseBanner 
+        currentVersion={APP_VERSION}
+        userLastSeenVersion={userLastSeenVersion}
+      />
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -53,6 +78,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                   Admin
                 </Link>
                 <span className="text-gray-300">|</span>
+                <Link href="/help/my-feedback" className="text-gray-600 hover:text-blue-600 font-medium">
+                  My Feedback
+                </Link>
                 <Link href="/help" className="text-gray-600 hover:text-blue-600 font-medium">
                   Help
                 </Link>
@@ -83,9 +111,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
               </Link>
               <Link href="/release-notes" className="text-gray-600 hover:text-blue-600">
                 Release Notes
-              </Link>
-              <Link href="/admin" className="text-gray-600 hover:text-blue-600">
-                Admin Panel
               </Link>
             </div>
           </div>

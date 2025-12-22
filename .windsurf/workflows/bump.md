@@ -114,6 +114,30 @@ Edit `frontend/package.json`:
 All components (HelpLayout, ConditionalLayout, etc.) automatically use this version.
 You only need to update `package.json` - no other files need version changes.
 
+## Step 4.5: Add Announcement Banner
+
+Create announcement in database for new release:
+
+**Using Admin Panel (Recommended):**
+1. Log in to Admin panel
+2. Navigate to Admin → Announcements
+3. Click "Create New Announcement"
+4. Fill in:
+   - **Title:** 🎉 Version X.Y.Z Released - [Brief Feature Summary]
+   - **Message:** Brief description of main features/fixes. Link to Help Center if applicable.
+   - **Priority:** MEDIUM (or HIGH for major releases)
+   - **Target Roles:** ADMIN, CONSTRUCTION_GROUP_OVERSEER, ASSISTANT_CONSTRUCTION_GROUP_OVERSEER
+   - **Duration:** 14 days from release date
+   - **Link:** `/help/[feature-name]` (if new help page created)
+
+**Announcement Guidelines:**
+- Keep message concise (2-3 sentences max)
+- Focus on user benefits, not technical details
+- Use emojis for visual appeal
+- Link to relevant help documentation
+- Set appropriate duration (7-14 days typical)
+- Target roles based on who needs to know
+
 ## Branch Strategy
 
 - **`green-development`** - Active development branch, deploys to GREEN (STANDBY)
@@ -266,6 +290,7 @@ Before saying "ready for release":
 - [ ] Version updated in ConditionalLayout.tsx
 - [ ] Release notes created (user-friendly, with frontmatter)
 - [ ] CHANGELOG.md updated (technical)
+- [ ] **Announcement banner created in Admin panel**
 - [ ] Help documentation analyzed
 - [ ] Help pages created/updated (if needed)
 - [ ] Help index updated (if needed)

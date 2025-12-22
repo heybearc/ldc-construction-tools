@@ -31,6 +31,13 @@ const helpTopics: HelpTopic[] = [
     icon: '🔐'
   },
   {
+    id: 'my-feedback',
+    title: 'My Feedback',
+    description: 'Track your submitted feedback and see admin responses',
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
+    icon: '📋'
+  },
+  {
     id: 'trade-teams',
     title: 'Trade Teams',
     description: 'Managing trade teams, crews, and assignments',

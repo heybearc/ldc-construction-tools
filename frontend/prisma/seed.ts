@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding LDC Construction Tools database...');
+  console.log('🌱 Seeding LDC Tools database...');
 
   // Check if admin user already exists
   const existingAdmin = await prisma.user.findUnique({
@@ -49,13 +49,13 @@ async function main() {
     await prisma.emailConfiguration.create({
       data: {
         provider: 'gmail',
-        displayName: 'LDC Construction Tools Gmail',
+        displayName: 'LDC Tools Gmail',
         smtpHost: 'smtp.gmail.com',
         smtpPort: 587,
         username: 'your-email@gmail.com',
         appPasswordEncrypted: 'CONFIGURE_GMAIL_APP_PASSWORD',
         fromEmail: 'your-email@gmail.com',
-        fromName: 'LDC Construction Tools',
+        fromName: 'LDC Tools',
         encryption: 'tls',
         isDefault: true,
         isActive: false,
