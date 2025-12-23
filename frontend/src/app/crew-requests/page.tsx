@@ -159,7 +159,7 @@ export default function CrewRequestsPage() {
     fetchPersonnelUsers();
     fetchTradeTeams();
     fetchCGSettings();
-  }, [fetchRequests]);
+  }, [statusFilter]);
 
   const handleStatusChange = async (requestId: string, newStatus: string, resolutionNotes?: string, sendEmail?: boolean) => {
     setIsUpdating(true);
