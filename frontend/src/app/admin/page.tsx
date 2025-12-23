@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Shield, Users, Mail, Activity, BarChart, FileText, Settings, 
   CheckCircle, AlertCircle, TrendingUp, Clock, MessageSquare,
@@ -40,6 +40,16 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [environment, setEnvironment] = useState<string>('');
+
+  const adminModules = useMemo(() => [
+    { name: 'User Management', href: '/admin/users', icon: Users, color: 'blue' },
+    { name: 'Email Config', href: '/admin/email', icon: Mail, color: 'green' },
+    { name: 'Health Monitor', href: '/admin/health', icon: Activity, color: 'emerald' },
+    { name: 'API Status', href: '/admin/api', icon: BarChart, color: 'purple' },
+    { name: 'Audit Logs', href: '/admin/audit', icon: FileText, color: 'orange' },
+    { name: 'Feedback', href: '/admin/feedback', icon: MessageSquare, color: 'pink' },
+    { name: 'System Ops', href: '/admin/system', icon: Settings, color: 'gray' },
+  ], []);
 
   useEffect(() => {
     // Detect environment from hostname
@@ -301,15 +311,7 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-5">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Modules</h2>
           <div className="grid grid-cols-2 gap-3">
-            {[
-              { name: 'User Management', href: '/admin/users', icon: Users, color: 'blue' },
-              { name: 'Email Config', href: '/admin/email', icon: Mail, color: 'green' },
-              { name: 'Health Monitor', href: '/admin/health', icon: Activity, color: 'emerald' },
-              { name: 'API Status', href: '/admin/api', icon: BarChart, color: 'purple' },
-              { name: 'Audit Logs', href: '/admin/audit', icon: FileText, color: 'orange' },
-              { name: 'Feedback', href: '/admin/feedback', icon: MessageSquare, color: 'pink' },
-              { name: 'System Ops', href: '/admin/system', icon: Settings, color: 'gray' },
-            ].map((module) => (
+            {adminModules.map((module) => (
               <Link
                 key={module.name}
                 href={module.href}
