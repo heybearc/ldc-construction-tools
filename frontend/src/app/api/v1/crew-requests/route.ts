@@ -118,20 +118,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is SUPER_ADMIN and has override fields
+    // Check if user can submit on behalf of others (Personnel Contact roles + SUPER_ADMIN)
     const userRecord = await prisma.user.findUnique({
       where: { id: user.id },
       select: { role: true }
     });
 
-    const isSuperAdmin = userRecord?.role === 'SUPER_ADMIN';
+    const canSubmitOnBehalfOf = userRecord?.role && [
+      'SUPER_ADMIN',
+      'PERSONNEL_CONTACT',
+      'PERSONNEL_CONTACT_ASSISTANT',
+      'PERSONNEL_CONTACT_SUPPORT'
+    ].includes(userRecord.role);
+    
     const hasOverride = override_requestor_name && override_requestor_email;
 
-    // Use override if provided by SUPER_ADMIN, otherwise use session user
-    const requestorName = (isSuperAdmin && hasOverride) 
+    // Use override if provided by authorized user, otherwise use session user
+    const requestorName = (canSubmitOnBehalfOf && hasOverride) 
       ? override_requestor_name 
       : (user.name || session.user.email || 'Unknown');
-    const requestorEmail = (isSuperAdmin && hasOverride)
+    const requestorEmail = (canSubmitOnBehalfOf && hasOverride)
       ? override_requestor_email
       : session.user.email;
 

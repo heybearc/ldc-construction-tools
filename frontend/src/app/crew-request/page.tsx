@@ -124,6 +124,14 @@ export default function CrewRequestPage() {
 
   const selectedTeam = tradeTeams.find(t => t.id === formData.trade_team_id);
 
+  // Check if user can submit on behalf of others
+  const canSubmitOnBehalfOf = user?.role && [
+    'SUPER_ADMIN',
+    'PERSONNEL_CONTACT',
+    'PERSONNEL_CONTACT_ASSISTANT',
+    'PERSONNEL_CONTACT_SUPPORT'
+  ].includes(user.role);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -233,9 +241,9 @@ export default function CrewRequestPage() {
             <Mail className="h-5 w-5 text-blue-600 mr-2" />
             <span className="text-sm text-gray-500">{user.email}</span>
           </div>
-          {user.role === 'SUPER_ADMIN' && (
+          {canSubmitOnBehalfOf && (
             <div className="mt-2 text-xs text-blue-600 font-medium">
-              ✓ Admin Mode: You can submit on behalf of others below
+              ✓ Personnel Contact Mode: You can submit on behalf of others below
             </div>
           )}
         </div>
@@ -303,8 +311,8 @@ export default function CrewRequestPage() {
             </div>
           </div>
 
-          {/* Submit on Behalf Of (SUPER_ADMIN only) */}
-          {user.role === 'SUPER_ADMIN' && (
+          {/* Submit on Behalf Of (Personnel Contact roles) */}
+          {canSubmitOnBehalfOf && (
             <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
               <div className="mb-3">
                 <h3 className="text-sm font-semibold text-purple-900 mb-1">Submit on Behalf Of (Optional)</h3>
