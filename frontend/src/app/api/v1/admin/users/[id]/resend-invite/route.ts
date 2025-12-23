@@ -119,8 +119,8 @@ export async function POST(
 
     const transporter = nodemailer.createTransport(transportConfig);
 
-    // Generate invitation link
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://10.92.3.23:3001';
+    // Generate invitation link - always use production URL
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://ldctools.com';
     const inviteLink = `${baseUrl}/auth/accept-invite?token=${inviteToken}`;
 
     // Personalize greeting
