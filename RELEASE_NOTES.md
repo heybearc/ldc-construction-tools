@@ -1,4 +1,74 @@
-# LDC Tools v1.0.0 - Release Notes
+# LDC Tools Release Notes
+
+## v1.12.0 - User Invitation System
+
+**Release Date:** December 23, 2025  
+**Status:** Production Ready ✅
+
+### 🎯 New Features
+
+**User Invitation System**
+- ✅ Send email invitations to new users
+- ✅ Resend invitations to users who haven't accepted
+- ✅ Professional email templates with 7-day expiration
+- ✅ Invitation acceptance flow with password setup
+- ✅ Automatic user activation upon acceptance
+- ✅ Invitation tracking and status management
+
+**Crew Request Management**
+- ✅ Delete crew requests (SUPER_ADMIN only)
+- ✅ Trash icon for easy request deletion
+
+### 🔧 Improvements
+
+**Invitation System**
+- All invitation links use production URL (ldctools.com)
+- Proper UserInvitation table integration
+- Invitation status tracking (PENDING, ACCEPTED)
+- Email sent confirmation and tracking
+
+**User Management**
+- Invited users appear immediately in user list
+- Resend invitation option in user actions dropdown
+- Better status indicators (INVITED, ACTIVE, INACTIVE)
+
+### 🐛 Bug Fixes
+
+- Fixed invitation acceptance "Invalid Invitation" error
+- Fixed invitation email links to always use production URL
+- Fixed User record creation on invitation
+- Fixed invitation verification using UserInvitation table
+- Fixed email configuration null handling
+
+---
+
+## v1.11.0 - Secondary Role System
+
+**Release Date:** December 2025  
+**Status:** Production Ready 🎉
+
+### 🎯 New Features
+
+**Secondary Role System (ldcRole)**
+- Organizational roles separate from system roles
+- Personnel Contact roles can assign crew requests to themselves
+- Better role-based filtering and permissions
+
+**Crew Request Improvements**
+- Assignment dropdown shows all eligible users
+- Email notifications on request completion
+- Visual status indicators
+- Multi-volunteer batch requests
+
+### 🔧 Improvements
+
+- Construction Group dropdown in user management
+- Better API response transformation
+- Improved crew request workflow
+
+---
+
+## v1.0.0 - Initial Release
 
 **Release Date:** November 1, 2025  
 **Status:** Production Ready 🎉
