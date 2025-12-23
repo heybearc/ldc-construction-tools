@@ -101,6 +101,7 @@ export async function GET(request: NextRequest) {
         name: user.name || 'Unknown',
         email: user.email || '',
         role: user.role || 'READ_ONLY',
+        ldcRole: user.ldcRole || undefined,
         adminLevel: user.adminLevel || undefined,
         status: displayStatus,
         regionId: user.regionId || '',
