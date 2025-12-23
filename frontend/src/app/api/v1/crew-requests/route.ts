@@ -106,6 +106,8 @@ export async function POST(request: NextRequest) {
       project_id,
       project_roster_name,
       comments,
+      override_requestor_name,
+      override_requestor_email,
     } = body;
 
     // Validation
@@ -116,11 +118,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is SUPER_ADMIN and has override fields
+    const userRecord = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { role: true }
+    });
+
+    const isSuperAdmin = userRecord?.role === 'SUPER_ADMIN';
+    const hasOverride = override_requestor_name && override_requestor_email;
+
+    // Use override if provided by SUPER_ADMIN, otherwise use session user
+    const requestorName = (isSuperAdmin && hasOverride) 
+      ? override_requestor_name 
+      : (user.name || session.user.email || 'Unknown');
+    const requestorEmail = (isSuperAdmin && hasOverride)
+      ? override_requestor_email
+      : session.user.email;
+
     const newRequest = await prisma.crewChangeRequest.create({
       data: {
         requestType: request_type,
-        requestorName: user.name || session.user.email || 'Unknown',
-        requestorEmail: session.user.email,
+        requestorName,
+        requestorEmail,
         volunteerName: volunteer_name,
         volunteerBaId: volunteer_ba_id || null,
         tradeTeamId: trade_team_id || null,

@@ -25,6 +25,7 @@ interface Project {
 interface UserInfo {
   name: string;
   email: string;
+  role?: string;
 }
 
 interface FormData {
@@ -35,6 +36,8 @@ interface FormData {
   crew_id: string;
   project_id: string;
   comments: string;
+  override_requestor_name: string;
+  override_requestor_email: string;
 }
 
 const initialFormData: FormData = {
@@ -45,6 +48,8 @@ const initialFormData: FormData = {
   crew_id: '',
   project_id: '',
   comments: '',
+  override_requestor_name: '',
+  override_requestor_email: '',
 };
 
 export default function CrewRequestPage() {
@@ -72,7 +77,8 @@ export default function CrewRequestPage() {
         
         setUser({
           name: sessionData.user.name || sessionData.user.email,
-          email: sessionData.user.email
+          email: sessionData.user.email,
+          role: sessionData.user.role
         });
 
         // Fetch trade teams and projects
@@ -134,6 +140,8 @@ export default function CrewRequestPage() {
           project_id: formData.project_id || null,
           project_roster_name: projects.find(p => p.id === formData.project_id)?.name || null,
           comments: formData.comments || null,
+          override_requestor_name: formData.override_requestor_name || null,
+          override_requestor_email: formData.override_requestor_email || null,
         }),
       });
 
@@ -222,6 +230,11 @@ export default function CrewRequestPage() {
             <Mail className="h-5 w-5 text-blue-600 mr-2" />
             <span className="text-sm text-gray-500">{user.email}</span>
           </div>
+          {user.role === 'SUPER_ADMIN' && (
+            <div className="mt-2 text-xs text-blue-600 font-medium">
+              ✓ Admin Mode: You can submit on behalf of others below
+            </div>
+          )}
         </div>
 
         {/* Form */}
@@ -275,6 +288,43 @@ export default function CrewRequestPage() {
               </label>
             </div>
           </div>
+
+          {/* Submit on Behalf Of (SUPER_ADMIN only) */}
+          {user.role === 'SUPER_ADMIN' && (
+            <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-purple-900 mb-1">Submit on Behalf Of (Optional)</h3>
+                <p className="text-xs text-purple-700">Leave blank to submit as yourself. Fill in to submit for someone else.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Requestor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.override_requestor_name}
+                    onChange={handleInputChange('override_requestor_name')}
+                    placeholder="e.g., John Smith"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Requestor Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.override_requestor_email}
+                    onChange={handleInputChange('override_requestor_email')}
+                    placeholder="e.g., john.smith@example.com"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Notifications will be sent to this email</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Volunteer Name */}
           <div className="bg-gray-50 rounded-lg p-4">
