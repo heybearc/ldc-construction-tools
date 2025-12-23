@@ -122,7 +122,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User invitation sent successfully!');
-        setInviteForm({ email: '', role: '', regionId: '', zoneId: '' });
+        setInviteForm({ name: '', email: '', role: '', regionId: '', zoneId: '' });
         setIsInviteModalOpen(false);
         loadUsers();
         loadUserStats();
