@@ -9,6 +9,8 @@ interface User {
   name: string;
   email: string;
   role: string;
+  ldcRole?: string;
+  constructionGroupId?: string;
   status: 'ACTIVE' | 'INVITED' | 'INACTIVE';
   regionId: string;
   zoneId: string;
@@ -157,6 +159,8 @@ export default function UserManagementPage() {
           name: selectedUser.name,
           email: selectedUser.email,
           role: selectedUser.role,
+          ldcRole: selectedUser.ldcRole,
+          constructionGroupId: selectedUser.constructionGroupId,
           status: selectedUser.status
         })
       });
@@ -1081,6 +1085,39 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
                   <option value="READ_ONLY">Read Only</option>
                 </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  LDC Role (Organizational)
+                </label>
+                <select
+                  value={selectedUser.ldcRole || ''}
+                  onChange={(e) => setSelectedUser({...selectedUser, ldcRole: e.target.value || undefined})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">None</option>
+                  <option value="PERSONNEL_CONTACT">Personnel Contact</option>
+                  <option value="PERSONNEL_CONTACT_ASSISTANT">Personnel Contact Assistant</option>
+                  <option value="PERSONNEL_CONTACT_SUPPORT">Personnel Contact Support</option>
+                  <option value="ZONE_OVERSEER">Zone Overseer</option>
+                  <option value="CONSTRUCTION_GROUP_OVERSEER">Construction Group Overseer</option>
+                  <option value="TRADE_TEAM_OVERSEER">Trade Team Overseer</option>
+                  <option value="TRADE_CREW_OVERSEER">Trade Crew Overseer</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Construction Group
+                </label>
+                <input
+                  type="text"
+                  value={selectedUser.constructionGroupId || ''}
+                  onChange={(e) => setSelectedUser({...selectedUser, constructionGroupId: e.target.value || undefined})}
+                  placeholder="e.g., 01.12"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               
               <div>

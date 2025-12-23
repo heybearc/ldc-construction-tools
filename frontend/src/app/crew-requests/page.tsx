@@ -117,9 +117,9 @@ export default function CrewRequestsPage() {
       const response = await fetch('/api/v1/admin/users');
       if (response.ok) {
         const data = await response.json();
-        // Filter to only Personnel roles
+        // Filter to Personnel roles (check both role and ldcRole fields)
         const personnel = (data.users || []).filter((u: PersonnelUser) => 
-          u.role?.includes('PERSONNEL')
+          u.role?.includes('PERSONNEL') || (u as any).ldcRole?.includes('PERSONNEL')
         );
         setPersonnelUsers(personnel);
       }
