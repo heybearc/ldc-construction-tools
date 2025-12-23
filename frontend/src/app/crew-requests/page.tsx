@@ -514,6 +514,11 @@ export default function CrewRequestsPage() {
                     
                     <div className="mt-2 text-xs text-gray-400">
                       Submitted: {formatDate(request.created_at)}
+                      {request.assigned_to && (
+                        <span className="ml-4">
+                          Assigned to: <strong className="text-blue-600">{request.assigned_to.name}</strong>
+                        </span>
+                      )}
                       {request.completed_at && (
                         <span className="ml-4">
                           Completed: {formatDate(request.completed_at)} by {request.completed_by?.name}

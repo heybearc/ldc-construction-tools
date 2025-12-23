@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
         name: true,
         email: true,
         role: true,
+        ldcRole: true,
         adminLevel: true,
         status: true,
         regionId: true,
