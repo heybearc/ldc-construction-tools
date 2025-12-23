@@ -1,5 +1,45 @@
 # LDC Construction Tools - Release Notes
 
+## Version 1.10.2 - December 22, 2025
+
+### 🐛 Critical Bug Fixes
+
+#### Admin Console Stability
+Fixed multiple critical issues affecting the admin console that were causing errors and infinite render loops:
+
+**Infinite Render Loop Fixes:**
+- Fixed infinite re-renders on admin layout by memoizing `adminModules` array
+- Fixed infinite re-renders on crew requests page by correcting `useEffect` dependencies
+- Fixed infinite re-renders on admin dashboard by wrapping `loadDashboardData` in `useCallback`
+
+**Missing API Endpoints:**
+- Created `/api/v1/construction-groups` endpoint for announcements page
+- Fixes 404 errors when creating or editing announcements
+
+**Database Schema:**
+- Implemented missing `CrewChangeRequest` model with full relations
+- Added support for crew request functionality mentioned in previous release notes
+
+**Navigation:**
+- Restored "Submit Crew Request" and "Manage Requests" links to main navigation menu
+
+### 🔧 Infrastructure Improvements
+
+**Backup System:**
+- Configured SSH keys between frontend containers and database server
+- Backup functionality now operational with NFS share access
+- System Operations page backup features fully functional
+- Added graceful error handling for SSH connection failures
+
+**Benefits:**
+- Admin console now stable and error-free
+- All admin pages load without infinite loops
+- Crew request functionality fully operational
+- Backup and restore features working properly
+- Improved system reliability and performance
+
+---
+
 ## Version 1.8.3 - December 19, 2025
 
 ### 🎉 What's New
