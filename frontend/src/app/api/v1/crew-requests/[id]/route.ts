@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
+import { decryptPassword } from '@/lib/email-crypto';
 import nodemailer from 'nodemailer';
 
 // GET - Get single request
@@ -198,7 +199,7 @@ async function sendCompletionEmail(
     secure: emailConfig.encryption === 'ssl',
     auth: {
       user: emailConfig.username,
-      pass: emailConfig.appPasswordEncrypted // Note: In production, decrypt this
+      pass: decryptPassword(emailConfig.appPasswordEncrypted || '')
     }
   };
 
