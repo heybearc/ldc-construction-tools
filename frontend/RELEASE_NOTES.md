@@ -1,5 +1,50 @@
 # LDC Construction Tools - Release Notes
 
+## Version 1.10.3 - December 23, 2025
+
+### ✨ New Features
+
+#### Enhanced Crew Request Form
+Major improvements to the crew request submission process, making it easier for Personnel Contacts to manage bulk requests:
+
+**Submit on Behalf Of Others:**
+- Personnel Contact, Assistant, and Support roles can now submit requests for other people
+- Optional fields to specify the actual requestor's name and email
+- Notifications automatically sent to the person you're submitting for
+- Perfect for bulk entry of multiple requests
+
+**4th Request Type Added:**
+- New option: "Add this Volunteer to Crew AND Project Roster"
+- Allows adding a volunteer to both a crew and project in one request
+- Shows both crew selection and project fields when selected
+
+**Improved Project Selection:**
+- Project dropdown for existing projects
+- OR manual text field for new/unlisted projects
+- Flexible approach for any scenario
+
+**Two-Step Crew Selection:**
+- Select Trade Team first, then Crew
+- Organized approach for 40+ crews
+- Faster for bulk entry within the same trade team
+
+### 🎯 Benefits
+
+- **Faster Bulk Entry:** Personnel Contacts can quickly enter multiple requests for different people
+- **Better Organization:** Two-step crew selection makes finding the right crew easier
+- **More Flexibility:** Can add volunteers to crews, projects, or both in one request
+- **Proper Attribution:** Requests show the correct requestor for notifications and tracking
+
+### 👥 Who Can Use These Features
+
+The "Submit on Behalf Of" feature is available to:
+- Personnel Contact
+- Personnel Contact Assistant
+- Personnel Contact Support
+- Super Admin
+
+---
+
 ## Version 1.10.2 - December 22, 2025
 
 ### 🐛 Critical Bug Fixes
