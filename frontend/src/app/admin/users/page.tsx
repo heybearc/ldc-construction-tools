@@ -25,9 +25,16 @@ interface UserStats {
   inactive: number;
 }
 
+interface ConstructionGroup {
+  id: string;
+  code: string;
+  name: string;
+}
+
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [constructionGroups, setConstructionGroups] = useState<ConstructionGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -61,6 +68,7 @@ export default function UserManagementPage() {
   useEffect(() => {
     loadUsers();
     loadUserStats();
+    loadConstructionGroups();
   }, []);
 
   const loadUsers = async () => {
@@ -86,6 +94,18 @@ export default function UserManagementPage() {
       }
     } catch (error) {
       console.error('Failed to load user stats:', error);
+    }
+  };
+
+  const loadConstructionGroups = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/hierarchy/construction-groups');
+      if (response.ok) {
+        const data = await response.json();
+        setConstructionGroups(data.constructionGroups || []);
+      }
+    } catch (error) {
+      console.error('Failed to load construction groups:', error);
     }
   };
 
@@ -1111,13 +1131,16 @@ export default function UserManagementPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Construction Group
                 </label>
-                <input
-                  type="text"
+                <select
                   value={selectedUser.constructionGroupId || ''}
                   onChange={(e) => setSelectedUser({...selectedUser, constructionGroupId: e.target.value || undefined})}
-                  placeholder="e.g., 01.12"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                >
+                  <option value="">None</option>
+                  {constructionGroups.map(cg => (
+                    <option key={cg.id} value={cg.id}>{cg.code}</option>
+                  ))}
+                </select>
               </div>
               
               <div>
