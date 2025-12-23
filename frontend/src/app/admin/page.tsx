@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Shield, Users, Mail, Activity, BarChart, FileText, Settings, 
   CheckCircle, AlertCircle, TrendingUp, Clock, MessageSquare,
@@ -51,23 +51,7 @@ export default function AdminDashboardPage() {
     { name: 'System Ops', href: '/admin/system', icon: Settings, color: 'gray' },
   ], []);
 
-  useEffect(() => {
-    // Detect environment from hostname
-    const hostname = window.location.hostname;
-    if (hostname.includes('green')) {
-      setEnvironment('GREEN');
-    } else if (hostname.includes('blue')) {
-      setEnvironment('BLUE');
-    } else if (hostname === 'ldctools.com' || hostname === 'www.ldctools.com') {
-      setEnvironment('PRODUCTION');
-    } else {
-      setEnvironment('DEVELOPMENT');
-    }
-    
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       // Fetch user stats
       const userStatsRes = await fetch('/api/v1/admin/users/stats');
@@ -129,7 +113,23 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Detect environment from hostname
+    const hostname = window.location.hostname;
+    if (hostname.includes('green')) {
+      setEnvironment('GREEN');
+    } else if (hostname.includes('blue')) {
+      setEnvironment('BLUE');
+    } else if (hostname === 'ldctools.com' || hostname === 'www.ldctools.com') {
+      setEnvironment('PRODUCTION');
+    } else {
+      setEnvironment('DEVELOPMENT');
+    }
+    
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const formatTimeAgo = (timestamp: string) => {
     const date = new Date(timestamp);
