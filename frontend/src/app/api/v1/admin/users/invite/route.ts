@@ -55,7 +55,33 @@ export async function POST(request: NextRequest) {
     const inviteExpires = new Date();
     inviteExpires.setDate(inviteExpires.getDate() + 7); // 7 days expiry
 
-    // Create the user invitation record
+    // Create the user with INVITED status
+    const newUser = await prisma.user.create({
+      data: {
+        name: name || null,
+        email,
+        role,
+        status: 'INVITED',
+        zoneId: zoneId || cgScope.zoneId || '01',
+        regionId: regionId || cgScope.regionId || '01.12',
+        ...(cgScope?.constructionGroupId && {
+          constructionGroup: {
+            connect: { id: cgScope.constructionGroupId }
+          }
+        }),
+        emailVerified: null,
+        invitedBy: cgScope.userId,
+        invitedAt: new Date(),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      }
+    });
+
+    // Also create the user invitation record for tracking
     const invitation = await prisma.userInvitation.create({
       data: {
         email,
@@ -163,10 +189,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Invitation sent successfully',
-      invitation: {
-        id: invitation.id,
-        email: invitation.email,
-        role: invitation.role,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
       }
     }, { status: 201 });
 
