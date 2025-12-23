@@ -202,6 +202,29 @@ export default function UserManagementPage() {
     }
   };
 
+  const handleResendInvitation = async (userId: string) => {
+    if (!confirm('Resend invitation email to this user?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/v1/admin/users/${userId}/resend-invite`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        alert('Invitation resent successfully!');
+        loadUsers();
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to resend invitation. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to resend invitation:', error);
+      alert('Failed to resend invitation. Please try again.');
+    }
+  };
+
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       return;
@@ -566,6 +589,18 @@ export default function UserManagementPage() {
                                   <Edit className="mr-2 h-4 w-4" />
                                   Edit User
                                 </button>
+                                {user.status === 'INVITED' && (
+                                  <button
+                                    onClick={() => {
+                                      handleResendInvitation(user.id);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center"
+                                  >
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    Resend Invitation
+                                  </button>
+                                )}
                                 <button
                                   onClick={() => {
                                     handleDeleteUser(user.id);
