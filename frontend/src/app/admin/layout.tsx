@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Shield, Users, Mail, Activity, BarChart, FileText, Settings, MessageSquare, FolderTree, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -27,7 +27,7 @@ export default function AdminLayout({
     }
   }, []);
 
-  const adminModules = [
+  const adminModules = useMemo(() => [
     {
       name: 'Dashboard',
       href: '/admin',
@@ -88,7 +88,7 @@ export default function AdminLayout({
       icon: Settings,
       description: 'Backup, restore, and maintenance'
     }
-  ];
+  ], []);
 
   return (
     <div className="min-h-screen bg-gray-50">
