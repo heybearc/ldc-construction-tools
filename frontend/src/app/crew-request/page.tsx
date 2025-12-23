@@ -230,6 +230,9 @@ export default function CrewRequestPage() {
   }
 
   if (isSubmitted) {
+    const notificationEmail = formData.override_requestor_email || user.email;
+    const notificationName = formData.override_requestor_name || user.name;
+    
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
@@ -241,7 +244,15 @@ export default function CrewRequestPage() {
             Thank you for your submission. The personnel team will review your request and process it as soon as possible.
           </p>
           <p className="text-sm text-gray-500 mb-6">
-            You will receive an email notification at <strong>{user.email}</strong> when your request is completed.
+            {formData.override_requestor_email ? (
+              <>
+                <strong>{notificationName}</strong> will receive an email notification at <strong>{notificationEmail}</strong> when the request is completed.
+              </>
+            ) : (
+              <>
+                You will receive an email notification at <strong>{notificationEmail}</strong> when your request is completed.
+              </>
+            )}
           </p>
           <button
             onClick={handleNewRequest}
