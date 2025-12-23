@@ -393,15 +393,16 @@ model Region {
 }
 
 model ConstructionGroup {
-  id          String      @id @default(cuid())
-  code        String      @unique  // "CG-01.12-001"
-  name        String               // "Region 01.12 Construction Group"
-  regionId    String
-  region      Region      @relation(fields: [regionId], references: [id])
-  description String?
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String      @id @default(cuid())
+  code          String      @unique  // "CG-01.12-001"
+  name          String               // "Region 01.12 Construction Group"
+  regionId      String
+  region        Region      @relation(fields: [regionId], references: [id])
+  description   String?
+  cgProjectUrl  String?              // URL to CG Project page for instructions
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   
   // All scoped data
   users       User[]
