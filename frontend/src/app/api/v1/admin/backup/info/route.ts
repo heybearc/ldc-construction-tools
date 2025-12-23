@@ -26,39 +26,53 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get list of backups with details from NFS storage
-    const { stdout: backupList } = await execAsync(
-      'ssh -o StrictHostKeyChecking=no root@10.92.3.21 "ls -lh /mnt/data/ldc-tools-backups/database/automated/db-ldc-tools-*.sql.gz 2>/dev/null | tail -10"'
-    );
+    let backups: any[] = [];
+    let lastBackup: any = null;
+    let databases: any[] = [];
+    let sshAvailable = true;
 
-    // Parse backup list
-    const backups = backupList.trim().split('\n').filter(line => line).map(line => {
-      const parts = line.split(/\s+/);
-      const size = parts[4];
-      const date = `${parts[5]} ${parts[6]} ${parts[7]}`;
-      const filename = parts[8]?.split('/').pop() || '';
-      return { filename, size, date };
-    }).reverse(); // Most recent first
+    try {
+      // Get list of backups with details from NFS storage
+      const { stdout: backupList } = await execAsync(
+        'ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 root@10.92.3.21 "ls -lh /mnt/data/ldc-tools-backups/database/automated/db-ldc-tools-*.sql.gz 2>/dev/null | tail -10"'
+      );
 
-    // Get last backup time
-    const lastBackup = backups.length > 0 ? backups[0] : null;
+      // Parse backup list
+      backups = backupList.trim().split('\n').filter(line => line).map(line => {
+        const parts = line.split(/\s+/);
+        const size = parts[4];
+        const date = `${parts[5]} ${parts[6]} ${parts[7]}`;
+        const filename = parts[8]?.split('/').pop() || '';
+        return { filename, size, date };
+      }).reverse(); // Most recent first
 
-    // Get database size
-    const { stdout: dbSizes } = await execAsync(
-      'ssh -o StrictHostKeyChecking=no root@10.92.3.21 "sudo -u postgres psql -t -c \\"SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database WHERE datname = \'ldc_tools\';\\""'
-    );
+      // Get last backup time
+      lastBackup = backups.length > 0 ? backups[0] : null;
 
-    const databases = dbSizes.trim().split('\n').filter(line => line.trim()).map(line => {
-      const [name, size] = line.trim().split('|').map(s => s.trim());
-      return { name, size };
-    });
+      // Get database size
+      const { stdout: dbSizes } = await execAsync(
+        'ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 root@10.92.3.21 "sudo -u postgres psql -t -c \\"SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database WHERE datname = \'ldc_tools\';\\""'
+      );
+
+      databases = dbSizes.trim().split('\n').filter(line => line.trim()).map(line => {
+        const [name, size] = line.trim().split('|').map(s => s.trim());
+        return { name, size };
+      });
+    } catch (sshError) {
+      console.error('SSH connection to database server failed:', sshError);
+      sshAvailable = false;
+      // Return graceful response when SSH is not available
+      databases = [{ name: 'ldc_tools', size: 'N/A (SSH unavailable)' }];
+    }
 
     return NextResponse.json({
       success: true,
       backups,
       lastBackup,
       databases,
-      backupCount: backups.length
+      backupCount: backups.length,
+      sshAvailable,
+      message: !sshAvailable ? 'Backup information unavailable - SSH connection to database server not configured' : undefined
     });
   } catch (error) {
     console.error('Backup info error:', error);
