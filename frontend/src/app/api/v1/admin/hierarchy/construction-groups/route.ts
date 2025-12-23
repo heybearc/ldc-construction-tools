@@ -5,6 +5,38 @@ import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { STANDARD_TRADE_TEAMS } from '@/lib/standard-trade-teams';
 
+// GET: List all construction groups
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const constructionGroups = await prisma.constructionGroup.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        regionId: true,
+        isActive: true
+      },
+      orderBy: { code: 'asc' }
+    });
+
+    return NextResponse.json({ constructionGroups });
+
+  } catch (error) {
+    console.error('Get construction groups error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch construction groups' },
+      { status: 500 }
+    );
+  }
+}
+
 // POST: Create a new construction group (SUPER_ADMIN only)
 export async function POST(request: NextRequest) {
   try {
