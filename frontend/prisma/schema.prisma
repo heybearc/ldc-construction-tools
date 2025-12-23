@@ -892,7 +892,7 @@ model FeedbackComment {
 
 model CrewChangeRequest {
   id                    String    @id @default(cuid())
-  requestType           String    // ADD_TO_CREW, REMOVE_FROM_CREW, ADD_TO_PROJECT_ROSTER
+  requestType           String    // ADD_TO_CREW, REMOVE_FROM_CREW, ADD_TO_PROJECT_ROSTER, ADD_TO_CREW_AND_PROJECT
   requestorName         String
   requestorEmail        String
   volunteerName         String
@@ -903,6 +903,7 @@ model CrewChangeRequest {
   projectId             String?
   projectRosterName     String?
   comments              String?   @db.Text
+  batchId               String?   // Groups multiple requests submitted together
   status                String    @default("NEW") // NEW, IN_PROGRESS, COMPLETED, REJECTED
   assignedToId          String?
   resolutionNotes       String?   @db.Text
@@ -919,5 +920,6 @@ model CrewChangeRequest {
   @@index([status])
   @@index([constructionGroupId])
   @@index([createdAt])
+  @@index([batchId])
   @@map("crew_change_requests")
 }

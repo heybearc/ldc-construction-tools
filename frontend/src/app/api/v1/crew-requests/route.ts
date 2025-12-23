@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
       comments,
       override_requestor_name,
       override_requestor_email,
+      batch_id,
     } = body;
 
     // Validation
@@ -154,6 +155,7 @@ export async function POST(request: NextRequest) {
         projectId: project_id || null,
         projectRosterName: project_roster_name || null,
         comments: comments || null,
+        batchId: batch_id || null,
         status: 'NEW',
         constructionGroupId: user.constructionGroupId,
       }

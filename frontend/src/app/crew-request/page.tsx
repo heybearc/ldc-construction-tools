@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Send, CheckCircle, User, Mail, Users, Briefcase, ChevronDown } from 'lucide-react';
+import { ClipboardList, Send, CheckCircle, User, Mail, Users, Briefcase, ChevronDown, Plus, Trash2 } from 'lucide-react';
 
 type RequestType = 'ADD_TO_CREW' | 'REMOVE_FROM_CREW' | 'ADD_TO_PROJECT_ROSTER' | 'ADD_TO_CREW_AND_PROJECT';
 
@@ -28,10 +28,15 @@ interface UserInfo {
   role?: string;
 }
 
+interface Volunteer {
+  id: string;
+  name: string;
+  ba_id: string;
+}
+
 interface FormData {
   request_type: RequestType | '';
-  volunteer_name: string;
-  volunteer_ba_id: string;
+  volunteers: Volunteer[];
   trade_team_id: string;
   crew_id: string;
   project_id: string;
@@ -43,8 +48,7 @@ interface FormData {
 
 const initialFormData: FormData = {
   request_type: '',
-  volunteer_name: '',
-  volunteer_ba_id: '',
+  volunteers: [{ id: crypto.randomUUID(), name: '', ba_id: '' }],
   trade_team_id: '',
   crew_id: '',
   project_id: '',
@@ -122,6 +126,29 @@ export default function CrewRequestPage() {
     });
   }, []);
 
+  const handleVolunteerChange = useCallback((volunteerId: string, field: 'name' | 'ba_id', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      volunteers: prev.volunteers.map(v => 
+        v.id === volunteerId ? { ...v, [field]: value } : v
+      )
+    }));
+  }, []);
+
+  const addVolunteer = useCallback(() => {
+    setFormData(prev => ({
+      ...prev,
+      volunteers: [...prev.volunteers, { id: crypto.randomUUID(), name: '', ba_id: '' }]
+    }));
+  }, []);
+
+  const removeVolunteer = useCallback((volunteerId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      volunteers: prev.volunteers.filter(v => v.id !== volunteerId)
+    }));
+  }, []);
+
   const selectedTeam = tradeTeams.find(t => t.id === formData.trade_team_id);
 
   // Check if user can submit on behalf of others
@@ -138,32 +165,47 @@ export default function CrewRequestPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/v1/crew-requests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          request_type: formData.request_type,
-          volunteer_name: formData.volunteer_name,
-          volunteer_ba_id: formData.volunteer_ba_id || null,
-          trade_team_id: formData.trade_team_id || null,
-          crew_id: formData.crew_id || null,
-          crew_name: selectedTeam?.crews.find(c => c.id === formData.crew_id)?.name || null,
-          project_id: formData.project_id || null,
-          project_roster_name: formData.project_name || projects.find(p => p.id === formData.project_id)?.name || null,
-          comments: formData.comments || null,
-          override_requestor_name: formData.override_requestor_name || null,
-          override_requestor_email: formData.override_requestor_email || null,
-        }),
-      });
+      // Generate batch ID for grouping requests
+      const batchId = crypto.randomUUID();
+      const crewName = selectedTeam?.crews.find(c => c.id === formData.crew_id)?.name || null;
+      const projectName = formData.project_name || projects.find(p => p.id === formData.project_id)?.name || null;
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to submit request');
+      // Create individual requests for each volunteer
+      const requests = formData.volunteers.map(volunteer => ({
+        request_type: formData.request_type,
+        volunteer_name: volunteer.name,
+        volunteer_ba_id: volunteer.ba_id || null,
+        trade_team_id: formData.trade_team_id || null,
+        crew_id: formData.crew_id || null,
+        crew_name: crewName,
+        project_id: formData.project_id || null,
+        project_roster_name: projectName,
+        comments: formData.comments || null,
+        override_requestor_name: formData.override_requestor_name || null,
+        override_requestor_email: formData.override_requestor_email || null,
+        batch_id: batchId,
+      }));
+
+      // Submit all requests
+      const responses = await Promise.all(
+        requests.map(request =>
+          fetch('/api/v1/crew-requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(request),
+          })
+        )
+      );
+
+      // Check if all succeeded
+      const failed = responses.filter(r => !r.ok);
+      if (failed.length > 0) {
+        throw new Error(`Failed to submit ${failed.length} of ${requests.length} requests`);
       }
 
       setIsSubmitted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit request');
+      setError(err instanceof Error ? err.message : 'Failed to submit requests');
     } finally {
       setIsSubmitting(false);
     }
@@ -348,34 +390,74 @@ export default function CrewRequestPage() {
             </div>
           )}
 
-          {/* Volunteer Name */}
+          {/* Volunteers List */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <Users className="h-4 w-4 mr-2 text-gray-500" />
-              Volunteer Name <span className="text-red-500 ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.volunteer_name}
-              onChange={handleInputChange('volunteer_name')}
-              placeholder="Enter volunteer's full name"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          {/* Volunteer BA ID */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Volunteer BA ID (if known)
-            </label>
-            <input
-              type="text"
-              value={formData.volunteer_ba_id}
-              onChange={handleInputChange('volunteer_ba_id')}
-              placeholder="Enter BA ID if known"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <div className="flex items-center justify-between mb-4">
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Users className="h-4 w-4 mr-2 text-gray-500" />
+                Volunteers <span className="text-red-500 ml-1">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={addVolunteer}
+                className="flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Volunteer
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {formData.volunteers.map((volunteer, index) => (
+                <div key={volunteer.id} className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <span className="text-sm font-medium text-gray-600">Volunteer #{index + 1}</span>
+                    {formData.volunteers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeVolunteer(volunteer.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={volunteer.name}
+                        onChange={(e) => handleVolunteerChange(volunteer.id, 'name', e.target.value)}
+                        placeholder="Enter volunteer's full name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        BA ID (if known)
+                      </label>
+                      <input
+                        type="text"
+                        value={volunteer.ba_id}
+                        onChange={(e) => handleVolunteerChange(volunteer.id, 'ba_id', e.target.value)}
+                        placeholder="Enter BA ID if known"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {formData.volunteers.length > 1 && (
+              <p className="text-sm text-blue-600 mt-3">
+                Creating batch request for {formData.volunteers.length} volunteers
+              </p>
+            )}
           </div>
 
           {/* Trade Team & Crew Selection - Two-step approach */}

@@ -11,7 +11,8 @@ import {
   BarChart3,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  UserPlus
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -68,6 +69,13 @@ export default function DashboardPage() {
   };
 
   const quickActions = [
+    {
+      title: 'Submit Crew Request',
+      description: 'Add volunteers to crews or project rosters',
+      href: '/crew-request',
+      icon: UserPlus,
+      color: 'bg-indigo-500'
+    },
     {
       title: 'Trade Teams',
       description: 'Manage construction trade teams and crews',
