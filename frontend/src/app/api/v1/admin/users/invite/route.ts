@@ -40,8 +40,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get CG scope for the new user
+    // Get CG scope and current user
     const cgScope = await getCGScope();
+    if (!cgScope) {
+      return NextResponse.json(
+        { error: 'Unable to determine user context' },
+        { status: 500 }
+      );
+    }
 
     // Generate a random token for the invitation
     const crypto = require('crypto');
@@ -49,26 +55,20 @@ export async function POST(request: NextRequest) {
     const inviteExpires = new Date();
     inviteExpires.setDate(inviteExpires.getDate() + 7); // 7 days expiry
 
-    // Create the user with invited status
-    const newUser = await prisma.user.create({
+    // Create the user invitation record
+    const invitation = await prisma.userInvitation.create({
       data: {
-        name: name || null,
         email,
+        firstName: name?.split(' ')[0] || '',
+        lastName: name?.split(' ').slice(1).join(' ') || '',
         role,
-        status: 'ACTIVE',
-        zoneId: zoneId || null,
-        regionId: regionId || null,
-        constructionGroupId: cgScope?.constructionGroupId || null,
-        emailVerified: null, // Not verified yet
-        inviteToken,
-        inviteExpires,
+        regionId: regionId || cgScope.regionId || '',
+        zoneId: zoneId || cgScope.zoneId || '',
+        invitedBy: cgScope.userId,
+        invitationToken: inviteToken,
+        expiresAt: inviteExpires,
+        status: 'PENDING',
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      }
     });
 
     // Get email configuration
@@ -84,15 +84,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Decrypt the password using proper decryption
-    const password = decryptPassword(emailConfig.appPasswordEncrypted);
+    const password = decryptPassword(emailConfig.appPasswordEncrypted || '');
 
     // Create transporter based on configuration
     const transportConfig: any = {
-      host: emailConfig.smtpHost,
-      port: emailConfig.smtpPort,
+      host: emailConfig.smtpHost || '',
+      port: emailConfig.smtpPort || 587,
       secure: emailConfig.encryption === 'ssl',
       auth: {
-        user: emailConfig.username,
+        user: emailConfig.username || '',
         pass: password
       }
     };
@@ -155,13 +155,18 @@ export async function POST(request: NextRequest) {
       `,
     });
 
+    // Mark invitation as sent
+    await prisma.userInvitation.update({
+      where: { id: invitation.id },
+      data: { sentAt: new Date() }
+    });
+
     return NextResponse.json({
       message: 'Invitation sent successfully',
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
+      invitation: {
+        id: invitation.id,
+        email: invitation.email,
+        role: invitation.role,
       }
     }, { status: 201 });
 
