@@ -149,7 +149,7 @@ export async function PATCH(
   }
 }
 
-// DELETE - Delete request
+// DELETE - Delete a crew request (SUPER_ADMIN only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -160,11 +160,22 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get user to check if SUPER_ADMIN
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { role: true }
+    });
+
+    if (user?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Only SUPER_ADMIN can delete requests' }, { status: 403 });
+    }
+
+    // Delete the request
     await prisma.crewChangeRequest.delete({
       where: { id: params.id }
     });
 
-    return NextResponse.json({ message: 'Request deleted' });
+    return NextResponse.json({ message: 'Request deleted successfully' });
   } catch (error) {
     console.error('Delete crew request error:', error);
     return NextResponse.json({ error: 'Failed to delete request' }, { status: 500 });

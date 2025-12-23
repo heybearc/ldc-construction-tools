@@ -5,7 +5,7 @@ import {
   ClipboardList, Search, Filter, CheckCircle, Clock, AlertCircle, 
   User, Mail, Users, Briefcase, MessageSquare, X, ChevronDown,
   UserPlus, UserMinus, FileText, RefreshCw, ExternalLink, Info,
-  Plus, Save
+  Plus, Save, Trash2
 } from 'lucide-react';
 
 interface CrewRequest {
@@ -237,6 +237,29 @@ export default function CrewRequestsPage() {
       setVolunteerError(err instanceof Error ? err.message : 'Failed to add volunteer');
     } finally {
       setAddingVolunteer(false);
+    }
+  };
+
+  const handleDelete = async (requestId: string) => {
+    if (!confirm('Are you sure you want to delete this request? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/crew-requests/${requestId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete request');
+      }
+
+      // Refresh the requests list
+      await fetchRequests();
+      alert('Request deleted successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete request');
     }
   };
 
@@ -555,6 +578,13 @@ export default function CrewRequestsPage() {
                             className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                           >
                             Complete
+                          </button>
+                          <button
+                            onClick={() => handleDelete(request.id)}
+                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
+                            title="Delete request (SUPER_ADMIN only)"
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       </>
