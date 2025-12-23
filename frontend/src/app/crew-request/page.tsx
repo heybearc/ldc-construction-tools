@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ClipboardList, Send, CheckCircle, User, Mail, Users, Briefcase, ChevronDown } from 'lucide-react';
 
-type RequestType = 'ADD_TO_CREW' | 'REMOVE_FROM_CREW' | 'ADD_TO_PROJECT_ROSTER';
+type RequestType = 'ADD_TO_CREW' | 'REMOVE_FROM_CREW' | 'ADD_TO_PROJECT_ROSTER' | 'ADD_TO_CREW_AND_PROJECT';
 
 interface TradeTeam {
   id: string;
@@ -286,6 +286,17 @@ export default function CrewRequestPage() {
                 />
                 <span className="ml-3 text-gray-700">3. Add this Volunteer to Project Roster</span>
               </label>
+              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400 transition-colors">
+                <input
+                  type="radio"
+                  name="request_type"
+                  value="ADD_TO_CREW_AND_PROJECT"
+                  checked={formData.request_type === 'ADD_TO_CREW_AND_PROJECT'}
+                  onChange={handleInputChange('request_type')}
+                  className="h-4 w-4 text-green-600 focus:ring-green-500"
+                />
+                <span className="ml-3 text-gray-700">4. Add this Volunteer to Crew AND Project Roster</span>
+              </label>
             </div>
           </div>
 
@@ -357,7 +368,7 @@ export default function CrewRequestPage() {
           </div>
 
           {/* Trade Team & Crew Selection */}
-          {(formData.request_type === 'ADD_TO_CREW' || formData.request_type === 'REMOVE_FROM_CREW') && (
+          {(formData.request_type === 'ADD_TO_CREW' || formData.request_type === 'REMOVE_FROM_CREW' || formData.request_type === 'ADD_TO_CREW_AND_PROJECT') && (
             <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -404,7 +415,7 @@ export default function CrewRequestPage() {
           )}
 
           {/* Project Selection */}
-          {formData.request_type === 'ADD_TO_PROJECT_ROSTER' && (
+          {(formData.request_type === 'ADD_TO_PROJECT_ROSTER' || formData.request_type === 'ADD_TO_CREW_AND_PROJECT') && (
             <div className="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Project <span className="text-red-500">*</span>
