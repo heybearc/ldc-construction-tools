@@ -73,6 +73,8 @@ model User {
   personnelContacts   PersonnelContact[]
   volunteer           Volunteer?
   announcements       Announcement[]
+  assignedCrewRequests CrewChangeRequest[] @relation("AssignedCrewRequests")
+  completedCrewRequests CrewChangeRequest[] @relation("CompletedCrewRequests")
 }
 
 model VerificationToken {
@@ -409,6 +411,7 @@ model ConstructionGroup {
   volunteers    Volunteer[]
   congregations   Congregation[]
   announcements   Announcement[]
+  crewChangeRequests CrewChangeRequest[]
 
   @@map("construction_groups")
 }
@@ -885,4 +888,36 @@ model FeedbackComment {
 
   @@index([feedbackId])
   @@map("feedback_comments")
+}
+
+model CrewChangeRequest {
+  id                    String    @id @default(cuid())
+  requestType           String    // ADD_TO_CREW, REMOVE_FROM_CREW, ADD_TO_PROJECT_ROSTER
+  requestorName         String
+  requestorEmail        String
+  volunteerName         String
+  volunteerBaId         String?
+  tradeTeamId           String?
+  crewId                String?
+  crewName              String?
+  projectId             String?
+  projectRosterName     String?
+  comments              String?   @db.Text
+  status                String    @default("NEW") // NEW, IN_PROGRESS, COMPLETED, REJECTED
+  assignedToId          String?
+  resolutionNotes       String?   @db.Text
+  completedAt           DateTime?
+  completedById         String?
+  constructionGroupId   String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  assignedTo            User?               @relation("AssignedCrewRequests", fields: [assignedToId], references: [id], onDelete: SetNull)
+  completedBy           User?               @relation("CompletedCrewRequests", fields: [completedById], references: [id], onDelete: SetNull)
+  constructionGroup     ConstructionGroup   @relation(fields: [constructionGroupId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([constructionGroupId])
+  @@index([createdAt])
+  @@map("crew_change_requests")
 }
