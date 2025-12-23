@@ -13,26 +13,47 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user with this invite token
-    const user = await prisma.user.findFirst({
+    // Find invitation with this token
+    const invitation = await prisma.userInvitation.findFirst({
       where: {
-        inviteToken: token,
-        inviteExpires: {
+        invitationToken: token,
+        expiresAt: {
           gte: new Date() // Token not expired
-        }
+        },
+        status: 'PENDING'
       },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        expiresAt: true
+      }
+    });
+
+    if (!invitation) {
+      return NextResponse.json(
+        { valid: false, message: 'Invalid or expired invitation token' },
+        { status: 404 }
+      );
+    }
+
+    // Get the user record
+    const user = await prisma.user.findUnique({
+      where: { email: invitation.email },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        inviteExpires: true
+        status: true
       }
     });
 
-    if (!user) {
+    if (!user || user.status !== 'INVITED') {
       return NextResponse.json(
-        { valid: false, message: 'Invalid or expired invitation token' },
+        { valid: false, message: 'Invalid invitation' },
         { status: 404 }
       );
     }
@@ -40,7 +61,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       valid: true,
       user: {
-        name: user.name,
+        name: user.name || `${invitation.firstName} ${invitation.lastName}`.trim(),
         email: user.email,
         role: user.role
       }
