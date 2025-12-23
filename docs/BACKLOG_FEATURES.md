@@ -93,6 +93,31 @@
 - **Effort**: L
 - **Requested**: 2025-09-24
 
+### 🔧 Workflow Automation
+
+#### FEAT-017: Crew Request Auto-Assignment
+- **Module**: Crew Request System
+- **Priority**: Medium
+- **Description**: Automatically perform crew/project assignments when crew requests are marked complete, instead of just tracking/notifying
+- **Business Value**: Reduces manual work, ensures assignments are actually made, single source of truth for crew/project membership
+- **User Story**: As a Personnel Contact, I want crew requests to automatically make the assignments so that I don't have to manually update crew membership and project rosters after submitting requests
+- **Status**: 💭 IDEA
+- **Effort**: XL
+- **Requested**: 2025-12-23
+- **Technical Details**:
+  - When request marked "COMPLETED", perform actual assignment:
+    - `ADD_TO_CREW` → Add volunteer to crew membership table
+    - `ADD_TO_PROJECT_ROSTER` → Add volunteer to project roster
+    - `ADD_TO_CREW_AND_PROJECT` → Do both
+    - `REMOVE_FROM_CREW` → Remove volunteer from crew
+  - Requires crew membership and project roster database tables
+  - Need duplicate assignment detection/prevention
+  - Consider hybrid approach: create pending assignments for review before taking effect
+- **Dependencies**: 
+  - Crew membership data model
+  - Project roster data model
+  - May need integration with Builder Assistant (ba.jw.org) if that's the source of truth
+
 ## 📋 PLANNED
 
 *Features approved for future sprints will be moved here*
@@ -117,6 +142,6 @@
 - **Requested**: 2025-09-24
 ```
 
-**Total Feature Requests**: 8  
-**Priority Distribution**: 1 High, 4 Medium, 3 Low  
-**Effort Distribution**: 0 Small, 3 Medium, 3 Large, 2 Extra Large
+**Total Feature Requests**: 9  
+**Priority Distribution**: 1 High, 5 Medium, 3 Low  
+**Effort Distribution**: 0 Small, 3 Medium, 3 Large, 3 Extra Large
