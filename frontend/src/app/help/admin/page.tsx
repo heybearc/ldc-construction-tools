@@ -13,6 +13,7 @@ export default function AdminHelpPage() {
       icon: '👥',
       topics: [
         { title: 'Inviting New Users', href: '/help/admin/invitations' },
+        { title: 'Understanding User Roles', href: '/help/admin/user-roles' },
         { title: 'Managing User Roles', href: '/help/admin/roles' },
         { title: 'Deactivating Users', href: '/help/admin/users' }
       ]

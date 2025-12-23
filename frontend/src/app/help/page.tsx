@@ -66,6 +66,13 @@ const helpTopics: HelpTopic[] = [
     icon: '⚙️'
   },
   {
+    id: 'crew-requests',
+    title: 'Crew Requests',
+    description: 'Submit and manage crew change requests for volunteers',
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
+    icon: '📝'
+  },
+  {
     id: 'organization',
     title: 'Organization Hierarchy',
     description: 'Understanding Branch, Zone, Region, and CG structure',
