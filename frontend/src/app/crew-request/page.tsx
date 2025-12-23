@@ -112,23 +112,17 @@ export default function CrewRequestPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const value = e.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      // Reset crew when trade team changes
+      if (field === 'trade_team_id') {
+        updated.crew_id = '';
+      }
+      return updated;
+    });
   }, []);
 
-  // Flatten all crews from all trade teams for easy selection
-  const allCrews = tradeTeams.flatMap(team => 
-    team.crews.map(crew => ({
-      id: crew.id,
-      name: crew.name,
-      teamName: team.name,
-      displayName: `${team.name} - ${crew.name}`
-    }))
-  );
-
-  const selectedCrew = allCrews.find(c => c.id === formData.crew_id);
+  const selectedTeam = tradeTeams.find(t => t.id === formData.trade_team_id);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,7 +139,7 @@ export default function CrewRequestPage() {
           volunteer_ba_id: formData.volunteer_ba_id || null,
           trade_team_id: formData.trade_team_id || null,
           crew_id: formData.crew_id || null,
-          crew_name: selectedCrew?.name || null,
+          crew_name: selectedTeam?.crews.find(c => c.id === formData.crew_id)?.name || null,
           project_id: formData.project_id || null,
           project_roster_name: formData.project_name || projects.find(p => p.id === formData.project_id)?.name || null,
           comments: formData.comments || null,
@@ -376,26 +370,50 @@ export default function CrewRequestPage() {
             />
           </div>
 
-          {/* Crew Selection - Simplified single dropdown */}
+          {/* Trade Team & Crew Selection - Two-step approach */}
           {(formData.request_type === 'ADD_TO_CREW' || formData.request_type === 'REMOVE_FROM_CREW' || formData.request_type === 'ADD_TO_CREW_AND_PROJECT') && (
-            <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Crew <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  required
-                  value={formData.crew_id}
-                  onChange={handleInputChange('crew_id')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
-                >
-                  <option value="">Select a Crew</option>
-                  {allCrews.map(crew => (
-                    <option key={crew.id} value={crew.id}>{crew.displayName}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trade Team <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    required
+                    value={formData.trade_team_id}
+                    onChange={handleInputChange('trade_team_id')}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                  >
+                    <option value="">Select a Trade Team</option>
+                    {tradeTeams.map(team => (
+                      <option key={team.id} value={team.id}>{team.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                </div>
               </div>
+              
+              {formData.trade_team_id && selectedTeam && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Crew <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={formData.crew_id}
+                      onChange={handleInputChange('crew_id')}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                    >
+                      <option value="">Select a Crew</option>
+                      {selectedTeam.crews.map(crew => (
+                        <option key={crew.id} value={crew.id}>{crew.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
