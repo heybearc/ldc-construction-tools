@@ -1,6 +1,12 @@
 -- Add volunteerId to User table (nullable for backwards compatibility)
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "volunteerId" TEXT;
-ALTER TABLE "User" ADD CONSTRAINT "User_volunteerId_key" UNIQUE ("volunteerId");
+
+-- Add unique constraint only if it doesn't exist
+DO $$ BEGIN
+    ALTER TABLE "User" ADD CONSTRAINT "User_volunteerId_key" UNIQUE ("volunteerId");
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Add ldcRole as String (convert from enum, nullable)
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "ldcRole" TEXT;
