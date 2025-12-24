@@ -7,6 +7,19 @@ import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, 
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 
+interface VolunteerRole {
+  id: string;
+  roleCategory: string;
+  roleName: string;
+  roleCode: string;
+  entityId?: string | null;
+  entityType?: string | null;
+  isPrimary: boolean;
+  isActive: boolean;
+  startDate: string;
+  endDate?: string | null;
+}
+
 interface Volunteer {
   id: string;
   first_name: string;
@@ -25,6 +38,7 @@ interface Volunteer {
   trade_crew_name?: string;
   trade_team_name?: string;
   has_user_account?: boolean;
+  roles?: VolunteerRole[];
 }
 
 interface VolunteerStats {
@@ -255,6 +269,17 @@ export default function VolunteersPage() {
     return <Users className="h-8 w-8 text-gray-400" />;
   };
 
+  const getRoleColors = (category: string): string => {
+    const colors: Record<string, string> = {
+      'CG_OVERSIGHT': 'bg-purple-100 text-purple-800',
+      'CONSTRUCTION_STAFF': 'bg-blue-100 text-blue-800',
+      'TRADE_TEAM': 'bg-green-100 text-green-800',
+      'TRADE_CREW': 'bg-amber-100 text-amber-800',
+      'PROJECT_STAFF': 'bg-indigo-100 text-indigo-800',
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800';
+  };
+
   const getRoleBadge = (volunteer: Volunteer) => {
     const roleColors: Record<string, string> = {
       'Trade Team Overseer': 'bg-green-100 text-green-800',
@@ -454,6 +479,27 @@ export default function VolunteersPage() {
 
             <div className="space-y-2 mb-4">
               {getRoleBadge(volunteer)}
+              
+              {/* Organizational Roles */}
+              {volunteer.roles && volunteer.roles.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {volunteer.roles.slice(0, 3).map((role) => (
+                    <span
+                      key={role.id}
+                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getRoleColors(role.roleCategory)}`}
+                    >
+                      {role.roleCode}
+                      {role.isPrimary && <span className="ml-1">★</span>}
+                    </span>
+                  ))}
+                  {volunteer.roles.length > 3 && (
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                      +{volunteer.roles.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+              
               {volunteer.trade_team_name && (
                 <div className="flex items-center text-sm text-gray-600">
                   <Building2 className="h-4 w-4 mr-2" />
@@ -539,8 +585,28 @@ export default function VolunteersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {volunteer.ba_id || '—'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getRoleBadge(volunteer)}
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      {getRoleBadge(volunteer)}
+                      {volunteer.roles && volunteer.roles.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {volunteer.roles.slice(0, 2).map((role) => (
+                            <span
+                              key={role.id}
+                              className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${getRoleColors(role.roleCategory)}`}
+                            >
+                              {role.roleCode}
+                              {role.isPrimary && <span className="ml-0.5">★</span>}
+                            </span>
+                          ))}
+                          {volunteer.roles.length > 2 && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                              +{volunteer.roles.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {volunteer.congregation || '—'}

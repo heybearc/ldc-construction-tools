@@ -57,6 +57,10 @@ export async function GET(request: NextRequest) {
         user: {
           select: { id: true, email: true, name: true },
         },
+        roles: {
+          where: { isActive: true },
+          orderBy: [{ isPrimary: 'desc' }, { startDate: 'desc' }],
+        },
       },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
@@ -82,6 +86,18 @@ export async function GET(request: NextRequest) {
       trade_team_name: v.tradeTeam?.name || v.crew?.tradeTeam?.name,
       user_id: v.userId,
       has_user_account: !!v.userId,
+      roles: v.roles?.map(r => ({
+        id: r.id,
+        roleCategory: r.roleCategory,
+        roleName: r.roleName,
+        roleCode: r.roleCode,
+        entityId: r.entityId,
+        entityType: r.entityType,
+        isPrimary: r.isPrimary,
+        isActive: r.isActive,
+        startDate: r.startDate.toISOString(),
+        endDate: r.endDate?.toISOString() || null,
+      })) || [],
     }));
 
     return NextResponse.json(transformed);
