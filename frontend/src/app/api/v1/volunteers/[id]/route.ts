@@ -103,7 +103,12 @@ export async function PATCH(
     if (body.serving_as !== undefined) updateData.servingAs = body.serving_as;
     // Note: role field removed - now using VolunteerRole junction table
     if (body.is_active !== undefined) updateData.isActive = body.is_active;
-    if (body.user_id !== undefined) updateData.userId = body.user_id || null;
+    // Note: user_id is handled via relation, not direct field
+    if (body.user_id !== undefined && body.user_id) {
+      updateData.user = { connect: { id: body.user_id } };
+    } else if (body.user_id === null) {
+      updateData.user = { disconnect: true };
+    }
 
     const volunteer = await prisma.volunteer.update({
       where: { id: params.id },
