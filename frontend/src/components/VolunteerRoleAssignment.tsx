@@ -194,6 +194,7 @@ export default function VolunteerRoleAssignment({
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => handleRemoveRole(role.id)}
                 className="text-red-600 hover:text-red-800"
               >
