@@ -82,11 +82,20 @@ export default function CrewDetailPage() {
     }
   };
 
-  // Group volunteers by role type
-  const overseers = volunteers.filter(v => v.role === 'Trade Crew Overseer');
-  const assistants = volunteers.filter(v => v.role === 'Trade Crew Overseer Assistant');
-  const support = volunteers.filter(v => v.role === 'Trade Crew Support');
-  const crewVolunteers = volunteers.filter(v => v.role === 'Trade Crew Volunteer');
+  // Group volunteers by organizational role type
+  const overseers = volunteers.filter(v => 
+    v.roles?.some(r => r.roleCode === 'TCO' && r.crewId === crewId)
+  );
+  const assistants = volunteers.filter(v => 
+    v.roles?.some(r => r.roleCode === 'TCOA' && r.crewId === crewId)
+  );
+  const support = volunteers.filter(v => 
+    v.roles?.some(r => r.roleCode === 'TC-Support' && r.crewId === crewId)
+  );
+  const crewVolunteers = volunteers.filter(v => 
+    v.roles?.some(r => r.roleCode === 'TCV' && r.crewId === crewId) ||
+    (v.trade_crew_id === crewId && !v.roles?.some(r => ['TCO', 'TCOA', 'TC-Support'].includes(r.roleCode)))
+  );
 
   if (loading) {
     return (
