@@ -15,10 +15,19 @@ export async function GET(request: NextRequest) {
               select: { volunteers: true }
             },
             volunteers: {
+              where: { isActive: true },
               select: { 
                 id: true,
-                isOverseer: true,
-                isAssistant: true
+                roles: {
+                  where: { 
+                    isActive: true,
+                    crewId: { not: null }
+                  },
+                  select: {
+                    roleCode: true,
+                    crewId: true
+                  }
+                }
               }
             }
           }
@@ -29,8 +38,16 @@ export async function GET(request: NextRequest) {
             id: true, 
             firstName: true, 
             lastName: true,
-            isOverseer: true,
-            isAssistant: true
+            roles: {
+              where: { 
+                isActive: true,
+                tradeTeamId: { not: null }
+              },
+              select: {
+                roleCode: true,
+                tradeTeamId: true
+              }
+            }
           }
         },
         _count: {
@@ -45,23 +62,26 @@ export async function GET(request: NextRequest) {
 
     // Transform data to match expected format with oversight counts
     const transformedTeams = tradeTeams.map((team: any) => {
-      // Count only non-oversight volunteers assigned directly to trade team
-      const directNonOversightVolunteers = team.volunteers.filter((v: any) => 
-        !v.isOverseer && !v.isAssistant
-      ).length;
-      
-      // Count volunteers in crews
+      // Count volunteers in crews (using actual crew assignment)
       const crewVolunteers = team.crews.reduce((sum: number, crew: any) => sum + crew._count.volunteers, 0);
-      const totalMembers = directNonOversightVolunteers + crewVolunteers;
+      const totalMembers = crewVolunteers;
 
-      // Count trade team oversight roles (using legacy flags)
-      const ttoCount = team.volunteers.filter((v: any) => v.isOverseer).length;
-      const ttoaCount = team.volunteers.filter((v: any) => v.isAssistant).length;
-      const ttsCount = 0; // No legacy flag for support role
+      // Count trade team oversight roles using organizational roles
+      const ttoCount = team.volunteers.filter((v: any) => 
+        v.roles?.some((r: any) => r.roleCode === 'TTO' && r.tradeTeamId === team.id)
+      ).length;
+      const ttoaCount = team.volunteers.filter((v: any) => 
+        v.roles?.some((r: any) => r.roleCode === 'TTOA' && r.tradeTeamId === team.id)
+      ).length;
+      const ttsCount = team.volunteers.filter((v: any) => 
+        v.roles?.some((r: any) => r.roleCode === 'TT-Support' && r.tradeTeamId === team.id)
+      ).length;
 
-      // Count crews needing oversight
+      // Count crews needing TCO (Trade Crew Overseer)
       const crewsNeedingTCO = team.crews.filter((crew: any) =>
-        !crew.volunteers.some((v: any) => v.isOverseer)
+        !crew.volunteers.some((v: any) => 
+          v.roles?.some((r: any) => r.roleCode === 'TCO' && r.crewId === crew.id)
+        )
       ).length;
 
       const result: any = {
