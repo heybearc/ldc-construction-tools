@@ -103,34 +103,13 @@ export default function ConstructionGroupDetailPage() {
   };
 
   const fetchUsers = async () => {
-  const handleSaveCGUrl = async () => {
-    setSavingUrl(true);
     try {
-      const response = await fetch(`/api/v1/construction-groups/${cgId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cgProjectUrl: cgProjectUrl || null }),
-      });
-      if (response.ok) {
-        const updated = await response.json();
-        setCg(updated);
-        alert("Settings saved successfully!");
-      } else {
-        alert("Failed to save settings");
-      }
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-      alert("Failed to save settings");
-    } finally {
-      setSavingUrl(false);
-    }
-  };
-
-    try {
-      const res = await fetch('/api/v1/volunteers');
+      const res = await fetch('/api/v1/admin/users');
       if (res.ok) {
         const data = await res.json();
-        setAvailableUsers(data.volunteers || []);
+        // Filter for active users only
+        const activeUsers = (data.users || []).filter((u: any) => u.status === 'ACTIVE');
+        setAvailableUsers(activeUsers);
       }
     } catch (err) {
       console.error('Failed to fetch users:', err);

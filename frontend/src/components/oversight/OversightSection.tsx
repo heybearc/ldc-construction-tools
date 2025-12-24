@@ -16,6 +16,7 @@ interface OversightAssignment {
     email: string;
     firstName?: string | null;
     lastName?: string | null;
+    ldcRole?: string | null;
   };
 }
 
@@ -32,7 +33,7 @@ interface OversightSectionProps {
   apiBasePath: string;
   roleConfig: Record<string, RoleConfig>;
   roleOrder: string[];
-  availableUsers: Array<{ id: string; name: string | null; email: string }>;
+  availableUsers: Array<{ id: string; name: string | null; email: string; ldcRole?: string | null }>;
   onRefresh?: () => void;
 }
 
@@ -218,7 +219,14 @@ export default function OversightSection({
                       key={assignment.id}
                       className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border text-sm group"
                     >
-                      <span>{getUserDisplayName(assignment.user)}</span>
+                      <div className="flex flex-col">
+                        <span>{getUserDisplayName(assignment.user)}</span>
+                        {assignment.user?.ldcRole && (
+                          <span className="text-xs text-gray-500">
+                            {assignment.user.ldcRole.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                      </div>
                       <button
                         onClick={() => handleRemove(assignment.id)}
                         className="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -287,6 +295,7 @@ export default function OversightSection({
                     .map(user => (
                       <option key={user.id} value={user.id}>
                         {user.name || user.email}
+                        {user.ldcRole ? ` (${user.ldcRole.replace(/_/g, ' ')})` : ''}
                       </option>
                     ))}
                 </select>
