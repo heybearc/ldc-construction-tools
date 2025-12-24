@@ -4,6 +4,20 @@ import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { getCGScope } from '@/lib/cg-scope';
 
+// Map legacy role names to organizational role codes
+const ROLE_MAPPING: Record<string, { roleCode: string; roleCategory: string; roleName: string }> = {
+  'Trade Team Overseer': { roleCode: 'TTO', roleCategory: 'TRADE_TEAM', roleName: 'Trade Team Overseer' },
+  'Trade Team Overseer Assistant': { roleCode: 'TTOA', roleCategory: 'TRADE_TEAM', roleName: 'Trade Team Overseer Assistant' },
+  'Trade Team Support': { roleCode: 'TT-Support', roleCategory: 'TRADE_TEAM', roleName: 'Trade Team Support' },
+  'Trade Crew Overseer': { roleCode: 'TCO', roleCategory: 'TRADE_CREW', roleName: 'Trade Crew Overseer' },
+  'Trade Crew Overseer Assistant': { roleCode: 'TCOA', roleCategory: 'TRADE_CREW', roleName: 'Trade Crew Overseer Assistant' },
+  'Trade Crew Support': { roleCode: 'TC-Support', roleCategory: 'TRADE_CREW', roleName: 'Trade Crew Support' },
+  'Trade Crew Volunteer': { roleCode: 'TCV', roleCategory: 'TRADE_CREW', roleName: 'Trade Crew Volunteer' },
+  'Personnel Contact': { roleCode: 'PC', roleCategory: 'REGION_SUPPORT_SERVICES', roleName: 'Personnel Contact' },
+  'Personnel Contact Assistant': { roleCode: 'PCA', roleCategory: 'REGION_SUPPORT_SERVICES', roleName: 'Personnel Contact Assistant' },
+  'Personnel Contact Support': { roleCode: 'PC-Support', roleCategory: 'REGION_SUPPORT_SERVICES', roleName: 'Personnel Contact Support' },
+};
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -76,7 +90,8 @@ export async function POST(request: NextRequest) {
           ? volunteer.serving_as.split(',').map((s: string) => s.trim()).filter((s: string) => s !== '')
           : [];
 
-        await prisma.volunteer.create({
+        // Create volunteer with basic info only (no legacy role field)
+        const newVolunteer = await prisma.volunteer.create({
           data: {
             firstName: volunteer.first_name,
             lastName: volunteer.last_name,
@@ -85,16 +100,39 @@ export async function POST(request: NextRequest) {
             emailJw: volunteer.email_jw || null,
             phone: volunteer.phone || null,
             congregation: volunteer.congregation || null,
-            role: volunteer.role || 'Trade Crew Volunteer',
             servingAs: servingAsArray,
-            isOverseer: volunteer.is_overseer === 'TRUE' || volunteer.is_overseer === true,
-            isAssistant: volunteer.is_assistant === 'TRUE' || volunteer.is_assistant === true,
-            isActive: volunteer.is_active === 'TRUE' || volunteer.is_active === true,
+            isActive: volunteer.is_active !== 'FALSE' && volunteer.is_active !== false,
             crewId: crewId,
             tradeTeamId: tradeTeamId,
             constructionGroupId: cgScope.constructionGroupId,
           },
         });
+
+        // Create organizational role if role is provided
+        if (volunteer.role && volunteer.role.trim() !== '') {
+          const roleMapping = ROLE_MAPPING[volunteer.role.trim()];
+          if (roleMapping) {
+            await prisma.volunteerRole.create({
+              data: {
+                volunteerId: newVolunteer.id,
+                roleCategory: roleMapping.roleCategory,
+                roleName: roleMapping.roleName,
+                roleCode: roleMapping.roleCode,
+                entityType: roleMapping.roleCategory === 'TRADE_TEAM' ? 'TRADE_TEAM' : 
+                           roleMapping.roleCategory === 'TRADE_CREW' ? 'CREW' : null,
+                entityId: roleMapping.roleCategory === 'TRADE_TEAM' ? tradeTeamId :
+                         roleMapping.roleCategory === 'TRADE_CREW' ? crewId : null,
+                tradeTeamId: tradeTeamId,
+                crewId: roleMapping.roleCategory === 'TRADE_CREW' ? crewId : null,
+                isPrimary: true,
+                isActive: true,
+                startDate: new Date(),
+              },
+            });
+          } else {
+            console.warn(`Unknown role "${volunteer.role}" - skipping role assignment`);
+          }
+        }
 
         results.success++;
         console.log(`Successfully imported: ${volunteer.first_name} ${volunteer.last_name}`);
