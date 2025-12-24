@@ -93,6 +93,8 @@ export async function GET(request: NextRequest) {
         roleCode: r.roleCode,
         entityId: r.entityId,
         entityType: r.entityType,
+        tradeTeamId: r.tradeTeamId,
+        crewId: r.crewId,
         isPrimary: r.isPrimary,
         isActive: r.isActive,
         startDate: r.startDate.toISOString(),
