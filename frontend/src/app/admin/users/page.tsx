@@ -44,7 +44,7 @@ export default function UserManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '' });
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '', ldcRole: '', regionId: '', zoneId: '' });
   const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -123,7 +123,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User invitation sent successfully!');
-        setInviteForm({ name: '', email: '', role: '', regionId: '', zoneId: '' });
+        setInviteForm({ name: '', email: '', role: '', ldcRole: '', regionId: '', zoneId: '' });
         setIsInviteModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -728,6 +728,29 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
                   <option value="READ_ONLY">Read Only</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  LDC Role (Organizational) - Optional
+                </label>
+                <select
+                  value={inviteForm.ldcRole}
+                  onChange={(e) => setInviteForm({...inviteForm, ldcRole: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">None</option>
+                  <option value="PERSONNEL_CONTACT">Personnel Contact</option>
+                  <option value="PERSONNEL_CONTACT_ASSISTANT">Personnel Contact Assistant</option>
+                  <option value="PERSONNEL_CONTACT_SUPPORT">Personnel Contact Support</option>
+                  <option value="ZONE_OVERSEER">Zone Overseer</option>
+                  <option value="CONSTRUCTION_GROUP_OVERSEER">Construction Group Overseer</option>
+                  <option value="TRADE_TEAM_OVERSEER">Trade Team Overseer</option>
+                  <option value="TRADE_CREW_OVERSEER">Trade Crew Overseer</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Use when system role differs from organizational role (e.g., Super Admin who is also a Personnel Contact)
+                </p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
