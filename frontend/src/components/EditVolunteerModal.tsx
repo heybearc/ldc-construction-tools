@@ -39,17 +39,6 @@ interface Volunteer {
   roles?: VolunteerRole[];
 }
 
-interface TradeTeam {
-  id: string;
-  name: string;
-}
-
-interface Crew {
-  id: string;
-  name: string;
-  tradeTeamId: string;
-}
-
 interface UserAccount {
   id: string;
   name: string;
@@ -65,94 +54,23 @@ interface EditVolunteerModalProps {
 
 const SERVING_ROLES = ['Elder', 'Ministerial Servant', 'Regular Pioneer', 'Publisher'];
 
-const VOLUNTEER_ROLES = [
-  'Trade Team Overseer',
-  'Trade Team Overseer Assistant',
-  'Trade Team Support',
-  'Trade Crew Overseer',
-  'Trade Crew Overseer Assistant',
-  'Trade Crew Support',
-  'Trade Crew Volunteer',
-];
-
-const TRADE_TEAM_LEVEL_ROLES = [
-  'Trade Team Overseer',
-  'Trade Team Overseer Assistant',
-  'Trade Team Support',
-];
-
 export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave }: EditVolunteerModalProps) {
   const [formData, setFormData] = useState<Volunteer | null>(null);
-  const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
-  const [crews, setCrews] = useState<Crew[]>([]);
   const [users, setUsers] = useState<UserAccount[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState('');
-  const [selectedCrewId, setSelectedCrewId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [volunteerRoles, setVolunteerRoles] = useState<VolunteerRole[]>([]);
 
-  const isTradeTeamLevelRole = formData ? TRADE_TEAM_LEVEL_ROLES.includes(formData.role) : false;
-
   useEffect(() => {
     if (isOpen && volunteer) {
       setFormData({ ...volunteer });
-      setSelectedCrewId(volunteer.trade_crew_id || null);
-      setSelectedTeamId(volunteer.trade_team_id || "");
       setSelectedUserId(volunteer.user_id || null);
       setVolunteerRoles(volunteer.roles || []);
-      fetchTradeTeams();
       fetchUsers();
       setError('');
     }
   }, [isOpen, volunteer]);
-
-  useEffect(() => {
-    if (selectedTeamId) {
-      fetchCrews(selectedTeamId);
-    } else {
-      setCrews([]);
-    }
-  }, [selectedTeamId]);
-
-  const fetchTradeTeams = async () => {
-    try {
-      const response = await fetch('/api/v1/trade-teams');
-      if (response.ok) {
-        const data = await response.json();
-        setTradeTeams(data);
-        
-        if (volunteer?.trade_crew_id) {
-          for (const team of data) {
-            const crewsRes = await fetch(`/api/v1/trade-teams/${team.id}/crews`);
-            if (crewsRes.ok) {
-              const crewsData = await crewsRes.json();
-              const foundCrew = crewsData.find((c: Crew) => c.id === volunteer.trade_crew_id);
-              if (foundCrew) {
-                setSelectedTeamId(team.id);
-                break;
-              }
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch trade teams:', err);
-    }
-  };
-
-  const fetchCrews = async (teamId: string) => {
-    try {
-      const response = await fetch(`/api/v1/trade-teams/${teamId}/crews`);
-      if (response.ok) {
-        const data = await response.json();
-        setCrews(data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch crews:', err);
-    }
-  };
 
   const fetchUsers = async () => {
     try {
@@ -203,15 +121,9 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
     setError('');
 
     try {
-      const finalCrewId = isTradeTeamLevelRole ? null : selectedCrewId;
-      
       const updatedData: Volunteer = {
         ...formData,
-        trade_crew_id: finalCrewId,
-        trade_team_id: selectedTeamId || null,
         user_id: selectedUserId,
-        is_overseer: formData.role.includes('Overseer') && !formData.role.includes('Assistant'),
-        is_assistant: formData.role.includes('Assistant'),
       };
       
       await onSave(updatedData);
@@ -361,65 +273,6 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
             </div>
           </div>
 
-          {/* Role and Assignment */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Role and Assignment</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {VOLUNTEER_ROLES.map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade Team {isTradeTeamLevelRole && <span className="text-gray-500">(Oversees all crews)</span>}
-                </label>
-                <select
-                  value={selectedTeamId}
-                  onChange={(e) => {
-                    setSelectedTeamId(e.target.value);
-                    setSelectedCrewId(null);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Trade Team</option>
-                  {tradeTeams.map((team) => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {!isTradeTeamLevelRole && crews.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trade Crew</label>
-                <select
-                  value={selectedCrewId || ''}
-                  onChange={(e) => setSelectedCrewId(e.target.value || null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Trade Crew (optional)</option>
-                  {crews.map((crew) => (
-                    <option key={crew.id} value={crew.id}>{crew.name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {isTradeTeamLevelRole && selectedTeamId && (
-              <p className="text-sm text-gray-500 italic">
-                As a {formData.role}, this volunteer oversees all crews under the selected Trade Team.
-              </p>
-            )}
-          </div>
 
           {/* Link User Account */}
           <div className="space-y-4">
