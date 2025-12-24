@@ -31,6 +31,15 @@ export async function GET(
         user: {
           select: { id: true, email: true, name: true },
         },
+        roles: {
+          where: {
+            isActive: true,
+          },
+          orderBy: [
+            { isPrimary: 'desc' },
+            { startDate: 'desc' },
+          ],
+        },
       },
     });
 
@@ -58,6 +67,7 @@ export async function GET(
       trade_team_name: volunteer.crew?.tradeTeam?.name,
       user_id: volunteer.userId,
       has_user_account: !!volunteer.userId,
+      roles: volunteer.roles,
     });
   } catch (error) {
     console.error('Error fetching volunteer:', error);
