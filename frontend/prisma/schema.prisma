@@ -265,6 +265,7 @@ model TradeTeam {
   scheduleEntries     ProjectScheduleEntry[]
   oversight           TradeTeamOversight[]
   volunteers          Volunteer[]
+  volunteerRoles      VolunteerRole[]
 
   @@map("trade_teams")
 }
@@ -289,6 +290,7 @@ model Crew {
   projectAssignments  ProjectCrewAssignment[]
   scheduleEntries     ProjectScheduleEntry[]
   volunteers          Volunteer[]
+  volunteerRoles      VolunteerRole[]
 
   @@map("crews")
 }
