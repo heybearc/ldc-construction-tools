@@ -73,8 +73,8 @@ export async function GET(
       trade_team_id: volunteer.tradeTeamId,
       trade_crew_name: volunteer.crew?.name,
       trade_team_name: volunteer.crew?.tradeTeam?.name,
-      user_id: volunteer.userId,
-      has_user_account: !!volunteer.userId,
+      user_id: volunteer.user?.id || null,
+      has_user_account: !!volunteer.user,
       roles: volunteer.roles,
     });
   } catch (error) {

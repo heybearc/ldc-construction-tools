@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
       trade_crew_name: v.crew?.name,
       trade_team_id: v.tradeTeamId,
       trade_team_name: v.tradeTeam?.name || v.crew?.tradeTeam?.name,
-      user_id: v.userId,
-      has_user_account: !!v.userId,
+      user_id: v.user?.id || null,
+      has_user_account: !!v.user,
       roles: v.roles?.map(r => ({
         id: r.id,
         roleCategory: r.roleCategory,
