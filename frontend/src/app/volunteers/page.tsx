@@ -280,23 +280,6 @@ export default function VolunteersPage() {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  const getRoleBadge = (volunteer: Volunteer) => {
-    const roleColors: Record<string, string> = {
-      'Trade Team Overseer': 'bg-green-100 text-green-800',
-      'Trade Team Overseer Assistant': 'bg-blue-100 text-blue-800',
-      'Trade Team Support': 'bg-purple-100 text-purple-800',
-      'Trade Crew Overseer': 'bg-green-100 text-green-800',
-      'Trade Crew Overseer Assistant': 'bg-blue-100 text-blue-800',
-      'Trade Crew Support': 'bg-purple-100 text-purple-800',
-      'Trade Crew Volunteer': 'bg-gray-100 text-gray-800',
-    };
-    const colorClass = roleColors[volunteer.role] || 'bg-gray-100 text-gray-800';
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
-        {volunteer.role}
-      </span>
-    );
-  };
 
   if (loading) {
     return (
@@ -478,8 +461,6 @@ export default function VolunteersPage() {
             </div>
 
             <div className="space-y-2 mb-4">
-              {getRoleBadge(volunteer)}
-              
               {/* Organizational Roles */}
               {volunteer.roles && volunteer.roles.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
@@ -587,7 +568,6 @@ export default function VolunteersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">
-                      {getRoleBadge(volunteer)}
                       {volunteer.roles && volunteer.roles.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {volunteer.roles.slice(0, 2).map((role) => (
