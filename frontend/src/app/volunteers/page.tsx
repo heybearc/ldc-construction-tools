@@ -3,7 +3,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus, Upload, Download, FileText, Grid3x3, List } from 'lucide-react';
+import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus, Upload, Download, FileText, Grid3x3, List, Link2 } from 'lucide-react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 
@@ -622,6 +622,12 @@ export default function VolunteersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
+                      {volunteer.has_user_account && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Linked to user account">
+                          <Link2 className="h-3 w-3 mr-1" />
+                          User
+                        </span>
+                      )}
                       {volunteer.is_overseer && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           Overseer
