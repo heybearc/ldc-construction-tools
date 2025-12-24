@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, User, Phone, Mail, Building2, Trash2, Link2 } from 'lucide-react';
 import VolunteerRoleAssignment from './VolunteerRoleAssignment';
+import { formatPhoneNumber, unformatPhoneNumber } from '@/lib/formatPhone';
 
 interface VolunteerRole {
   id: string;
@@ -239,8 +240,13 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
                 <input
                   type="tel"
                   name="phone"
-                  value={formData.phone || ''}
-                  onChange={handleInputChange}
+                  value={formatPhoneNumber(formData.phone || '')}
+                  onChange={(e) => {
+                    const formatted = formatPhoneNumber(e.target.value);
+                    handleInputChange({ target: { name: 'phone', value: unformatPhoneNumber(formatted) } } as any);
+                  }}
+                  placeholder="(555) 555-5555"
+                  maxLength={14}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
