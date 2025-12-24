@@ -70,7 +70,7 @@ export default function VolunteerRolesHelpPage() {
               Regional and zone-level construction coordination roles
             </p>
             <p className="text-xs text-gray-600">
-              <strong>Examples:</strong> CFR, FR, Design Contact, PFR, Housing Contact, Safety Contact, Trade Disciplines
+              <strong>Examples:</strong> CFR, FR, Design Contact, PFR, Personnel Contact, Housing Contact, Safety Contact, Trade Disciplines
             </p>
           </div>
 

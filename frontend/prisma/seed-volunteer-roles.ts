@@ -51,9 +51,9 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
   },
   {
     category: 'CONSTRUCTION_STAFF',
-    name: 'Field Rep (Wife)',
-    code: 'FR-W',
-    description: 'Field representative (wife)'
+    name: 'Field Rep Support',
+    code: 'FR-Support',
+    description: 'Provides support to Field Rep'
   },
   {
     category: 'CONSTRUCTION_STAFF',
@@ -63,9 +63,9 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
   },
   {
     category: 'CONSTRUCTION_STAFF',
-    name: 'Field Rep Assistant (Wife)',
-    code: 'FRAA-W',
-    description: 'Field Rep Assistant (wife)'
+    name: 'Field Rep Assistant Support',
+    code: 'FRAA-Support',
+    description: 'Provides support to Field Rep Assistant'
   },
   {
     category: 'CONSTRUCTION_STAFF',
@@ -99,21 +99,21 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
   },
   {
     category: 'CONSTRUCTION_STAFF',
-    name: 'Field Cost Controller (Wife)',
-    code: 'LCC-Field-W',
-    description: 'Field Cost Controller (wife)'
+    name: 'Field Cost Controller Support',
+    code: 'LCC-Field-Support',
+    description: 'Provides support to Field Cost Controller'
   },
   {
     category: 'CONSTRUCTION_STAFF',
-    name: 'Personnel/Training Contact',
-    code: 'PTC',
-    description: 'Regional personnel and training coordination'
+    name: 'Personnel Contact',
+    code: 'PC',
+    description: 'Regional personnel coordination'
   },
   {
     category: 'CONSTRUCTION_STAFF',
-    name: 'Personnel/Training Contact (Wife)',
-    code: 'PTC-W',
-    description: 'Personnel/Training Contact (wife)'
+    name: 'Personnel Contact Support',
+    code: 'PC-Support',
+    description: 'Provides support to Personnel Contact'
   },
   {
     category: 'CONSTRUCTION_STAFF',
