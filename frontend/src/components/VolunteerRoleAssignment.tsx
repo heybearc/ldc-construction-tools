@@ -188,6 +188,8 @@ export default function VolunteerRoleAssignment({
           roleCode: selectedRole.code,
           entityId: finalEntityId,
           entityType: finalEntityType,
+          tradeTeamId: selectedRole.category === 'TRADE_TEAM' ? selectedTradeTeamId : (selectedRole.category === 'TRADE_CREW' ? selectedTradeTeamId : null),
+          crewId: selectedRole.category === 'TRADE_CREW' ? selectedCrewId : null,
           isPrimary: finalIsPrimary
         })
       });
@@ -340,8 +342,11 @@ export default function VolunteerRoleAssignment({
                   </div>
                   <div className="text-xs mt-0.5">
                     {CATEGORY_LABELS[role.roleCategory]}
-                    {role.entityType && role.entityId && (
-                      <span className="ml-2">• {role.entityType}</span>
+                    {role.crew && (
+                      <span className="ml-2">• {role.crew.name}</span>
+                    )}
+                    {!role.crew && role.tradeTeam && (
+                      <span className="ml-2">• {role.tradeTeam.name}</span>
                     )}
                   </div>
                 </div>

@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { volunteerId, roleCategory, roleName, roleCode, entityId, entityType, isPrimary } = body;
+    const { volunteerId, roleCategory, roleName, roleCode, entityId, entityType, tradeTeamId, crewId, isPrimary } = body;
 
     if (!volunteerId || !roleCategory || !roleName || !roleCode) {
       return NextResponse.json(
@@ -148,6 +148,8 @@ export async function POST(request: NextRequest) {
         roleCode,
         entityId: entityId || null,
         entityType: entityType || null,
+        tradeTeamId: tradeTeamId || null,
+        crewId: crewId || null,
         isPrimary: isPrimary !== undefined ? isPrimary : true,
         isActive: true
       },
@@ -158,6 +160,12 @@ export async function POST(request: NextRequest) {
             firstName: true,
             lastName: true
           }
+        },
+        tradeTeam: {
+          select: { id: true, name: true }
+        },
+        crew: {
+          select: { id: true, name: true }
         }
       }
     });

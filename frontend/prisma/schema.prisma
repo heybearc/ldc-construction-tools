@@ -885,6 +885,10 @@ model VolunteerRole {
   // Entity assignment (what this role is for)
   entityId          String?            // CG ID, Team ID, Crew ID, or Project ID
   entityType        String?            // "CG", "TEAM", "CREW", "PROJECT"
+  tradeTeamId       String?
+  tradeTeam         TradeTeam?         @relation(fields: [tradeTeamId], references: [id], onDelete: SetNull)
+  crewId            String?
+  crew              Crew?              @relation(fields: [crewId], references: [id], onDelete: SetNull)
   
   // Role metadata
   isPrimary         Boolean            @default(true)   // Primary role vs secondary
@@ -898,6 +902,8 @@ model VolunteerRole {
   @@unique([volunteerId, roleCategory, roleName, entityId])
   @@index([volunteerId])
   @@index([entityId, entityType])
+  @@index([tradeTeamId])
+  @@index([crewId])
   @@map("volunteer_roles")
 }
 

@@ -35,6 +35,14 @@ export async function GET(
           where: {
             isActive: true,
           },
+          include: {
+            tradeTeam: {
+              select: { id: true, name: true }
+            },
+            crew: {
+              select: { id: true, name: true }
+            }
+          },
           orderBy: [
             { isPrimary: 'desc' },
             { startDate: 'desc' },
