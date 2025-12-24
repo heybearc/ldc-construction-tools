@@ -20,20 +20,29 @@ export async function GET(request: NextRequest) {
         isActive: true,
       },
       select: {
-        role: true,
         congregation: true,
+        roles: {
+          where: {
+            isActive: true,
+          },
+          select: {
+            roleName: true,
+            roleCategory: true,
+          },
+        },
       },
     });
 
-    // Calculate role breakdown
+    // Calculate role breakdown from organizational roles
     const roleCount: Record<string, number> = {};
     const congregationCount: Record<string, number> = {};
 
     volunteers.forEach(v => {
-      // Role breakdown
-      if (v.role) {
-        roleCount[v.role] = (roleCount[v.role] || 0) + 1;
-      }
+      // Role breakdown from organizational roles
+      v.roles.forEach(role => {
+        roleCount[role.roleName] = (roleCount[role.roleName] || 0) + 1;
+      });
+      
       // Congregation breakdown
       if (v.congregation) {
         congregationCount[v.congregation] = (congregationCount[v.congregation] || 0) + 1;
