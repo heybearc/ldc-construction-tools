@@ -272,10 +272,9 @@ export default function VolunteersPage() {
   const getRoleColors = (category: string): string => {
     const colors: Record<string, string> = {
       'CG_OVERSIGHT': 'bg-purple-100 text-purple-800',
-      'CONSTRUCTION_STAFF': 'bg-blue-100 text-blue-800',
+      'CG_STAFF': 'bg-blue-100 text-blue-800',
       'TRADE_TEAM': 'bg-green-100 text-green-800',
       'TRADE_CREW': 'bg-amber-100 text-amber-800',
-      'PROJECT_STAFF': 'bg-indigo-100 text-indigo-800',
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
   };

@@ -903,11 +903,10 @@ model VolunteerRole {
 
 // Volunteer role categories
 enum VolunteerRoleCategory {
-  CG_OVERSIGHT         // CGO, ACGO, CG Support, CG Member
-  CONSTRUCTION_STAFF   // Personnel, Regulatory, Safety, PCC, Estimator, Scheduler, etc.
+  CG_OVERSIGHT         // CGO, ACGO, CGO Support
+  CG_STAFF             // CG Members, Safety Coordinator, PCC, Regulatory, Estimator, Scheduler, Region Support Services
   TRADE_TEAM           // TTO, TTOA, TT Support
   TRADE_CREW           // TCO, TCOA, TC Support, Crew Volunteer
-  PROJECT_STAFF        // Project-specific assignments
 }
 
 model CrewChangeRequest {

@@ -59,18 +59,18 @@ export default function VolunteerRolesHelpPage() {
             </p>
           </div>
 
-          {/* Construction Staff */}
+          {/* CG Staff */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center mb-2">
               <Briefcase className="h-5 w-5 text-blue-600 mr-2" />
-              <h3 className="text-lg font-semibold text-blue-900">Construction Staff</h3>
+              <h3 className="text-lg font-semibold text-blue-900">CG Staff</h3>
               <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Blue</span>
             </div>
             <p className="text-sm text-gray-700 mb-2">
-              Regional and zone-level construction coordination roles
+              Construction Group staff and regional support services
             </p>
             <p className="text-xs text-gray-600">
-              <strong>Examples:</strong> CFR, FR, Design Contact, PFR, Personnel Contact, Housing Contact, Safety Contact, Trade Disciplines
+              <strong>Examples:</strong> CG Members, Safety Coordinator, PCC, Regulatory Consultant, Estimator, Scheduler, Personnel Contact, Housing Contact, Equipment Management, Sourcing Buyer, Training Organizer
             </p>
           </div>
 
@@ -104,20 +104,6 @@ export default function VolunteerRolesHelpPage() {
             </p>
           </div>
 
-          {/* Project Staff */}
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-            <div className="flex items-center mb-2">
-              <FolderKanban className="h-5 w-5 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold text-indigo-900">Project Staff</h3>
-              <span className="ml-2 px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded">Indigo</span>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">
-              Project-specific coordination and support roles
-            </p>
-            <p className="text-xs text-gray-600">
-              <strong>Examples:</strong> PSC, LPRC, PCC, Safety Coordinator, Maintenance Trainer
-            </p>
-          </div>
         </div>
       </section>
 

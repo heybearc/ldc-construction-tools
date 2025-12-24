@@ -10,7 +10,7 @@ interface RoleDefinition {
 }
 
 const VOLUNTEER_ROLES: RoleDefinition[] = [
-  // CG OVERSIGHT ROLES
+  // CG OVERSIGHT
   {
     category: 'CG_OVERSIGHT',
     name: 'Construction Group Overseer',
@@ -25,160 +25,268 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
   },
   {
     category: 'CG_OVERSIGHT',
-    name: 'Construction Group Support',
-    code: 'CG-Support',
-    description: 'Provides administrative support to Construction Group'
+    name: 'Construction Group Overseer Support',
+    code: 'CGO-Support',
+    description: 'Provides support to Construction Group Overseer'
   },
 
-  // CONSTRUCTION STAFF - REGIONAL ROLES
+  // CG STAFF - FROM ORG CHART
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Construction Field Rep',
-    code: 'CFR',
-    description: 'Regional construction field representative'
+    category: 'CG_STAFF',
+    name: 'Construction Group Members',
+    code: 'CG-Member',
+    description: 'Construction Group member'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Construction Field Rep - RA Support',
-    code: 'CFR-RA',
-    description: 'CFR providing Regional Architect support'
+    category: 'CG_STAFF',
+    name: 'Construction Group Members Assistant',
+    code: 'CG-Member-Asst',
+    description: 'Assists Construction Group members'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Field Rep',
-    code: 'FR',
-    description: 'Regional field representative'
+    category: 'CG_STAFF',
+    name: 'Construction Group Members Support',
+    code: 'CG-Member-Support',
+    description: 'Provides support to Construction Group members'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Field Rep Support',
-    code: 'FR-Support',
-    description: 'Provides support to Field Rep'
+    category: 'CG_STAFF',
+    name: 'Safety Coordinator',
+    code: 'SC',
+    description: 'Coordinates safety for Construction Group'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Field Rep Assistant',
-    code: 'FRAA',
-    description: 'Assists Field Rep'
+    category: 'CG_STAFF',
+    name: 'Safety Coordinator Assistant',
+    code: 'SC-Asst',
+    description: 'Assists Safety Coordinator'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Field Rep Assistant Support',
-    code: 'FRAA-Support',
-    description: 'Provides support to Field Rep Assistant'
+    category: 'CG_STAFF',
+    name: 'Safety Coordinator Support',
+    code: 'SC-Support',
+    description: 'Provides support to Safety Coordinator'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Design Contact',
-    code: 'DC',
-    description: 'Regional design coordination contact'
+    category: 'CG_STAFF',
+    name: 'Project Construction Coordinator',
+    code: 'PCC',
+    description: 'Coordinates project construction activities'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Design Lead',
-    code: 'DL',
-    description: 'Regional design team lead'
+    category: 'CG_STAFF',
+    name: 'Project Construction Coordinator Assistant',
+    code: 'PCC-Asst',
+    description: 'Assists Project Construction Coordinator'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Purchasing Field Rep',
-    code: 'PFR',
-    description: 'Regional purchasing representative'
+    category: 'CG_STAFF',
+    name: 'Project Construction Coordinator Support',
+    code: 'PCC-Support',
+    description: 'Provides support to Project Construction Coordinator'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Local Cost Controller',
-    code: 'LCC',
-    description: 'Regional cost control'
+    category: 'CG_STAFF',
+    name: 'Regulatory Consultant',
+    code: 'RC',
+    description: 'Provides regulatory consultation'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Field Cost Controller',
-    code: 'LCC-Field',
-    description: 'Field-level cost control'
+    category: 'CG_STAFF',
+    name: 'Regulatory Consultant Assistant',
+    code: 'RC-Asst',
+    description: 'Assists Regulatory Consultant'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Field Cost Controller Support',
-    code: 'LCC-Field-Support',
-    description: 'Provides support to Field Cost Controller'
+    category: 'CG_STAFF',
+    name: 'Regulatory Consultant Support',
+    code: 'RC-Support',
+    description: 'Provides support to Regulatory Consultant'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Personnel Contact',
-    code: 'PC',
-    description: 'Regional personnel coordination'
+    category: 'CG_STAFF',
+    name: 'Estimator',
+    code: 'EST',
+    description: 'Provides cost estimation services'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Personnel Contact Support',
-    code: 'PC-Support',
-    description: 'Provides support to Personnel Contact'
+    category: 'CG_STAFF',
+    name: 'Estimator Assistant',
+    code: 'EST-Asst',
+    description: 'Assists Estimator'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
+    category: 'CG_STAFF',
+    name: 'Estimator Support',
+    code: 'EST-Support',
+    description: 'Provides support to Estimator'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Scheduler',
+    code: 'SCHED',
+    description: 'Manages Construction Group scheduling'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Scheduler Assistant',
+    code: 'SCHED-Asst',
+    description: 'Assists Scheduler'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Scheduler Support',
+    code: 'SCHED-Support',
+    description: 'Provides support to Scheduler'
+  },
+
+  // CG STAFF - REGION SUPPORT SERVICES
+  {
+    category: 'CG_STAFF',
+    name: 'Equipment Management Contact',
+    code: 'EMC',
+    description: 'Manages equipment for region'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Equipment Management Contact Assistant',
+    code: 'EMC-Asst',
+    description: 'Assists Equipment Management Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Equipment Management Contact Support',
+    code: 'EMC-Support',
+    description: 'Provides support to Equipment Management Contact'
+  },
+  {
+    category: 'CG_STAFF',
     name: 'Housing Contact',
     code: 'HC',
-    description: 'Regional housing coordination'
+    description: 'Coordinates housing for volunteers'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
+    category: 'CG_STAFF',
     name: 'Housing Contact Assistant',
     code: 'HC-Asst',
     description: 'Assists Housing Contact'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
+    category: 'CG_STAFF',
     name: 'Housing Contact Support',
     code: 'HC-Support',
     description: 'Provides support to Housing Contact'
   },
   {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Zone Safety Contact',
-    code: 'ZSC',
-    description: 'Zone-level safety coordination'
+    category: 'CG_STAFF',
+    name: 'Personnel Contact',
+    code: 'PC',
+    description: 'Regional personnel coordination'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Personnel Contact Assistant',
+    code: 'PCA',
+    description: 'Assists Personnel Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Personnel Contact Support',
+    code: 'PC-Support',
+    description: 'Provides support to Personnel Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Regulatory Contact',
+    code: 'REG',
+    description: 'Regional regulatory coordination'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Regulatory Contact Assistant',
+    code: 'REG-Asst',
+    description: 'Assists Regulatory Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Regulatory Contact Support',
+    code: 'REG-Support',
+    description: 'Provides support to Regulatory Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Safety Coordinator Contact',
+    code: 'SCC',
+    description: 'Regional safety coordination contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Safety Coordinator Contact Assistant',
+    code: 'SCC-Asst',
+    description: 'Assists Safety Coordinator Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Safety Coordinator Contact Support',
+    code: 'SCC-Support',
+    description: 'Provides support to Safety Coordinator Contact'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Sourcing Buyer',
+    code: 'SB',
+    description: 'Manages sourcing and purchasing'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Sourcing Buyer Assistant',
+    code: 'SB-Asst',
+    description: 'Assists Sourcing Buyer'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Sourcing Buyer Support',
+    code: 'SB-Support',
+    description: 'Provides support to Sourcing Buyer'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Training Organizer',
+    code: 'TO',
+    description: 'Organizes training for volunteers'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Training Organizer Assistant',
+    code: 'TO-Asst',
+    description: 'Assists Training Organizer'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Training Organizer Support',
+    code: 'TO-Support',
+    description: 'Provides support to Training Organizer'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Translation Buyer',
+    code: 'TB',
+    description: 'Manages translation services'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Translation Buyer Assistant',
+    code: 'TB-Asst',
+    description: 'Assists Translation Buyer'
+  },
+  {
+    category: 'CG_STAFF',
+    name: 'Translation Buyer Support',
+    code: 'TB-Support',
+    description: 'Provides support to Translation Buyer'
   },
 
-  // CONSTRUCTION STAFF - TRADE DISCIPLINES
-  {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Mechanical',
-    code: 'MECH',
-    description: 'Mechanical systems specialist'
-  },
-  {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Structural & Roofing',
-    code: 'STRUCT',
-    description: 'Structural and roofing specialist'
-  },
-  {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Electrical',
-    code: 'ELEC',
-    description: 'Electrical systems specialist'
-  },
-  {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Architectural',
-    code: 'ARCH',
-    description: 'Architectural design specialist'
-  },
-  {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'A/V & Low Voltage',
-    code: 'AV-LV',
-    description: 'Audio/Visual and low voltage systems specialist'
-  },
-  {
-    category: 'CONSTRUCTION_STAFF',
-    name: 'Plumbing',
-    code: 'PLUMB',
-    description: 'Plumbing systems specialist'
-  },
-
-  // TRADE TEAM ROLES
+  // TRADE TEAM
   {
     category: 'TRADE_TEAM',
     name: 'Trade Team Overseer',
@@ -195,10 +303,10 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
     category: 'TRADE_TEAM',
     name: 'Trade Team Support',
     code: 'TTS',
-    description: 'Provides administrative support to trade team'
+    description: 'Provides support to trade team'
   },
 
-  // TRADE CREW ROLES
+  // TRADE CREW
   {
     category: 'TRADE_CREW',
     name: 'Trade Crew Overseer',
@@ -215,131 +323,43 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
     category: 'TRADE_CREW',
     name: 'Trade Crew Support',
     code: 'TCS',
-    description: 'Provides administrative support to trade crew'
+    description: 'Provides support to trade crew'
   },
   {
     category: 'TRADE_CREW',
     name: 'Trade Crew Volunteer',
     code: 'TCV',
-    description: 'Active trade crew member'
-  },
-
-  // PROJECT STAFF ROLES
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Project Staffing Contact',
-    code: 'PSC',
-    description: 'Coordinates project staffing needs'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Project Staffing Contact - Assistant',
-    code: 'PSC-Asst',
-    description: 'Assists Project Staffing Contact'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Local Project Regulatory Contact',
-    code: 'LPRC',
-    description: 'Manages project regulatory compliance'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Project Construction Coordinator',
-    code: 'PCC',
-    description: 'Coordinates overall project construction'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Project Construction Coordinator - Assistant #1',
-    code: 'PCC-Asst1',
-    description: 'First assistant to PCC'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Project Construction Coordinator - Assistant #2',
-    code: 'PCC-Asst2',
-    description: 'Second assistant to PCC'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Safety Coordinator',
-    code: 'SC',
-    description: 'Project safety coordination'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Safety Coordinator - Assistant #1',
-    code: 'SC-Asst1',
-    description: 'First assistant to Safety Coordinator'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Safety Coordinator - Assistant #2',
-    code: 'SC-Asst2',
-    description: 'Second assistant to Safety Coordinator'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Maintenance Trainer',
-    code: 'MT',
-    description: 'Provides maintenance training'
-  },
-  {
-    category: 'PROJECT_STAFF',
-    name: 'Maintenance Trainer Assistant',
-    code: 'MTA',
-    description: 'Assists Maintenance Trainer'
+    description: 'Volunteer member of trade crew'
   }
 ];
 
 async function seedVolunteerRoles() {
-  console.log('🌱 Seeding volunteer roles...');
+  console.log('Starting volunteer roles seed...');
 
-  let created = 0;
-  let skipped = 0;
+  try {
+    // Clear existing roles (optional - comment out if you want to keep existing data)
+    // await prisma.role.deleteMany({});
+    // console.log('Cleared existing roles');
 
-  for (const role of VOLUNTEER_ROLES) {
-    try {
-      // Check if role already exists
-      const existing = await prisma.volunteerRole.findFirst({
-        where: {
-          roleCategory: role.category,
-          roleName: role.name
-        }
-      });
-
-      if (existing) {
-        console.log(`⏭️  Skipped: ${role.name} (${role.code}) - already exists`);
-        skipped++;
-        continue;
-      }
-
-      // Create the role definition
-      // Note: We're not creating actual VolunteerRole records here,
-      // those are created when volunteers are assigned roles.
-      // This is just documenting the available roles.
-      
-      console.log(`✅ Documented: ${role.name} (${role.code})`);
-      created++;
-    } catch (error) {
-      console.error(`❌ Error with role ${role.name}:`, error);
-    }
+    // Note: This seed file defines the available roles but doesn't create database records
+    // Roles are defined in the API and assigned to volunteers through the VolunteerRole junction table
+    
+    console.log(`Defined ${VOLUNTEER_ROLES.length} volunteer roles:`);
+    console.log(`- CG Oversight: ${VOLUNTEER_ROLES.filter(r => r.category === 'CG_OVERSIGHT').length} roles`);
+    console.log(`- CG Staff: ${VOLUNTEER_ROLES.filter(r => r.category === 'CG_STAFF').length} roles`);
+    console.log(`- Trade Team: ${VOLUNTEER_ROLES.filter(r => r.category === 'TRADE_TEAM').length} roles`);
+    console.log(`- Trade Crew: ${VOLUNTEER_ROLES.filter(r => r.category === 'TRADE_CREW').length} roles`);
+    
+    console.log('\nVolunteer roles seed completed successfully!');
+  } catch (error) {
+    console.error('Error seeding volunteer roles:', error);
+    throw error;
   }
-
-  console.log('\n📊 Summary:');
-  console.log(`   Created: ${created}`);
-  console.log(`   Skipped: ${skipped}`);
-  console.log(`   Total: ${VOLUNTEER_ROLES.length}`);
-  console.log('\n✨ Role definitions documented!');
-  console.log('\n📝 Note: These are role definitions. Actual role assignments');
-  console.log('   are created in the volunteer_roles table when volunteers');
-  console.log('   are assigned to these roles.');
 }
 
 seedVolunteerRoles()
   .catch((e) => {
-    console.error('❌ Seed failed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
