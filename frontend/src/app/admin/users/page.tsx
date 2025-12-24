@@ -48,6 +48,7 @@ export default function UserManagementPage() {
   const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [passwordManagement, setPasswordManagement] = useState({ changePassword: false, newPassword: '', sendResetEmail: false });
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   
@@ -172,23 +173,36 @@ export default function UserManagementPage() {
     setIsSubmitting(true);
     
     try {
+      const updateData: any = {
+        name: selectedUser.name,
+        email: selectedUser.email,
+        role: selectedUser.role,
+        ldcRole: selectedUser.ldcRole,
+        constructionGroupId: selectedUser.constructionGroupId,
+        status: selectedUser.status
+      };
+
+      // Add password if changing
+      if (passwordManagement.changePassword && passwordManagement.newPassword) {
+        if (passwordManagement.newPassword.length < 8) {
+          alert('Password must be at least 8 characters');
+          setIsSubmitting(false);
+          return;
+        }
+        updateData.password = passwordManagement.newPassword;
+      }
+
       const response = await fetch(`/api/v1/admin/users/${selectedUser.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: selectedUser.name,
-          email: selectedUser.email,
-          role: selectedUser.role,
-          ldcRole: selectedUser.ldcRole,
-          constructionGroupId: selectedUser.constructionGroupId,
-          status: selectedUser.status
-        })
+        body: JSON.stringify(updateData)
       });
       
       if (response.ok) {
         alert('User updated successfully!');
         setIsEditModalOpen(false);
         setSelectedUser(null);
+        setPasswordManagement({ changePassword: false, newPassword: '', sendResetEmail: false });
         loadUsers();
         loadUserStats();
       } else {
@@ -1036,19 +1050,38 @@ export default function UserManagementPage() {
                 </button>
                 <button
                   onClick={() => {
-                    // Download template
-                    const csvContent = "name,email,role,regionId,zoneId\nJohn Doe,john@example.com,CFR,region-1,zone-1";
+                    // Download comprehensive template with examples
+                    const csvContent = `name,email,role,ldcRole,regionId,zoneId,status
+John Doe,john.doe@example.com,ZONE_OVERSEER,ZONE_OVERSEER,01.12,01,ACTIVE
+Jane Smith,jane.smith@example.com,TRADE_TEAM_OVERSEER,TRADE_TEAM_OVERSEER,01.12,01,ACTIVE
+Bob Johnson,bob.johnson@example.com,PERSONNEL_CONTACT,PERSONNEL_CONTACT,01.12,01,ACTIVE
+Alice Williams,alice.williams@example.com,READ_ONLY,,01.12,01,INVITED
+
+# Role Options:
+# SUPER_ADMIN, ZONE_OVERSEER, ZONE_OVERSEER_ASSISTANT, ZONE_OVERSEER_SUPPORT
+# CONSTRUCTION_GROUP_OVERSEER, CONSTRUCTION_GROUP_OVERSEER_ASSISTANT, CONSTRUCTION_GROUP_OVERSEER_SUPPORT
+# TRADE_TEAM_OVERSEER, TRADE_TEAM_OVERSEER_ASSISTANT, TRADE_TEAM_OVERSEER_SUPPORT
+# TRADE_CREW_OVERSEER, TRADE_CREW_OVERSEER_ASSISTANT, TRADE_CREW_OVERSEER_SUPPORT
+# PERSONNEL_CONTACT, PERSONNEL_CONTACT_ASSISTANT, PERSONNEL_CONTACT_SUPPORT
+# FIELD_REP, FIELD_REP_ASSISTANT, FIELD_REP_SUPPORT
+# DESIGN_CONTACT, DESIGN_CONTACT_ASSISTANT, DESIGN_CONTACT_SUPPORT
+# PROJECT_CONSTRUCTION_COORDINATOR, PROJECT_CONSTRUCTION_COORDINATOR_ASSISTANT, PROJECT_CONSTRUCTION_COORDINATOR_SUPPORT
+# SAFETY_COORDINATOR, SAFETY_COORDINATOR_ASSISTANT, SAFETY_COORDINATOR_SUPPORT
+# READ_ONLY
+
+# Status Options: ACTIVE, INVITED, INACTIVE
+# ldcRole is optional - use for organizational roles`;
                     const blob = new Blob([csvContent], { type: 'text/csv' });
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'user_import_template.csv';
+                    a.download = 'ldc_tools_user_import_template.csv';
                     a.click();
                     window.URL.revokeObjectURL(url);
                   }}
                   className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
                 >
-                  Download Template
+                  📥 Download Template
                 </button>
               </div>
             </div>
@@ -1191,6 +1224,70 @@ export default function UserManagementPage() {
                   <option value="INVITED">Invited</option>
                   <option value="INACTIVE">Inactive</option>
                 </select>
+              </div>
+
+              {/* Password Management Section */}
+              <div className="border-t pt-4 mt-4">
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Password Management</h4>
+                
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={passwordManagement.changePassword}
+                      onChange={(e) => setPasswordManagement({...passwordManagement, changePassword: e.target.checked, newPassword: '', sendResetEmail: false})}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Change user password</span>
+                  </label>
+
+                  {passwordManagement.changePassword && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordManagement.newPassword}
+                        onChange={(e) => setPasswordManagement({...passwordManagement, newPassword: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter new password (min 8 characters)"
+                        minLength={8}
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Password Reset Options: Check the box above to change the user's password, or use the "Send Password Reset Email" button to let them reset it themselves.
+                      </p>
+                    </div>
+                  )}
+
+                  {!passwordManagement.changePassword && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!selectedUser) return;
+                        if (!confirm(`Send password reset email to ${selectedUser.email}?`)) return;
+                        
+                        try {
+                          const response = await fetch(`/api/v1/admin/users/${selectedUser.id}/reset-password`, {
+                            method: 'POST'
+                          });
+                          
+                          if (response.ok) {
+                            alert('Password reset email sent successfully!');
+                          } else {
+                            alert('Failed to send password reset email.');
+                          }
+                        } catch (error) {
+                          console.error('Failed to send reset email:', error);
+                          alert('Failed to send password reset email.');
+                        }
+                      }}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                    >
+                      📧 Send Password Reset Email
+                    </button>
+                  )}
+                </div>
               </div>
               
               <div className="flex justify-end space-x-3 pt-4">

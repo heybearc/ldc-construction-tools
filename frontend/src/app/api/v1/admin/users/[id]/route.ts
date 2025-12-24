@@ -22,7 +22,7 @@ export async function PATCH(
     }
     
     const body = await request.json();
-    const { name, email, role, ldcRole, constructionGroupId, adminLevel, status } = body;
+    const { name, email, role, ldcRole, constructionGroupId, adminLevel, status, password } = body;
     
     // Get current user data for audit log
     const currentUser = await prisma.user.findUnique({
@@ -40,6 +40,12 @@ export async function PATCH(
       adminLevel: adminLevel === '' ? null : adminLevel,
       status,
     };
+
+    // Handle password change if provided
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      updateData.passwordHash = await bcrypt.hash(password, 10);
+    }
     
     // If status is being changed to ACTIVE and user is not yet verified,
     // set emailVerified to activate them
