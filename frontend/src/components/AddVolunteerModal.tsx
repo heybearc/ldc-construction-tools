@@ -1,18 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Phone, Mail, Building2 } from 'lucide-react';
+import { X, Save, User, Phone, Mail, Building2, Link2 } from 'lucide-react';
 import { formatPhoneNumber, unformatPhoneNumber } from '@/lib/formatPhone';
+import VolunteerRoleAssignment from './VolunteerRoleAssignment';
 
-interface TradeTeam {
+interface UserAccount {
   id: string;
   name: string;
-}
-
-interface Crew {
-  id: string;
-  name: string;
-  tradeTeamId: string;
+  email: string;
 }
 
 interface AddVolunteerModalProps {
@@ -23,91 +19,41 @@ interface AddVolunteerModalProps {
 
 const SERVING_ROLES = ['Elder', 'Ministerial Servant', 'Regular Pioneer', 'Publisher'];
 
-const VOLUNTEER_ROLES = [
-  'Trade Team Overseer',
-  'Trade Team Overseer Assistant',
-  'Trade Team Support',
-  'Trade Crew Overseer',
-  'Trade Crew Overseer Assistant',
-  'Trade Crew Support',
-  'Trade Crew Volunteer',
-];
-
-// Roles that are at the Trade Team level (don't need crew assignment)
-const TRADE_TEAM_LEVEL_ROLES = [
-  'Trade Team Overseer',
-  'Trade Team Overseer Assistant',
-  'Trade Team Support',
-];
-
 export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunteerModalProps) {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     ba_id: '',
-    role: 'Trade Crew Volunteer',
     phone: '',
     email_personal: '',
     email_jw: '',
     congregation: '',
     serving_as: [] as string[],
-    trade_crew_id: null as string | null,
   });
 
-  const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
-  const [crews, setCrews] = useState<Crew[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState('');
+  const [users, setUsers] = useState<UserAccount[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [createdVolunteerId, setCreatedVolunteerId] = useState<string | null>(null);
+  const [showRoleAssignment, setShowRoleAssignment] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Check if selected role is a Trade Team level role
-  const isTradeTeamLevelRole = TRADE_TEAM_LEVEL_ROLES.includes(formData.role);
-
   useEffect(() => {
     if (isOpen) {
-      fetchTradeTeams();
+      fetchUsers();
       resetForm();
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (selectedTeamId && !isTradeTeamLevelRole) {
-      fetchCrews(selectedTeamId);
-    } else {
-      setCrews([]);
-      setFormData(prev => ({ ...prev, trade_crew_id: null }));
-    }
-  }, [selectedTeamId, isTradeTeamLevelRole]);
-
-  // Clear crew selection when switching to a Trade Team level role
-  useEffect(() => {
-    if (isTradeTeamLevelRole) {
-      setFormData(prev => ({ ...prev, trade_crew_id: null }));
-      setCrews([]);
-    }
-  }, [formData.role]);
-
-  const fetchTradeTeams = async () => {
+  const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/v1/trade-teams');
+      const response = await fetch('/api/v1/admin/users');
       if (response.ok) {
         const data = await response.json();
-        setTradeTeams(data);
+        setUsers(data.users || []);
       }
-    } catch (error) {
-      console.error('Error fetching trade teams:', error);
-    }
-  };
-
-  const fetchCrews = async (teamId: string) => {
-    try {
-      const response = await fetch(`/api/v1/trade-teams/${teamId}/crews`);
-      if (response.ok) {
-        const data = await response.json();
-        setCrews(data);
-      }
-    } catch (error) {
-      console.error('Error fetching crews:', error);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
     }
   };
 
@@ -116,16 +62,15 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
       first_name: '',
       last_name: '',
       ba_id: '',
-      role: 'Trade Crew Volunteer',
       phone: '',
       email_personal: '',
       email_jw: '',
       congregation: '',
       serving_as: [],
-      trade_crew_id: null,
     });
-    setSelectedTeamId('');
-    setCrews([]);
+    setSelectedUserId(null);
+    setCreatedVolunteerId(null);
+    setShowRoleAssignment(false);
     setError('');
   };
 
@@ -149,20 +94,39 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
     setError('');
 
     try {
+      // Create volunteer with basic info
       const volunteerData = {
         ...formData,
-        is_overseer: formData.role.includes('Overseer') && !formData.role.includes('Assistant'),
-        is_assistant: formData.role.includes('Assistant'),
+        user_id: selectedUserId,
       };
 
-      await onSave(volunteerData);
-      resetForm();
+      const response = await fetch('/api/v1/volunteers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(volunteerData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create volunteer');
+      }
+
+      const newVolunteer = await response.json();
+      setCreatedVolunteerId(newVolunteer.id);
+      setShowRoleAssignment(true);
+      
+      // Call parent onSave to refresh list
+      await onSave(newVolunteer);
     } catch (err) {
       console.error('Error creating volunteer:', err);
       setError('Failed to create volunteer. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRolesComplete = () => {
+    resetForm();
+    onClose();
   };
 
   const handleClose = () => {
@@ -302,71 +266,30 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
             </div>
           </div>
 
-          {/* Role and Assignment */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Role and Assignment</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
-                </label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {VOLUNTEER_ROLES.map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade Team {isTradeTeamLevelRole && <span className="text-gray-500">(Oversees all crews)</span>}
-                </label>
-                <select
-                  value={selectedTeamId}
-                  onChange={(e) => setSelectedTeamId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Trade Team</option>
-                  {tradeTeams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Only show crew selection for crew-level roles */}
-            {!isTradeTeamLevelRole && crews.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade Crew
-                </label>
-                <select
-                  value={formData.trade_crew_id || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, trade_crew_id: e.target.value || null }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Trade Crew (optional)</option>
-                  {crews.map((crew) => (
-                    <option key={crew.id} value={crew.id}>
-                      {crew.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {isTradeTeamLevelRole && selectedTeamId && (
-              <p className="text-sm text-gray-500 italic">
-                As a {formData.role}, this volunteer will oversee all crews under the selected Trade Team.
+          {/* Link User Account */}
+          {!showRoleAssignment && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                <Link2 className="h-5 w-5 mr-2" />
+                Link User Account
+              </h3>
+              <p className="text-sm text-gray-500">
+                Optionally link this volunteer to a platform user account for login access.
               </p>
-            )}
-          </div>
+              <select
+                value={selectedUserId || ''}
+                onChange={(e) => setSelectedUserId(e.target.value || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">No linked user account</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Serving As */}
           <div className="space-y-4">
@@ -386,32 +309,58 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
             </div>
           </div>
 
+          {/* Show role assignment after volunteer is created */}
+          {showRoleAssignment && createdVolunteerId && (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                ✓ Volunteer created successfully! Now assign organizational roles.
+              </div>
+              <VolunteerRoleAssignment
+                volunteerId={createdVolunteerId}
+                currentRoles={[]}
+                onRolesChange={() => {}}
+              />
+            </div>
+          )}
+
           {/* Form Actions */}
           <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !formData.first_name || !formData.last_name}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Create Volunteer
-                </>
-              )}
-            </button>
+            {showRoleAssignment ? (
+              <button
+                type="button"
+                onClick={handleRolesComplete}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Done
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading || !formData.first_name || !formData.last_name}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Create Volunteer
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </div>
