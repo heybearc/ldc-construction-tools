@@ -63,6 +63,29 @@ Update NPM proxy or load balancer to point main domain to desired container.
 4. Maintain changelog for all releases
 5. Test invitation emails and critical workflows before switching traffic
 
+## ⚠️ CRITICAL: Deployment Procedures
+
+**ALWAYS follow the bulletproof deployment procedures documented in:**
+[`../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md`](../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md)
+
+**Key Requirements:**
+- Use `pm2 delete` instead of `pm2 restart` for deployments
+- Clear `.next` folder before every build
+- Regenerate Prisma client after schema changes
+- Remove `.env.local` from production servers
+- Test on STANDBY before deploying to LIVE
+
+**Quick Reference:**
+```bash
+# Standard Deployment
+pm2 delete ldc-frontend
+git pull origin main
+rm -rf .next node_modules/.cache
+npm run build
+pm2 start npm --name ldc-frontend -- start
+pm2 save
+```
+
 ## Rollback Process
 If issues occur after switching traffic:
 1. Switch traffic back to previous LIVE container

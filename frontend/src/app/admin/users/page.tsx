@@ -67,29 +67,47 @@ export default function UserManagementPage() {
   }, []);
 
   useEffect(() => {
-    loadUsers();
-    loadUserStats();
-    loadConstructionGroups();
+    let mounted = true;
+    
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          loadUsers(mounted),
+          loadUserStats(mounted),
+          loadConstructionGroups(mounted)
+        ]);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = async (mounted = true) => {
     try {
       const response = await fetch('/api/v1/admin/users');
-      if (response.ok) {
+      if (response.ok && mounted) {
         const data = await response.json();
         setUsers(data.users || []);
       }
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
-      setLoading(false);
+      if (mounted) {
+        setLoading(false);
+      }
     }
   };
 
-  const loadUserStats = async () => {
+  const loadUserStats = async (mounted = true) => {
     try {
       const response = await fetch('/api/v1/admin/users/stats');
-      if (response.ok) {
+      if (response.ok && mounted) {
         const data = await response.json();
         setStats(data.stats);
       }
@@ -98,15 +116,19 @@ export default function UserManagementPage() {
     }
   };
 
-  const loadConstructionGroups = async () => {
+  const loadConstructionGroups = async (mounted = true) => {
     try {
       const response = await fetch('/api/v1/admin/hierarchy/construction-groups');
-      if (response.ok) {
+      if (response.ok && mounted) {
         const data = await response.json();
         setConstructionGroups(data.constructionGroups || []);
       }
     } catch (error) {
       console.error('Failed to load construction groups:', error);
+      // Set empty array on error to prevent infinite loop
+      if (mounted) {
+        setConstructionGroups([]);
+      }
     }
   };
 

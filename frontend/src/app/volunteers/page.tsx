@@ -3,7 +3,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus, Upload, Download, FileText } from 'lucide-react';
+import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus, Upload, Download, FileText, Grid3x3, List } from 'lucide-react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 
@@ -46,6 +46,7 @@ export default function VolunteersPage() {
   const [importing, setImporting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [exportFilters, setExportFilters] = useState({ trade_team: '', trade_crew: '', role: '' });
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -290,6 +291,22 @@ export default function VolunteersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex border border-gray-300 rounded-md">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              title="Grid view"
+            >
+              <Grid3x3 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              title="List view"
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -411,8 +428,9 @@ export default function VolunteersPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVolunteers.map((volunteer) => (
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredVolunteers.map((volunteer) => (
           <div key={volunteer.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
@@ -482,9 +500,100 @@ export default function VolunteersPage() {
                 <UserX className="h-5 w-5 text-red-600" />
               )}
             </div>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BA ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Congregation</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredVolunteers.map((volunteer) => (
+                <tr key={volunteer.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {getRoleIcon(volunteer)}
+                      <div className="ml-3">
+                        <div className="text-sm font-medium text-gray-900">
+                          {volunteer.first_name} {volunteer.last_name}
+                        </div>
+                        {volunteer.trade_team_name && (
+                          <div className="text-sm text-gray-500">
+                            {volunteer.trade_team_name}
+                            {volunteer.trade_crew_name && ` - ${volunteer.trade_crew_name}`}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {volunteer.ba_id || '—'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {getRoleBadge(volunteer)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {volunteer.congregation || '—'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="space-y-1">
+                      {volunteer.phone && (
+                        <div className="flex items-center">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {volunteer.phone}
+                        </div>
+                      )}
+                      {(volunteer.email_personal || volunteer.email_jw) && (
+                        <div className="flex items-center">
+                          <Mail className="h-3 w-3 mr-1" />
+                          {volunteer.email_jw || volunteer.email_personal}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {volunteer.is_overseer && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Overseer
+                        </span>
+                      )}
+                      {volunteer.is_assistant && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Assistant
+                        </span>
+                      )}
+                      {volunteer.is_active ? (
+                        <UserCheck className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <UserX className="h-5 w-5 text-red-600" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => handleEditVolunteer(volunteer)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {filteredVolunteers.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg shadow">
@@ -496,16 +605,15 @@ export default function VolunteersPage() {
         </div>
       )}
 
-      {isEditModalOpen && selectedVolunteer && (
-        <EditVolunteerModal
-          volunteer={selectedVolunteer}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedVolunteer(null);
-          }}
-          onSave={handleSaveVolunteer}
-        />
-      )}
+      <EditVolunteerModal
+        volunteer={selectedVolunteer}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedVolunteer(null);
+        }}
+        onSave={handleSaveVolunteer}
+      />
 
       {isAddModalOpen && (
         <AddVolunteerModal
