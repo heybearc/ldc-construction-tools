@@ -101,11 +101,7 @@ export async function PATCH(
     if (body.email_jw !== undefined) updateData.emailJw = body.email_jw || null;
     if (body.congregation !== undefined) updateData.congregation = body.congregation || null;
     if (body.serving_as !== undefined) updateData.servingAs = body.serving_as;
-    if (body.role !== undefined) updateData.role = body.role;
-    if (body.trade_crew_id !== undefined) updateData.crewId = body.trade_crew_id || null;
-    if (body.trade_team_id !== undefined) updateData.tradeTeamId = body.trade_team_id || null;
-    if (body.is_overseer !== undefined) updateData.isOverseer = body.is_overseer;
-    if (body.is_assistant !== undefined) updateData.isAssistant = body.is_assistant;
+    // Note: role field removed - now using VolunteerRole junction table
     if (body.is_active !== undefined) updateData.isActive = body.is_active;
     if (body.user_id !== undefined) updateData.userId = body.user_id || null;
 
