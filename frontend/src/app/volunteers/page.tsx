@@ -273,6 +273,7 @@ export default function VolunteersPage() {
     const colors: Record<string, string> = {
       'CG_OVERSIGHT': 'bg-purple-100 text-purple-800',
       'CG_STAFF': 'bg-blue-100 text-blue-800',
+      'REGION_SUPPORT_SERVICES': 'bg-cyan-100 text-cyan-800',
       'TRADE_TEAM': 'bg-green-100 text-green-800',
       'TRADE_CREW': 'bg-amber-100 text-amber-800',
     };

@@ -67,10 +67,25 @@ export default function VolunteerRolesHelpPage() {
               <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Blue</span>
             </div>
             <p className="text-sm text-gray-700 mb-2">
-              Construction Group staff and regional support services
+              Construction Group staff roles from organization chart
             </p>
             <p className="text-xs text-gray-600">
-              <strong>Examples:</strong> CG Members, Safety Coordinator, PCC, Regulatory Consultant, Estimator, Scheduler, Personnel Contact, Housing Contact, Equipment Management, Sourcing Buyer, Training Organizer
+              <strong>Examples:</strong> CG Members, Safety Coordinator, PCC, Regulatory Consultant, Estimator, Scheduler
+            </p>
+          </div>
+
+          {/* Region Support Services */}
+          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+            <div className="flex items-center mb-2">
+              <Building2 className="h-5 w-5 text-cyan-600 mr-2" />
+              <h3 className="text-lg font-semibold text-cyan-900">Region Support Services</h3>
+              <span className="ml-2 px-2 py-1 bg-cyan-100 text-cyan-800 text-xs font-medium rounded">Cyan</span>
+            </div>
+            <p className="text-sm text-gray-700 mb-2">
+              Regional support and coordination services
+            </p>
+            <p className="text-xs text-gray-600">
+              <strong>Examples:</strong> Equipment Management, Housing Contact, Personnel Contact, Regulatory Contact, Safety Coordinator Contact, Sourcing Buyer, Training Organizer, Translation Buyer
             </p>
           </div>
 

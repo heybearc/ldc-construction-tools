@@ -140,147 +140,147 @@ const VOLUNTEER_ROLES: RoleDefinition[] = [
     description: 'Provides support to Scheduler'
   },
 
-  // CG STAFF - REGION SUPPORT SERVICES
+  // REGION SUPPORT SERVICES
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Equipment Management Contact',
     code: 'EMC',
     description: 'Manages equipment for region'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Equipment Management Contact Assistant',
     code: 'EMC-Asst',
     description: 'Assists Equipment Management Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Equipment Management Contact Support',
     code: 'EMC-Support',
     description: 'Provides support to Equipment Management Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Housing Contact',
     code: 'HC',
     description: 'Coordinates housing for volunteers'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Housing Contact Assistant',
     code: 'HC-Asst',
     description: 'Assists Housing Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Housing Contact Support',
     code: 'HC-Support',
     description: 'Provides support to Housing Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Personnel Contact',
     code: 'PC',
     description: 'Regional personnel coordination'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Personnel Contact Assistant',
     code: 'PCA',
     description: 'Assists Personnel Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Personnel Contact Support',
     code: 'PC-Support',
     description: 'Provides support to Personnel Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Regulatory Contact',
     code: 'REG',
     description: 'Regional regulatory coordination'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Regulatory Contact Assistant',
     code: 'REG-Asst',
     description: 'Assists Regulatory Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Regulatory Contact Support',
     code: 'REG-Support',
     description: 'Provides support to Regulatory Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Safety Coordinator Contact',
     code: 'SCC',
     description: 'Regional safety coordination contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Safety Coordinator Contact Assistant',
     code: 'SCC-Asst',
     description: 'Assists Safety Coordinator Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Safety Coordinator Contact Support',
     code: 'SCC-Support',
     description: 'Provides support to Safety Coordinator Contact'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Sourcing Buyer',
     code: 'SB',
     description: 'Manages sourcing and purchasing'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Sourcing Buyer Assistant',
     code: 'SB-Asst',
     description: 'Assists Sourcing Buyer'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Sourcing Buyer Support',
     code: 'SB-Support',
     description: 'Provides support to Sourcing Buyer'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Training Organizer',
     code: 'TO',
     description: 'Organizes training for volunteers'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Training Organizer Assistant',
     code: 'TO-Asst',
     description: 'Assists Training Organizer'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Training Organizer Support',
     code: 'TO-Support',
     description: 'Provides support to Training Organizer'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Translation Buyer',
     code: 'TB',
     description: 'Manages translation services'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Translation Buyer Assistant',
     code: 'TB-Asst',
     description: 'Assists Translation Buyer'
   },
   {
-    category: 'CG_STAFF',
+    category: 'REGION_SUPPORT_SERVICES',
     name: 'Translation Buyer Support',
     code: 'TB-Support',
     description: 'Provides support to Translation Buyer'
