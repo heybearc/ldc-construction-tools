@@ -2,6 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Save, User, Phone, Mail, Building2, Trash2, Link2 } from 'lucide-react';
+import VolunteerRoleAssignment from './VolunteerRoleAssignment';
+
+interface VolunteerRole {
+  id: string;
+  roleCategory: string;
+  roleName: string;
+  roleCode: string;
+  entityId?: string | null;
+  entityType?: string | null;
+  isPrimary: boolean;
+  isActive: boolean;
+  startDate: string;
+  endDate?: string | null;
+}
 
 interface Volunteer {
   id: string;
@@ -22,6 +36,7 @@ interface Volunteer {
   trade_team_id?: string | null;
   trade_team_name?: string | null;
   user_id?: string | null;
+  roles?: VolunteerRole[];
 }
 
 interface TradeTeam {
@@ -76,6 +91,7 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [volunteerRoles, setVolunteerRoles] = useState<VolunteerRole[]>([]);
 
   const isTradeTeamLevelRole = formData ? TRADE_TEAM_LEVEL_ROLES.includes(formData.role) : false;
 
@@ -85,6 +101,7 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
       setSelectedCrewId(volunteer.trade_crew_id || null);
       setSelectedTeamId(volunteer.trade_team_id || "");
       setSelectedUserId(volunteer.user_id || null);
+      setVolunteerRoles(volunteer.roles || []);
       fetchTradeTeams();
       fetchUsers();
       setError('');
@@ -146,6 +163,20 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
       }
     } catch (err) {
       console.error('Failed to fetch users:', err);
+    }
+  };
+
+  const handleRolesChange = () => {
+    // Refresh volunteer roles after assignment/removal
+    if (volunteer?.id) {
+      fetch(`/api/v1/volunteers/${volunteer.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.roles) {
+            setVolunteerRoles(data.roles);
+          }
+        })
+        .catch(err => console.error('Failed to refresh roles:', err));
     }
   };
 
@@ -435,6 +466,15 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
               ))}
             </div>
           </div>
+
+          {/* Organizational Roles */}
+          {formData && (
+            <VolunteerRoleAssignment
+              volunteerId={formData.id}
+              currentRoles={volunteerRoles}
+              onRolesChange={handleRolesChange}
+            />
+          )}
 
           {/* Form Actions */}
           <div className="flex justify-between pt-6 border-t border-gray-200">
