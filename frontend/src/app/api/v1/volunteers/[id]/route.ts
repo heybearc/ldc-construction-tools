@@ -124,12 +124,6 @@ export async function PATCH(
     // Trade team/crew assignments
     if (body.trade_team_id !== undefined) updateData.tradeTeamId = body.trade_team_id || null;
     if (body.trade_crew_id !== undefined) updateData.crewId = body.trade_crew_id || null;
-    // Note: user_id is handled via relation, not direct field
-    if (body.user_id !== undefined && body.user_id) {
-      updateData.user = { connect: { id: body.user_id } };
-    } else if (body.user_id === null) {
-      updateData.user = { disconnect: true };
-    }
 
     const volunteer = await prisma.volunteer.update({
       where: { id: params.id },
@@ -140,8 +134,37 @@ export async function PATCH(
             tradeTeam: true,
           },
         },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
       },
     });
+
+    // Handle user linking - update User.volunteerId instead of Volunteer.userId
+    if (body.user_id !== undefined) {
+      if (body.user_id) {
+        // Link user to this volunteer
+        await prisma.user.update({
+          where: { id: body.user_id },
+          data: { volunteerId: params.id },
+        });
+      } else {
+        // Unlink any user from this volunteer
+        const linkedUser = await prisma.user.findFirst({
+          where: { volunteerId: params.id },
+        });
+        if (linkedUser) {
+          await prisma.user.update({
+            where: { id: linkedUser.id },
+            data: { volunteerId: null },
+          });
+        }
+      }
+    }
 
     return NextResponse.json({
       id: volunteer.id,
