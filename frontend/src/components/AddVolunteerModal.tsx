@@ -111,11 +111,14 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
       }
 
       const newVolunteer = await response.json();
+      console.log('Volunteer created:', newVolunteer.id);
       setCreatedVolunteerId(newVolunteer.id);
+      console.log('Setting showRoleAssignment to true');
       setShowRoleAssignment(true);
       
       // Call parent onSave to refresh list
       await onSave(newVolunteer);
+      console.log('showRoleAssignment should now be true');
     } catch (err) {
       console.error('Error creating volunteer:', err);
       setError('Failed to create volunteer. Please try again.');
