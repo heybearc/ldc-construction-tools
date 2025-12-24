@@ -112,7 +112,8 @@ export default function VolunteerRoleAssignment({
       const response = await fetch('/api/v1/trade-teams');
       if (response.ok) {
         const data = await response.json();
-        setTradeTeams(data.trade_teams || []);
+        // API returns array directly, not wrapped in trade_teams
+        setTradeTeams(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Error fetching trade teams:', error);
@@ -124,7 +125,8 @@ export default function VolunteerRoleAssignment({
       const response = await fetch(`/api/v1/trade-teams/${tradeTeamId}/crews`);
       if (response.ok) {
         const data = await response.json();
-        setCrews(data.crews || []);
+        // API returns array directly, not wrapped in crews
+        setCrews(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Error fetching crews:', error);
