@@ -58,12 +58,20 @@ async function main() {
   console.log('🔄 Starting User → Volunteer migration...\n');
 
   // Find all users without a linked volunteer
-  const usersWithoutVolunteers = await prisma.user.findMany({
+  const usersWithoutVolunteers = await (prisma.user.findMany as any)({
     where: {
       volunteerId: null,
       status: { in: ['ACTIVE', 'INVITED'] } // Only migrate active/invited users
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+      constructionGroupId: true,
+      ldcRole: true,
       constructionGroup: true
     }
   });
@@ -86,7 +94,7 @@ async function main() {
       const emailPersonal = user.email;
 
       // Create volunteer record
-      const volunteer = await prisma.volunteer.create({
+      const volunteer = await (prisma as any).volunteer.create({
         data: {
           firstName,
           lastName,
@@ -105,7 +113,7 @@ async function main() {
       console.log(`✅ Created volunteer: ${firstName} ${lastName} (${emailPersonal})`);
 
       // Link user to volunteer
-      await prisma.user.update({
+      await (prisma.user.update as any)({
         where: { id: user.id },
         data: { volunteerId: volunteer.id }
       });
@@ -117,7 +125,7 @@ async function main() {
       if (user.ldcRole && ROLE_MAPPING[user.ldcRole]) {
         const roleInfo = ROLE_MAPPING[user.ldcRole];
         
-        await prisma.volunteerRole.create({
+        await (prisma as any).volunteerRole.create({
           data: {
             volunteerId: volunteer.id,
             roleCategory: roleInfo.category as any,
