@@ -41,10 +41,12 @@ model User {
   image               String?
   firstName           String?
   lastName            String?
-  role                UserRole            @default(READ_ONLY)
-  ldcRole             UserRole?           // Organizational LDC role (e.g., PERSONNEL_CONTACT)
+  role                UserRole            @default(READ_ONLY)  // System permission role only
   adminLevel          AdminLevel?         // Optional admin access level
   status              UserStatus          @default(INVITED)
+  // Link to Volunteer (source of truth for organizational roles)
+  volunteerId         String?             @unique
+  volunteer           Volunteer?          @relation(fields: [volunteerId], references: [id])
   // Multi-tenant: Primary CG assignment
   constructionGroupId String?
   constructionGroup   ConstructionGroup?  @relation(fields: [constructionGroupId], references: [id])
@@ -72,7 +74,6 @@ model User {
   tradeTeamOversight  TradeTeamOversight[]
   tradeCrewOversight  TradeCrewOversight[]
   personnelContacts   PersonnelContact[]
-  volunteer           Volunteer?
   announcements       Announcement[]
   assignedCrewRequests CrewChangeRequest[] @relation("AssignedCrewRequests")
   completedCrewRequests CrewChangeRequest[] @relation("CompletedCrewRequests")
@@ -447,36 +448,12 @@ enum StaffingRequestStatus {
   CANCELLED
 }
 
+// System permission roles only (not organizational roles)
 enum UserRole {
-  SUPER_ADMIN
-  ZONE_OVERSEER
-  ZONE_OVERSEER_ASSISTANT
-  ZONE_OVERSEER_SUPPORT
-  CONSTRUCTION_GROUP_OVERSEER
-  CONSTRUCTION_GROUP_OVERSEER_ASSISTANT
-  CONSTRUCTION_GROUP_OVERSEER_SUPPORT
-  TRADE_TEAM_OVERSEER
-  TRADE_TEAM_OVERSEER_ASSISTANT
-  TRADE_TEAM_OVERSEER_SUPPORT
-  TRADE_CREW_OVERSEER
-  TRADE_CREW_OVERSEER_ASSISTANT
-  TRADE_CREW_OVERSEER_SUPPORT
-  PERSONNEL_CONTACT
-  PERSONNEL_CONTACT_ASSISTANT
-  PERSONNEL_CONTACT_SUPPORT
-  FIELD_REP
-  FIELD_REP_ASSISTANT
-  FIELD_REP_SUPPORT
-  DESIGN_CONTACT
-  DESIGN_CONTACT_ASSISTANT
-  DESIGN_CONTACT_SUPPORT
-  PROJECT_CONSTRUCTION_COORDINATOR
-  PROJECT_CONSTRUCTION_COORDINATOR_ASSISTANT
-  PROJECT_CONSTRUCTION_COORDINATOR_SUPPORT
-  SAFETY_COORDINATOR
-  SAFETY_COORDINATOR_ASSISTANT
-  SAFETY_COORDINATOR_SUPPORT
-  READ_ONLY
+  SUPER_ADMIN  // Full system access
+  ADMIN        // CG-level administration
+  USER         // Standard access within scope
+  READ_ONLY    // View-only access
 }
 
 enum UserStatus {
@@ -725,8 +702,8 @@ model ProjectScheduleEntry {
 }
 
 // Phase 5: Volunteer Management (migrated from FastAPI)
-// Volunteers are personnel who can be assigned to Trade Teams/Crews
-// Some volunteers may also have platform User accounts (linked via userId)
+// Volunteers are the SOURCE OF TRUTH for all personnel
+// Users can optionally link to a Volunteer for login access
 model Volunteer {
   id                  String              @id @default(cuid())
   firstName           String
@@ -737,13 +714,11 @@ model Volunteer {
   emailJw             String?             // JW.org email
   congregation        String?
   servingAs           String[]            // Elder, Ministerial Servant, Regular Pioneer, Publisher
-  role                String              @default("Trade Crew Volunteer") // Trade Team Overseer, Crew Support, etc.
   
-  // Optional link to platform User account
-  userId              String?             @unique
-  user                User?               @relation(fields: [userId], references: [id])
+  // Optional link to platform User account (for login access)
+  user                User?
   
-  // Trade Team/Crew assignment
+  // Trade Team/Crew assignment (legacy - will be replaced by VolunteerRole)
   crewId              String?
   tradeTeamId         String?
   tradeTeam           TradeTeam?          @relation(fields: [tradeTeamId], references: [id])
@@ -752,6 +727,9 @@ model Volunteer {
   // Multi-tenant: CG scope
   constructionGroupId String
   constructionGroup   ConstructionGroup   @relation(fields: [constructionGroupId], references: [id])
+  
+  // Multiple organizational roles via junction table
+  roles               VolunteerRole[]
   
   isOverseer          Boolean             @default(false)
   isAssistant         Boolean             @default(false)
@@ -890,6 +868,45 @@ model FeedbackComment {
 
   @@index([feedbackId])
   @@map("feedback_comments")
+}
+
+// Volunteer Roles - Junction table for multiple organizational roles per volunteer
+model VolunteerRole {
+  id                String             @id @default(cuid())
+  volunteerId       String
+  volunteer         Volunteer          @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  
+  // Role information
+  roleCategory      VolunteerRoleCategory  // CG_OVERSIGHT, CONSTRUCTION_STAFF, TRADE_TEAM, TRADE_CREW
+  roleName          String             // Full name: "Personnel Contact (PC)"
+  roleCode          String             // Short code: "PC"
+  
+  // Entity assignment (what this role is for)
+  entityId          String?            // CG ID, Team ID, Crew ID, or Project ID
+  entityType        String?            // "CG", "TEAM", "CREW", "PROJECT"
+  
+  // Role metadata
+  isPrimary         Boolean            @default(true)   // Primary role vs secondary
+  startDate         DateTime           @default(now())
+  endDate           DateTime?
+  isActive          Boolean            @default(true)
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  @@unique([volunteerId, roleCategory, roleName, entityId])
+  @@index([volunteerId])
+  @@index([entityId, entityType])
+  @@map("volunteer_roles")
+}
+
+// Volunteer role categories
+enum VolunteerRoleCategory {
+  CG_OVERSIGHT         // CGO, ACGO, CG Support, CG Member
+  CONSTRUCTION_STAFF   // Personnel, Regulatory, Safety, PCC, Estimator, Scheduler, etc.
+  TRADE_TEAM           // TTO, TTOA, TT Support
+  TRADE_CREW           // TCO, TCOA, TC Support, Crew Volunteer
+  PROJECT_STAFF        // Project-specific assignments
 }
 
 model CrewChangeRequest {
