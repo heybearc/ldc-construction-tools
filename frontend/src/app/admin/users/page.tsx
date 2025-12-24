@@ -1189,8 +1189,8 @@ Alice Williams,alice.williams@example.com,READ_ONLY,,01.12,01,INVITED
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="ZONE_OVERSEER">Zone Overseer</option>
-                  <option value="CONSTRUCTION_GROUP_OVERSEER">Construction Group Overseer</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="USER">User</option>
                   <option value="READ_ONLY">Read Only</option>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
