@@ -62,29 +62,54 @@ Update NPM proxy or load balancer to point main domain to desired container.
 
 ## ⚠️ CRITICAL: Blue-Green Deployment Workflow
 
-**ALWAYS follow this order:**
-1. **Deploy to STANDBY ONLY** (currently GREEN)
-2. **Test thoroughly** on STANDBY URL (https://green.ldctools.com)
-3. **Switch traffic** to make STANDBY the new LIVE
-4. **Old LIVE becomes new STANDBY**
-5. **Sync new STANDBY** with LIVE code
-6. **Update this document** with new LIVE/STANDBY status
+**Use MCP Server Workflows (Recommended):**
+1. **`/bump`** - Version bump, deploy to STANDBY, create release notes
+2. **`/release`** - Switch traffic (STANDBY → LIVE)
+3. **`/sync`** - Sync new STANDBY with LIVE code
 
 **NEVER deploy to both environments simultaneously!**
 
 ---
 
-## Deployment Procedures
+## Deployment Methods
 
-**Full documentation:** [`../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md`](../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md)
+### Method 1: MCP Server Workflows (RECOMMENDED)
 
-### Step 1: Deploy to STANDBY (Currently GREEN)
+**See workflow files in `.windsurf/workflows/`:**
+- [`bump.md`](../.windsurf/workflows/bump.md) - Complete version bump and STANDBY deployment
+- [`release.md`](../.windsurf/workflows/release.md) - Traffic switching
+- [`sync.md`](../.windsurf/workflows/sync.md) - STANDBY synchronization
 
+**Quick Reference:**
 ```bash
-# Deploy to STANDBY environment ONLY
-ssh root@10.92.3.25  # GREEN (current STANDBY)
-cd /opt/ldc-construction-tools/frontend
+# 1. Bump version and deploy to STANDBY
+/bump
 
+# 2. Test on STANDBY: https://green.ldctools.com
+
+# 3. Switch traffic (after approval)
+/release
+
+# 4. Sync new STANDBY (after approval)
+/sync
+```
+
+**MCP Tools Used:**
+- `mcp3_get_deployment_status` - Check current LIVE/STANDBY status
+- `mcp3_deploy_to_standby` - Deploy to STANDBY with health checks
+- `mcp3_switch_traffic` - Switch HAProxy traffic with validation
+
+### Method 2: Manual Deployment (Fallback Only)
+
+**Only use if MCP server is unavailable.**
+
+**Full manual procedures:** [`../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md`](../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md)
+
+**Quick Manual Steps:**
+```bash
+# 1. Deploy to STANDBY (currently GREEN)
+ssh root@10.92.3.25
+cd /opt/ldc-construction-tools/frontend
 pm2 delete ldc-frontend
 git pull origin main
 rm -rf .next node_modules/.cache
@@ -92,13 +117,18 @@ npm run build
 pm2 start npm --name ldc-frontend -- start
 pm2 save
 
-# Verify
-curl http://localhost:3001/api/v1/admin/system/info
+# 2. Test on https://green.ldctools.com
+
+# 3. Switch traffic (update HAProxy on 10.92.3.36)
+
+# 4. Sync new STANDBY (BLUE)
+ssh root@10.92.3.23
+[same deployment commands]
 ```
 
-### Step 2: Test on STANDBY
+### Testing Checklist
 
-Visit https://green.ldctools.com and test:
+Visit STANDBY URL and verify:
 - ✓ Authentication (login/logout)
 - ✓ User management page
 - ✓ Trade Teams page
@@ -106,40 +136,7 @@ Visit https://green.ldctools.com and test:
 - ✓ Edit functionality
 - ✓ No console errors
 
-**Do NOT proceed if any tests fail!**
-
-### Step 3: Switch Traffic
-
-Update load balancer/proxy to point main domain to STANDBY:
-```bash
-# Update your proxy/DNS configuration
-# ldctools.com -> 10.92.3.25 (GREEN)
-```
-
-After switch:
-- GREEN becomes LIVE
-- BLUE becomes STANDBY
-
-### Step 4: Sync New STANDBY
-
-```bash
-# Sync BLUE (now STANDBY) with LIVE code
-ssh root@10.92.3.23
-cd /opt/ldc-construction-tools/frontend
-
-pm2 delete ldc-frontend
-git pull origin main
-rm -rf .next node_modules/.cache
-npm run build
-pm2 start npm --name ldc-frontend -- start
-pm2 save
-```
-
-### Step 5: Update This Document
-
-Update "Current Status" section at top of this file:
-- Swap LIVE and STANDBY designations
-- Update "Last Updated" date
+**Do NOT proceed with release if any tests fail!**
 
 ## Rollback Process
 If issues occur after switching traffic:
