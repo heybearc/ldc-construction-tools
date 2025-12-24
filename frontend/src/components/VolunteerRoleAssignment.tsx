@@ -30,26 +30,26 @@ interface VolunteerRoleAssignmentProps {
 
 const CATEGORY_ICONS: Record<string, any> = {
   CG_OVERSIGHT: Building2,
-  CONSTRUCTION_STAFF: Briefcase,
+  CG_STAFF: Briefcase,
+  REGION_SUPPORT_SERVICES: Users,
   TRADE_TEAM: Users,
-  TRADE_CREW: Wrench,
-  PROJECT_STAFF: FolderKanban
+  TRADE_CREW: Wrench
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
   CG_OVERSIGHT: 'CG Oversight',
-  CONSTRUCTION_STAFF: 'Construction Staff',
+  CG_STAFF: 'CG Staff',
+  REGION_SUPPORT_SERVICES: 'Region Support Services',
   TRADE_TEAM: 'Trade Team',
-  TRADE_CREW: 'Trade Crew',
-  PROJECT_STAFF: 'Project Staff'
+  TRADE_CREW: 'Trade Crew'
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
   CG_OVERSIGHT: 'bg-purple-100 text-purple-800 border-purple-200',
-  CONSTRUCTION_STAFF: 'bg-blue-100 text-blue-800 border-blue-200',
+  CG_STAFF: 'bg-blue-100 text-blue-800 border-blue-200',
+  REGION_SUPPORT_SERVICES: 'bg-cyan-100 text-cyan-800 border-cyan-200',
   TRADE_TEAM: 'bg-green-100 text-green-800 border-green-200',
-  TRADE_CREW: 'bg-amber-100 text-amber-800 border-amber-200',
-  PROJECT_STAFF: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+  TRADE_CREW: 'bg-amber-100 text-amber-800 border-amber-200'
 };
 
 export default function VolunteerRoleAssignment({ 
