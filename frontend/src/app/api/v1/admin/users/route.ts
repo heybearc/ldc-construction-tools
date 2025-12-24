@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         updatedAt: true,
         emailVerified: true,
         lastLogin: true,
+        volunteerId: true,
         constructionGroupId: true,
         constructionGroup: {
           select: {
@@ -106,6 +107,7 @@ export async function GET(request: NextRequest) {
         status: displayStatus,
         regionId: user.regionId || '',
         zoneId: user.zoneId || '',
+        volunteerId: user.volunteerId || null,
         lastLogin: user.lastLogin?.toISOString(),
         createdAt: user.createdAt.toISOString(),
         // Multi-tenant fields
