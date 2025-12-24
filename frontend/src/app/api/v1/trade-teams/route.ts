@@ -10,14 +10,33 @@ export async function GET(request: NextRequest) {
       include: {
         crews: {
           where: { isActive: true },
-          select: {
-            id: true,
-            name: true
+          include: {
+            _count: {
+              select: { volunteers: true }
+            },
+            volunteers: {
+              select: { 
+                id: true,
+                isOverseer: true,
+                isAssistant: true
+              }
+            }
+          }
+        },
+        volunteers: {
+          where: { isActive: true },
+          select: { 
+            id: true, 
+            firstName: true, 
+            lastName: true,
+            isOverseer: true,
+            isAssistant: true
           }
         },
         _count: {
           select: {
-            crews: true
+            crews: true,
+            volunteers: true
           }
         }
       },
@@ -26,18 +45,37 @@ export async function GET(request: NextRequest) {
 
     // Transform data to match expected format with oversight counts
     const transformedTeams = tradeTeams.map((team: any) => {
+      // Count only non-oversight volunteers assigned directly to trade team
+      const directNonOversightVolunteers = team.volunteers.filter((v: any) => 
+        !v.isOverseer && !v.isAssistant
+      ).length;
+      
+      // Count volunteers in crews
+      const crewVolunteers = team.crews.reduce((sum: number, crew: any) => sum + crew._count.volunteers, 0);
+      const totalMembers = directNonOversightVolunteers + crewVolunteers;
+
+      // Count trade team oversight roles (using legacy flags)
+      const ttoCount = team.volunteers.filter((v: any) => v.isOverseer).length;
+      const ttoaCount = team.volunteers.filter((v: any) => v.isAssistant).length;
+      const ttsCount = 0; // No legacy flag for support role
+
+      // Count crews needing oversight
+      const crewsNeedingTCO = team.crews.filter((crew: any) =>
+        !crew.volunteers.some((v: any) => v.isOverseer)
+      ).length;
+
       const result: any = {
         id: team.id,
         name: team.name,
         crew_count: team._count.crews,
-        total_members: 0, // No volunteer data yet
+        total_members: totalMembers,
         active_crews: team.crews.length,
         is_active: team.isActive,
         oversight: {
-          tto: { filled: 0, required: 1 },
-          ttoa: { filled: 0, required: 2 },
-          tts: { filled: 0, required: 0 },
-          crews_needing_tco: team.crews.length // All crews need oversight until volunteers are assigned
+          tto: { filled: ttoCount, required: 1 },
+          ttoa: { filled: ttoaCount, required: 2 },
+          tts: { filled: ttsCount, required: 0 },
+          crews_needing_tco: crewsNeedingTCO
         }
       };
 
