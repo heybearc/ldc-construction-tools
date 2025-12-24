@@ -10,23 +10,14 @@ export async function GET(request: NextRequest) {
       include: {
         crews: {
           where: { isActive: true },
-          include: {
-            _count: {
-              select: { volunteers: true }
-            },
-            volunteers: {
-              select: { role: true }
-            }
+          select: {
+            id: true,
+            name: true
           }
-        },
-        volunteers: {
-          where: { isActive: true },
-          select: { id: true, firstName: true, lastName: true, role: true }
         },
         _count: {
           select: {
-            crews: true,
-            volunteers: true
+            crews: true
           }
         }
       },
@@ -34,38 +25,19 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform data to match expected format with oversight counts
-    const transformedTeams = tradeTeams.map(team => {
-      // Count only non-oversight volunteers assigned directly to trade team
-      const directNonOversightVolunteers = team.volunteers.filter(v => 
-        !v.role?.includes('Overseer') && !v.role?.includes('Support')
-      ).length;
-      
-      // Count volunteers in crews
-      const crewVolunteers = team.crews.reduce((sum, crew) => sum + crew._count.volunteers, 0);
-      const totalMembers = directNonOversightVolunteers + crewVolunteers;
-
-      // Count trade team oversight roles
-      const ttoCount = team.volunteers.filter(v => v.role === 'Trade Team Overseer').length;
-      const ttoaCount = team.volunteers.filter(v => v.role === 'Trade Team Overseer Assistant').length;
-      const ttsCount = team.volunteers.filter(v => v.role === 'Trade Team Support').length;
-
-      // Count crews needing oversight
-      const crewsNeedingTCO = team.crews.filter(crew =>
-        !crew.volunteers.some(v => v.role === 'Trade Crew Overseer')
-      ).length;
-
+    const transformedTeams = tradeTeams.map((team: any) => {
       const result: any = {
         id: team.id,
         name: team.name,
         crew_count: team._count.crews,
-        total_members: totalMembers,
+        total_members: 0, // No volunteer data yet
         active_crews: team.crews.length,
         is_active: team.isActive,
         oversight: {
-          tto: { filled: ttoCount, required: 1 },
-          ttoa: { filled: ttoaCount, required: 2 },
-          tts: { filled: ttsCount, required: 0 },
-          crews_needing_tco: crewsNeedingTCO
+          tto: { filled: 0, required: 1 },
+          ttoa: { filled: 0, required: 2 },
+          tts: { filled: 0, required: 0 },
+          crews_needing_tco: team.crews.length // All crews need oversight until volunteers are assigned
         }
       };
 
