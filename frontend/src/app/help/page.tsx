@@ -59,6 +59,13 @@ const helpTopics: HelpTopic[] = [
     icon: '🙋'
   },
   {
+    id: 'volunteer-roles',
+    title: 'Volunteer Organizational Roles',
+    description: 'Assigning and managing multiple organizational roles for volunteers',
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
+    icon: '📋'
+  },
+  {
     id: 'admin',
     title: 'Admin Panel',
     description: 'System administration, users, and configuration',
