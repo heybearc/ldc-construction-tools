@@ -238,6 +238,42 @@ export default function VolunteerRoleAssignment({
     }
   };
 
+  const handleTogglePrimary = async (roleId: string, currentIsPrimary: boolean) => {
+    if (currentIsPrimary) {
+      alert('This is already the primary role. To change primary role, click "Make Primary" on a different role.');
+      return;
+    }
+
+    try {
+      // Unset primary on all other roles
+      for (const role of currentRoles) {
+        if (role.isPrimary && role.id !== roleId) {
+          await fetch(`/api/v1/volunteer-roles/${role.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isPrimary: false })
+          });
+        }
+      }
+
+      // Set this role as primary
+      const response = await fetch(`/api/v1/volunteer-roles/${roleId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPrimary: true })
+      });
+
+      if (response.ok) {
+        onRolesChange();
+      } else {
+        alert('Failed to update primary role');
+      }
+    } catch (error) {
+      console.error('Error updating primary role:', error);
+      alert('Failed to update primary role');
+    }
+  };
+
   const handleRemoveRole = async (roleId: string) => {
     if (!confirm('Remove this role assignment?')) return;
 
@@ -310,13 +346,26 @@ export default function VolunteerRoleAssignment({
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => handleRemoveRole(role.id)}
-                className="text-red-600 hover:text-red-800"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex items-center space-x-2">
+                {!role.isPrimary && (
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePrimary(role.id, role.isPrimary)}
+                    className="text-xs px-2 py-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+                    title="Make this the primary role"
+                  >
+                    Make Primary
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveRole(role.id)}
+                  className="text-red-600 hover:text-red-800"
+                  title="Remove role"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))
         )}
