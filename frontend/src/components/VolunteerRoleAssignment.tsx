@@ -160,6 +160,24 @@ export default function VolunteerRoleAssignment({
         finalEntityId = selectedCrewId;
       }
 
+      // If this is being set as primary and volunteer already has roles, unset other primary roles first
+      let finalIsPrimary = isPrimary;
+      if (isPrimary && currentRoles.length > 0) {
+        // Unset primary on all existing roles
+        for (const role of currentRoles) {
+          if (role.isPrimary) {
+            await fetch(`/api/v1/volunteer-roles/${role.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ isPrimary: false })
+            });
+          }
+        }
+      } else if (currentRoles.length === 0) {
+        // First role is always primary
+        finalIsPrimary = true;
+      }
+
       const response = await fetch('/api/v1/volunteer-roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,7 +188,7 @@ export default function VolunteerRoleAssignment({
           roleCode: selectedRole.code,
           entityId: finalEntityId,
           entityType: finalEntityType,
-          isPrimary
+          isPrimary: finalIsPrimary
         })
       });
 
