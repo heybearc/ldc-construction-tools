@@ -52,6 +52,17 @@ const CATEGORY_COLORS: Record<string, string> = {
   TRADE_CREW: 'bg-amber-100 text-amber-800 border-amber-200'
 };
 
+interface TradeTeam {
+  id: string;
+  name: string;
+}
+
+interface Crew {
+  id: string;
+  name: string;
+  tradeTeamId: string;
+}
+
 export default function VolunteerRoleAssignment({ 
   volunteerId, 
   currentRoles, 
@@ -65,10 +76,24 @@ export default function VolunteerRoleAssignment({
   const [entityType, setEntityType] = useState('');
   const [isPrimary, setIsPrimary] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
+  const [crews, setCrews] = useState<Crew[]>([]);
+  const [selectedTradeTeamId, setSelectedTradeTeamId] = useState('');
+  const [selectedCrewId, setSelectedCrewId] = useState('');
 
   useEffect(() => {
     fetchAvailableRoles();
+    fetchTradeTeams();
   }, []);
+
+  useEffect(() => {
+    if (selectedTradeTeamId) {
+      fetchCrews(selectedTradeTeamId);
+    } else {
+      setCrews([]);
+      setSelectedCrewId('');
+    }
+  }, [selectedTradeTeamId]);
 
   const fetchAvailableRoles = async () => {
     try {
@@ -82,11 +107,57 @@ export default function VolunteerRoleAssignment({
     }
   };
 
+  const fetchTradeTeams = async () => {
+    try {
+      const response = await fetch('/api/v1/trade-teams');
+      if (response.ok) {
+        const data = await response.json();
+        setTradeTeams(data.trade_teams || []);
+      }
+    } catch (error) {
+      console.error('Error fetching trade teams:', error);
+    }
+  };
+
+  const fetchCrews = async (tradeTeamId: string) => {
+    try {
+      const response = await fetch(`/api/v1/trade-teams/${tradeTeamId}/crews`);
+      if (response.ok) {
+        const data = await response.json();
+        setCrews(data.crews || []);
+      }
+    } catch (error) {
+      console.error('Error fetching crews:', error);
+    }
+  };
+
   const handleAddRole = async () => {
     if (!selectedRole) return;
 
+    // Validate Trade Team/Crew selection for those categories
+    if (selectedRole.category === 'TRADE_TEAM' && !selectedTradeTeamId) {
+      alert('Please select a Trade Team');
+      return;
+    }
+    if (selectedRole.category === 'TRADE_CREW' && !selectedCrewId) {
+      alert('Please select a Trade Crew');
+      return;
+    }
+
     setLoading(true);
     try {
+      // Determine entity type and ID based on role category
+      let finalEntityType = entityType || null;
+      let finalEntityId = entityId || null;
+
+      if (selectedRole.category === 'TRADE_TEAM') {
+        finalEntityType = 'TEAM';
+        finalEntityId = selectedTradeTeamId;
+      } else if (selectedRole.category === 'TRADE_CREW') {
+        finalEntityType = 'CREW';
+        finalEntityId = selectedCrewId;
+      }
+
       const response = await fetch('/api/v1/volunteer-roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,18 +166,25 @@ export default function VolunteerRoleAssignment({
           roleCategory: selectedRole.category,
           roleName: selectedRole.name,
           roleCode: selectedRole.code,
-          entityId: entityId || null,
-          entityType: entityType || null,
+          entityId: finalEntityId,
+          entityType: finalEntityType,
           isPrimary
         })
       });
 
       if (response.ok) {
+        // Update volunteer's trade team/crew assignment
+        if (selectedRole.category === 'TRADE_TEAM' || selectedRole.category === 'TRADE_CREW') {
+          await updateVolunteerTeamAssignment();
+        }
+
         setShowAddModal(false);
         setSelectedCategory('');
         setSelectedRole(null);
         setEntityId('');
         setEntityType('');
+        setSelectedTradeTeamId('');
+        setSelectedCrewId('');
         setIsPrimary(true);
         onRolesChange();
       } else {
@@ -118,6 +196,25 @@ export default function VolunteerRoleAssignment({
       alert('Failed to assign role');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateVolunteerTeamAssignment = async () => {
+    try {
+      const updateData: any = {};
+      if (selectedCrewId) {
+        updateData.trade_crew_id = selectedCrewId;
+      } else if (selectedTradeTeamId) {
+        updateData.trade_team_id = selectedTradeTeamId;
+      }
+
+      await fetch(`/api/v1/volunteers/${volunteerId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+    } catch (error) {
+      console.error('Error updating volunteer team assignment:', error);
     }
   };
 
@@ -278,8 +375,71 @@ export default function VolunteerRoleAssignment({
                 </div>
               )}
 
-              {/* Entity Assignment (Optional) */}
-              {selectedRole && (
+              {/* Trade Team Selection (for TRADE_TEAM roles) */}
+              {selectedRole && selectedRole.category === 'TRADE_TEAM' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Trade Team <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={selectedTradeTeamId}
+                    onChange={(e) => setSelectedTradeTeamId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select trade team...</option>
+                    {tradeTeams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Trade Crew Selection (for TRADE_CREW roles) */}
+              {selectedRole && selectedRole.category === 'TRADE_CREW' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Trade Team <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={selectedTradeTeamId}
+                      onChange={(e) => setSelectedTradeTeamId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select trade team...</option>
+                      {tradeTeams.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {selectedTradeTeamId && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Trade Crew <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={selectedCrewId}
+                        onChange={(e) => setSelectedCrewId(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select trade crew...</option>
+                        {crews.map((crew) => (
+                          <option key={crew.id} value={crew.id}>
+                            {crew.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Entity Assignment (Optional for other roles) */}
+              {selectedRole && selectedRole.category !== 'TRADE_TEAM' && selectedRole.category !== 'TRADE_CREW' && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -293,8 +453,6 @@ export default function VolunteerRoleAssignment({
                       >
                         <option value="">None</option>
                         <option value="CG">Construction Group</option>
-                        <option value="TEAM">Trade Team</option>
-                        <option value="CREW">Trade Crew</option>
                         <option value="PROJECT">Project</option>
                       </select>
                     </div>

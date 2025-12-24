@@ -113,6 +113,9 @@ export async function PATCH(
     if (body.serving_as !== undefined) updateData.servingAs = body.serving_as;
     // Note: role field removed - now using VolunteerRole junction table
     if (body.is_active !== undefined) updateData.isActive = body.is_active;
+    // Trade team/crew assignments
+    if (body.trade_team_id !== undefined) updateData.tradeTeamId = body.trade_team_id || null;
+    if (body.trade_crew_id !== undefined) updateData.crewId = body.trade_crew_id || null;
     // Note: user_id is handled via relation, not direct field
     if (body.user_id !== undefined && body.user_id) {
       updateData.user = { connect: { id: body.user_id } };
