@@ -225,16 +225,24 @@ export default function VolunteerRoleAssignment({
     try {
       const updateData: any = {};
       if (selectedCrewId) {
+        // When assigning to a crew, set both crew_id and trade_team_id
         updateData.trade_crew_id = selectedCrewId;
-      } else if (selectedTradeTeamId) {
         updateData.trade_team_id = selectedTradeTeamId;
+      } else if (selectedTradeTeamId) {
+        // When assigning to a trade team only, set trade_team_id and clear crew_id
+        updateData.trade_team_id = selectedTradeTeamId;
+        updateData.trade_crew_id = null;
       }
 
-      await fetch(`/api/v1/volunteers/${volunteerId}`, {
+      const response = await fetch(`/api/v1/volunteers/${volunteerId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData)
       });
+
+      if (!response.ok) {
+        console.error('Failed to update volunteer team assignment:', await response.text());
+      }
     } catch (error) {
       console.error('Error updating volunteer team assignment:', error);
     }

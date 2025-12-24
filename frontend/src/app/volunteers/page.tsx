@@ -538,6 +538,7 @@ export default function VolunteersPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BA ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trade Team/Crew</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Congregation</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -587,6 +588,18 @@ export default function VolunteersPage() {
                         </div>
                       )}
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {volunteer.trade_crew_name ? (
+                      <div>
+                        <div className="font-medium text-gray-900">{volunteer.trade_team_name}</div>
+                        <div className="text-xs text-gray-500">{volunteer.trade_crew_name}</div>
+                      </div>
+                    ) : volunteer.trade_team_name ? (
+                      <div className="font-medium text-gray-900">{volunteer.trade_team_name}</div>
+                    ) : (
+                      '—'
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {volunteer.congregation || '—'}
