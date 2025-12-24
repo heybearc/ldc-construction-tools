@@ -509,6 +509,7 @@ export default function VolunteersPage() {
 
       {isAddModalOpen && (
         <AddVolunteerModal
+          isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onSave={handleAddVolunteer}
         />
