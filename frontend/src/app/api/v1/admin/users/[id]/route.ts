@@ -64,6 +64,41 @@ export async function PATCH(
       data: updateData,
     });
     
+    // Sync volunteer data if user is linked to a volunteer
+    try {
+      if (updatedUser.volunteerId) {
+        const volunteerData: any = {};
+        
+        // Sync name changes
+        if (name) {
+          const nameParts = name.split(' ');
+          volunteerData.firstName = nameParts[0] || '';
+          volunteerData.lastName = nameParts.slice(1).join(' ') || '';
+        }
+        
+        // Sync email changes (volunteer email is source of truth)
+        if (email && email !== currentUser?.email) {
+          volunteerData.emailPersonal = email;
+        }
+        
+        // Sync status
+        volunteerData.isActive = status === 'ACTIVE';
+        
+        // Update volunteer if we have changes
+        if (Object.keys(volunteerData).length > 0) {
+          await (prisma as any).volunteer?.update({
+            where: { id: updatedUser.volunteerId },
+            data: volunteerData
+          }).catch((err: any) => {
+            console.log('Volunteer sync skipped (table may not exist yet):', err.message);
+          });
+        }
+      }
+    } catch (volunteerSyncError) {
+      // Non-critical error - volunteer sync can fail if schema not fully deployed
+      console.log('Volunteer sync skipped:', volunteerSyncError);
+    }
+    
     // Log the update to audit trail
     await logUpdate(
       session?.user?.id || null,
