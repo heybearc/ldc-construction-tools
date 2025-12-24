@@ -52,32 +52,81 @@ Update NPM proxy or load balancer to point main domain to desired container.
 - `NODE_ENV` - Set to "production" on both containers
 
 ## Current Status
-- **BLUE (10.92.3.23):** Development/STANDBY - v1.8.2
-- **GREEN (10.92.3.25):** LIVE/Production - (check version)
-- **Database:** Shared between both environments
+**Last Updated:** December 24, 2024
 
-## Best Practices
-1. Always test on BLUE before deploying to GREEN
-2. Keep both environments in sync when not actively developing
-3. Use version tags for tracking deployments
-4. Maintain changelog for all releases
-5. Test invitation emails and critical workflows before switching traffic
+- **BLUE (10.92.3.23):** LIVE/Production
+- **GREEN (10.92.3.25):** STANDBY/Testing
+- **Database:** Shared between both environments (10.92.3.21)
 
-## ⚠️ CRITICAL: Deployment Procedures
+**⚠️ UPDATE THIS SECTION AFTER EVERY TRAFFIC SWITCH**
 
-**ALWAYS follow the bulletproof deployment procedures documented in:**
-[`../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md`](../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md)
+## ⚠️ CRITICAL: Blue-Green Deployment Workflow
 
-**Key Requirements:**
-- Use `pm2 delete` instead of `pm2 restart` for deployments
-- Clear `.next` folder before every build
-- Regenerate Prisma client after schema changes
-- Remove `.env.local` from production servers
-- Test on STANDBY before deploying to LIVE
+**ALWAYS follow this order:**
+1. **Deploy to STANDBY ONLY** (currently GREEN)
+2. **Test thoroughly** on STANDBY URL (https://green.ldctools.com)
+3. **Switch traffic** to make STANDBY the new LIVE
+4. **Old LIVE becomes new STANDBY**
+5. **Sync new STANDBY** with LIVE code
+6. **Update this document** with new LIVE/STANDBY status
 
-**Quick Reference:**
+**NEVER deploy to both environments simultaneously!**
+
+---
+
+## Deployment Procedures
+
+**Full documentation:** [`../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md`](../DEPLOYMENT-ISSUES-AND-SOLUTIONS.md)
+
+### Step 1: Deploy to STANDBY (Currently GREEN)
+
 ```bash
-# Standard Deployment
+# Deploy to STANDBY environment ONLY
+ssh root@10.92.3.25  # GREEN (current STANDBY)
+cd /opt/ldc-construction-tools/frontend
+
+pm2 delete ldc-frontend
+git pull origin main
+rm -rf .next node_modules/.cache
+npm run build
+pm2 start npm --name ldc-frontend -- start
+pm2 save
+
+# Verify
+curl http://localhost:3001/api/v1/admin/system/info
+```
+
+### Step 2: Test on STANDBY
+
+Visit https://green.ldctools.com and test:
+- ✓ Authentication (login/logout)
+- ✓ User management page
+- ✓ Trade Teams page
+- ✓ Volunteers page (grid and list views)
+- ✓ Edit functionality
+- ✓ No console errors
+
+**Do NOT proceed if any tests fail!**
+
+### Step 3: Switch Traffic
+
+Update load balancer/proxy to point main domain to STANDBY:
+```bash
+# Update your proxy/DNS configuration
+# ldctools.com -> 10.92.3.25 (GREEN)
+```
+
+After switch:
+- GREEN becomes LIVE
+- BLUE becomes STANDBY
+
+### Step 4: Sync New STANDBY
+
+```bash
+# Sync BLUE (now STANDBY) with LIVE code
+ssh root@10.92.3.23
+cd /opt/ldc-construction-tools/frontend
+
 pm2 delete ldc-frontend
 git pull origin main
 rm -rf .next node_modules/.cache
@@ -85,6 +134,12 @@ npm run build
 pm2 start npm --name ldc-frontend -- start
 pm2 save
 ```
+
+### Step 5: Update This Document
+
+Update "Current Status" section at top of this file:
+- Swap LIVE and STANDBY designations
+- Update "Last Updated" date
 
 ## Rollback Process
 If issues occur after switching traffic:
