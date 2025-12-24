@@ -243,18 +243,12 @@ export default function VolunteersPage() {
     }
   };
 
-  const handleAddVolunteer = async (newVolunteer: any): Promise<void> => {
+  const handleAddVolunteer = async (newVolunteer: any) => {
     try {
-      const response = await fetch('/api/v1/volunteers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newVolunteer),
-      });
-      if (response.ok) {
-        fetchVolunteers();
-        fetchStats();
-        setIsAddModalOpen(false);
-      }
+      // Just refresh the list - don't close the modal
+      // The modal will handle its own closing after role assignment
+      fetchVolunteers();
+      fetchStats();
     } catch (error) {
       console.error('Error adding volunteer:', error);
     }
