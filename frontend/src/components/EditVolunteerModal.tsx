@@ -86,7 +86,7 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
   };
 
   const handleRolesChange = () => {
-    // Refresh volunteer roles after assignment/removal
+    // Refresh volunteer roles AND formData after assignment/removal
     if (volunteer?.id) {
       fetch(`/api/v1/volunteers/${volunteer.id}`)
         .then(res => res.json())
@@ -94,6 +94,14 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
           if (data.roles) {
             setVolunteerRoles(data.roles);
           }
+          // Update formData with latest team/crew assignments
+          setFormData(prev => ({
+            ...prev!,
+            trade_crew_id: data.trade_crew_id,
+            trade_team_id: data.trade_team_id,
+            trade_crew_name: data.trade_crew_name,
+            trade_team_name: data.trade_team_name
+          }));
         })
         .catch(err => console.error('Failed to refresh roles:', err));
     }
