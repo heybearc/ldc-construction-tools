@@ -153,6 +153,9 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
             </div>
           )}
 
+          {/* Show basic form only when not in role assignment mode */}
+          {!showRoleAssignment && (
+            <>
           {/* Personal Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
@@ -267,7 +270,6 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
           </div>
 
           {/* Link User Account */}
-          {!showRoleAssignment && (
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-900 flex items-center">
                 <Link2 className="h-5 w-5 mr-2" />
@@ -289,7 +291,6 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
                 ))}
               </select>
             </div>
-          )}
 
           {/* Serving As */}
           <div className="space-y-4">
@@ -308,6 +309,8 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
               ))}
             </div>
           </div>
+            </>
+          )}
 
           {/* Show role assignment after volunteer is created */}
           {showRoleAssignment && createdVolunteerId && (
