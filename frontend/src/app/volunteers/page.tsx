@@ -510,6 +510,12 @@ export default function VolunteersPage() {
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-200">
               <div className="flex gap-2">
+                {volunteer.has_user_account && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Linked to user account">
+                    <Link2 className="h-3 w-3 mr-1" />
+                    User
+                  </span>
+                )}
                 {volunteer.is_overseer && (
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Overseer
