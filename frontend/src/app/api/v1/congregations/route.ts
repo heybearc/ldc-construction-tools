@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { getCGScope } from '@/lib/cg-scope';
+import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
+import { canManageVolunteers } from '@/lib/permissions';
 
 // GET /api/v1/congregations - List all congregations
 export async function GET(request: NextRequest) {
@@ -61,6 +63,11 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check permissions - requires management role or admin
+    const userOrgRoles = await getUserOrgRoles(session);
+    const permissionError = checkPermission(canManageVolunteers(session, userOrgRoles));
+    if (permissionError) return permissionError;
 
     const cgScope = await getCGScope();
     const body = await request.json();
