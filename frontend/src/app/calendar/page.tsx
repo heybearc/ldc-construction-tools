@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Plus, Calendar, Copy, Check, Trash2, Downloa
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { getTradeTeamConfig } from '@/lib/trade-team-config';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Project {
   id: string;
@@ -47,6 +48,7 @@ interface ScheduleVersion {
 }
 
 function CalendarContent() {
+  const { canManageProjects } = usePermissions();
   const searchParams = useSearchParams();
   const projectIdParam = searchParams.get('project');
 
@@ -341,9 +343,11 @@ function CalendarContent() {
           <h1 className="text-3xl font-bold text-gray-900">Project Calendar</h1>
           <p className="mt-1 text-gray-600">Build and manage project schedules</p>
         </div>
-        <button onClick={() => { resetEntryForm(); setEditingEntry(null); setShowEntryModal(true); }} className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50" disabled={!selectedVersion}>
-          <Plus className="h-4 w-4 mr-2" />Add Entry
-        </button>
+        {canManageProjects && (
+          <button onClick={() => { resetEntryForm(); setEditingEntry(null); setShowEntryModal(true); }} className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50" disabled={!selectedVersion}>
+            <Plus className="h-4 w-4 mr-2" />Add Entry
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow p-4">
@@ -364,13 +368,15 @@ function CalendarContent() {
                   {versions.map(v => <option key={v.id} value={v.id}>{v.name} {v.isCurrent ? '✓' : ''}</option>)}
                 </select>
               </div>
-              {selectedVersion && !selectedVersion.isCurrent && (
+              {canManageProjects && selectedVersion && !selectedVersion.isCurrent && (
                 <button onClick={() => handleSetCurrent(selectedVersion.id)} className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"><Check className="h-4 w-4 mr-1" />Set Current</button>
               )}
-              {selectedVersion && !selectedVersion.isCurrent && (
+              {canManageProjects && selectedVersion && !selectedVersion.isCurrent && (
                 <button onClick={() => handleDeleteVersion(selectedVersion.id)} className="inline-flex items-center text-sm text-red-600 hover:text-red-800"><Trash2 className="h-4 w-4 mr-1" />Delete</button>
               )}
-              <button onClick={() => setShowNewVersionModal(true)} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"><Copy className="h-4 w-4 mr-2" />New Version</button>{selectedVersion && entries.length > 0 && (<><a href={`/api/v1/projects/${selectedProject?.id}/schedule/${selectedVersion?.id}/export`} className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm hover:bg-green-100"><Download className="h-4 w-4 mr-2" />Export Excel</a><button onClick={exportToPDF} className="inline-flex items-center px-3 py-2 border border-red-300 bg-red-50 text-red-700 rounded-md text-sm hover:bg-red-100 ml-2"><Download className="h-4 w-4 mr-2" />PDF: Simple List</button><button onClick={exportToCalendarPDF} className="inline-flex items-center px-3 py-2 border border-purple-300 bg-purple-50 text-purple-700 rounded-md text-sm hover:bg-purple-100 ml-2"><Download className="h-4 w-4 mr-2" />PDF: With Duration</button></>)}
+              {canManageProjects && (
+                <button onClick={() => setShowNewVersionModal(true)} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"><Copy className="h-4 w-4 mr-2" />New Version</button>
+              )}{selectedVersion && entries.length > 0 && (<><a href={`/api/v1/projects/${selectedProject?.id}/schedule/${selectedVersion?.id}/export`} className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm hover:bg-green-100"><Download className="h-4 w-4 mr-2" />Export Excel</a><button onClick={exportToPDF} className="inline-flex items-center px-3 py-2 border border-red-300 bg-red-50 text-red-700 rounded-md text-sm hover:bg-red-100 ml-2"><Download className="h-4 w-4 mr-2" />PDF: Simple List</button><button onClick={exportToCalendarPDF} className="inline-flex items-center px-3 py-2 border border-purple-300 bg-purple-50 text-purple-700 rounded-md text-sm hover:bg-purple-100 ml-2"><Download className="h-4 w-4 mr-2" />PDF: With Duration</button></>)}
             </>
           )}
         </div>
