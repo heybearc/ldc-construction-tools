@@ -72,6 +72,7 @@ export const authOptions: NextAuthOptions = {
           adminLevel: user.adminLevel,
           regionId: user.regionId,
           zoneId: user.zoneId,
+          volunteerId: user.volunteerId,
         }
       }
     })
@@ -97,6 +98,7 @@ export const authOptions: NextAuthOptions = {
         token.adminLevel = user.adminLevel
         token.regionId = user.regionId
         token.zoneId = user.zoneId
+        token.volunteerId = user.volunteerId
       }
       return token
     },
@@ -109,6 +111,7 @@ export const authOptions: NextAuthOptions = {
         session.user.adminLevel = token.adminLevel as string
         session.user.regionId = token.regionId as string
         session.user.zoneId = token.zoneId as string
+        session.user.volunteerId = token.volunteerId as string
       }
       return session
     }
