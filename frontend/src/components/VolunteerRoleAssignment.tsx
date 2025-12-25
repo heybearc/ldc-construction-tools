@@ -23,9 +23,9 @@ interface RoleDefinition {
 }
 
 interface VolunteerRoleAssignmentProps {
-  volunteerId: string;
+  volunteerId: string | null;
   currentRoles: VolunteerRole[];
-  onRolesChange: () => void;
+  onRolesChange: (roles?: VolunteerRole[]) => void;
 }
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -68,6 +68,8 @@ export default function VolunteerRoleAssignment({
   currentRoles, 
   onRolesChange 
 }: VolunteerRoleAssignmentProps) {
+  const isPendingMode = volunteerId === null;
+  const [localRoles, setLocalRoles] = useState<VolunteerRole[]>(currentRoles);
   const [availableRoles, setAvailableRoles] = useState<Record<string, RoleDefinition[]>>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -160,10 +162,48 @@ export default function VolunteerRoleAssignment({
         finalEntityId = selectedCrewId;
       }
 
-      // If this is being set as primary and volunteer already has roles, unset other primary roles first
+      // Determine if this should be primary
       let finalIsPrimary = isPrimary;
+      if (localRoles.length === 0) {
+        finalIsPrimary = true;
+      }
+
+      // PENDING MODE: Store role locally
+      if (isPendingMode) {
+        const newRole: VolunteerRole = {
+          id: `pending-${Date.now()}`,
+          roleCategory: selectedRole.category,
+          roleName: selectedRole.name,
+          roleCode: selectedRole.code,
+          entityId: finalEntityId,
+          entityType: finalEntityType,
+          isPrimary: finalIsPrimary,
+          isActive: true,
+          startDate: new Date().toISOString(),
+          endDate: null
+        };
+
+        const updatedRoles = finalIsPrimary 
+          ? [newRole, ...localRoles.map(r => ({ ...r, isPrimary: false }))]
+          : [...localRoles, newRole];
+        
+        setLocalRoles(updatedRoles);
+        onRolesChange(updatedRoles);
+        
+        setShowAddModal(false);
+        setSelectedCategory('');
+        setSelectedRole(null);
+        setEntityId('');
+        setEntityType('');
+        setSelectedTradeTeamId('');
+        setSelectedCrewId('');
+        setIsPrimary(true);
+        setLoading(false);
+        return;
+      }
+
+      // NORMAL MODE: Save to API
       if (isPrimary && currentRoles.length > 0) {
-        // Unset primary on all existing roles
         for (const role of currentRoles) {
           if (role.isPrimary) {
             await fetch(`/api/v1/volunteer-roles/${role.id}`, {
@@ -173,9 +213,6 @@ export default function VolunteerRoleAssignment({
             });
           }
         }
-      } else if (currentRoles.length === 0) {
-        // First role is always primary
-        finalIsPrimary = true;
       }
 
       const response = await fetch('/api/v1/volunteer-roles', {
@@ -195,7 +232,6 @@ export default function VolunteerRoleAssignment({
       });
 
       if (response.ok) {
-        // Update volunteer's trade team/crew assignment
         if (selectedRole.category === 'TRADE_TEAM' || selectedRole.category === 'TRADE_CREW') {
           await updateVolunteerTeamAssignment();
         }
@@ -254,8 +290,19 @@ export default function VolunteerRoleAssignment({
       return;
     }
 
+    // PENDING MODE: Update local roles
+    if (isPendingMode) {
+      const updatedRoles = localRoles.map(r => ({
+        ...r,
+        isPrimary: r.id === roleId
+      }));
+      setLocalRoles(updatedRoles);
+      onRolesChange(updatedRoles);
+      return;
+    }
+
+    // NORMAL MODE: Save to API
     try {
-      // Unset primary on all other roles
       for (const role of currentRoles) {
         if (role.isPrimary && role.id !== roleId) {
           await fetch(`/api/v1/volunteer-roles/${role.id}`, {
@@ -266,7 +313,6 @@ export default function VolunteerRoleAssignment({
         }
       }
 
-      // Set this role as primary
       const response = await fetch(`/api/v1/volunteer-roles/${roleId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -287,6 +333,15 @@ export default function VolunteerRoleAssignment({
   const handleRemoveRole = async (roleId: string) => {
     if (!confirm('Remove this role assignment?')) return;
 
+    // PENDING MODE: Remove from local roles
+    if (isPendingMode) {
+      const updatedRoles = localRoles.filter(r => r.id !== roleId);
+      setLocalRoles(updatedRoles);
+      onRolesChange(updatedRoles);
+      return;
+    }
+
+    // NORMAL MODE: Delete via API
     try {
       const response = await fetch(`/api/v1/volunteer-roles/${roleId}`, {
         method: 'DELETE'
@@ -324,10 +379,10 @@ export default function VolunteerRoleAssignment({
 
       {/* Current Roles */}
       <div className="space-y-2">
-        {currentRoles.length === 0 ? (
+        {(isPendingMode ? localRoles : currentRoles).length === 0 ? (
           <p className="text-sm text-gray-500 italic">No organizational roles assigned</p>
         ) : (
-          currentRoles.map((role) => (
+          (isPendingMode ? localRoles : currentRoles).map((role) => (
             <div
               key={role.id}
               className={`flex items-center justify-between p-3 border rounded-lg ${

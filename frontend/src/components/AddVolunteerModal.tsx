@@ -33,14 +33,12 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
 
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [createdVolunteerId, setCreatedVolunteerId] = useState<string | null>(null);
-  const [showRoleAssignment, setShowRoleAssignment] = useState(false);
+  const [pendingRoles, setPendingRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const prevIsOpenRef = useRef(false);
 
   useEffect(() => {
-    // Only reset when modal transitions from closed to open
     if (isOpen && !prevIsOpenRef.current) {
       fetchUsers();
       resetForm();
@@ -72,8 +70,7 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
       serving_as: [],
     });
     setSelectedUserId(null);
-    setCreatedVolunteerId(null);
-    setShowRoleAssignment(false);
+    setPendingRoles([]);
     setError('');
   };
 
@@ -91,13 +88,18 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
     }));
   };
 
+  const handleRolesChange = (roles?: any[]) => {
+    if (roles) {
+      setPendingRoles(roles);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // Create volunteer with basic info
       const volunteerData = {
         ...formData,
         user_id: selectedUserId,
@@ -114,14 +116,30 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
       }
 
       const newVolunteer = await response.json();
-      console.log('Volunteer created:', newVolunteer.id);
-      setCreatedVolunteerId(newVolunteer.id);
-      console.log('Setting showRoleAssignment to true');
-      setShowRoleAssignment(true);
-      
-      // Call parent onSave to refresh list
+
+      // Create any pending role assignments
+      if (pendingRoles.length > 0) {
+        for (const role of pendingRoles) {
+          await fetch('/api/v1/volunteer-roles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              volunteerId: newVolunteer.id,
+              roleCategory: role.roleCategory,
+              roleName: role.roleName,
+              roleCode: role.roleCode,
+              entityId: role.entityId,
+              entityType: role.entityType,
+              isPrimary: role.isPrimary,
+              isActive: role.isActive,
+            }),
+          });
+        }
+      }
+
       await onSave(newVolunteer);
-      console.log('showRoleAssignment should now be true');
+      resetForm();
+      onClose();
     } catch (err) {
       console.error('Error creating volunteer:', err);
       setError('Failed to create volunteer. Please try again.');
@@ -130,15 +148,6 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
     }
   };
 
-  const handleRolesComplete = () => {
-    resetForm();
-    onClose();
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
 
   if (!isOpen) return null;
 
@@ -147,7 +156,7 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">Add New Volunteer</h2>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -159,9 +168,6 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
             </div>
           )}
 
-          {/* Show basic form only when not in role assignment mode */}
-          {!showRoleAssignment && (
-            <>
           {/* Personal Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
@@ -315,61 +321,46 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
               ))}
             </div>
           </div>
-            </>
-          )}
 
-          {/* Show role assignment after volunteer is created */}
-          {showRoleAssignment && createdVolunteerId && (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                ✓ Volunteer created successfully! Now assign organizational roles.
-              </div>
-              <VolunteerRoleAssignment
-                volunteerId={createdVolunteerId}
-                currentRoles={[]}
-                onRolesChange={() => {}}
-              />
-            </div>
-          )}
+          {/* Organizational Roles */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Organizational Roles (Optional)</h3>
+            <p className="text-sm text-gray-500">
+              Assign organizational roles now, or add them later by editing the volunteer.
+            </p>
+            <VolunteerRoleAssignment
+              volunteerId={null}
+              currentRoles={pendingRoles}
+              onRolesChange={handleRolesChange}
+            />
+          </div>
 
           {/* Form Actions */}
           <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-            {showRoleAssignment ? (
-              <button
-                type="button"
-                onClick={handleRolesComplete}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              >
-                Done
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || !formData.first_name || !formData.last_name}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Create Volunteer
-                    </>
-                  )}
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !formData.first_name || !formData.last_name}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Create Volunteer
+                </>
+              )}
+            </button>
           </div>
         </form>
       </div>
