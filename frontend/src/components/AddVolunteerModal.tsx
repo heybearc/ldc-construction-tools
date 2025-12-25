@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, User, Phone, Mail, Building2, Link2 } from 'lucide-react';
 import { formatPhoneNumber, unformatPhoneNumber } from '@/lib/formatPhone';
 import VolunteerRoleAssignment from './VolunteerRoleAssignment';
@@ -37,12 +37,15 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
   const [showRoleAssignment, setShowRoleAssignment] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const prevIsOpenRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen && !showRoleAssignment && !createdVolunteerId) {
+    // Only reset when modal transitions from closed to open
+    if (isOpen && !prevIsOpenRef.current) {
       fetchUsers();
       resetForm();
     }
+    prevIsOpenRef.current = isOpen;
   }, [isOpen]);
 
   const fetchUsers = async () => {
