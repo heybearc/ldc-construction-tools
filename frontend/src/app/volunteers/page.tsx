@@ -4,8 +4,10 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, Plus, Upload, Download, FileText, Grid3x3, List, Link2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
+import { canManageVolunteers, canImportVolunteers, canExportVolunteers } from '@/lib/permissions';
 
 interface VolunteerRole {
   id: string;
@@ -48,6 +50,7 @@ interface VolunteerStats {
 }
 
 export default function VolunteersPage() {
+  const { data: session } = useSession();
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [stats, setStats] = useState<VolunteerStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +64,30 @@ export default function VolunteersPage() {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [exportFilters, setExportFilters] = useState({ trade_team: '', trade_crew: '', role: '' });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [userOrgRoles, setUserOrgRoles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch user's organizational roles
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      if (!session?.user) return;
+      try {
+        const response = await fetch('/api/v1/user/roles');
+        if (response.ok) {
+          const data = await response.json();
+          setUserOrgRoles(data.roles || []);
+        }
+      } catch (error) {
+        console.error('Error fetching user roles:', error);
+      }
+    };
+    fetchUserRoles();
+  }, [session]);
+
+  // Permission checks
+  const canManage = canManageVolunteers(session, userOrgRoles);
+  const canImport = canImportVolunteers(session, userOrgRoles);
+  const canExport = canExportVolunteers(session, userOrgRoles);
 
   useEffect(() => {
     fetchVolunteers();
@@ -316,14 +342,16 @@ export default function VolunteersPage() {
             onChange={handleFileSelect}
             className="hidden"
           />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={importing}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            {importing ? 'Importing...' : 'Import CSV'}
-          </button>
+          {canImport && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {importing ? 'Importing...' : 'Import CSV'}
+            </button>
+          )}
           <a
             href="/templates/volunteers_import_template.csv"
             download
@@ -332,14 +360,15 @@ export default function VolunteersPage() {
             <FileText className="h-4 w-4 mr-2" />
             Template
           </a>
-          <div className="relative">
-            <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </button>
+          {canExport && (
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </button>
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                 <div className="p-3 border-b border-gray-200">
@@ -378,14 +407,17 @@ export default function VolunteersPage() {
                   </button>
               </div>
             )}
-          </div>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Volunteer
-          </button>
+            </div>
+          )}
+          {canManage && (
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Volunteer
+            </button>
+          )}
         </div>
       </div>
 
@@ -446,12 +478,14 @@ export default function VolunteersPage() {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => handleEditVolunteer(volunteer)}
-                className="p-2 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
-              >
-                <Edit className="h-5 w-5" />
-              </button>
+              {canManage && (
+                <button
+                  onClick={() => handleEditVolunteer(volunteer)}
+                  className="p-2 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
+                >
+                  <Edit className="h-5 w-5" />
+                </button>
+              )}
             </div>
 
             <div className="space-y-2 mb-4">
