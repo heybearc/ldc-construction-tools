@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, MapPin, Users, Plus, X, Edit, Trash2, ExternalLink, Building2, Hash, Layers } from 'lucide-react';
 import ProjectCongregations from '@/components/ProjectCongregations';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Crew {
   id: string;
@@ -87,6 +88,7 @@ const CONSTRUCTION_PHASES = [
 ];
 
 export default function ProjectDetailPage() {
+  const { canManageProjects } = usePermissions();
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
@@ -273,22 +275,24 @@ export default function ProjectDetailPage() {
             )}
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
-          </button>
-          <button
-            onClick={handleDeleteProject}
-            className="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </button>
-        </div>
+        {canManageProjects && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </button>
+            <button
+              onClick={handleDeleteProject}
+              className="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Project Info Cards */}
@@ -374,13 +378,15 @@ export default function ProjectDetailPage() {
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <div className="flex items-center justify-between"><h2 className="text-lg font-medium text-gray-900">Assigned Crews</h2><Link href={`/calendar?project=${projectId}`} className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"><Calendar className="h-4 w-4 mr-2" />View Schedule</Link></div>
-          <button
-            onClick={() => setShowAssignModal(true)}
-            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Assign Crew
-          </button>
+          {canManageProjects && (
+            <button
+              onClick={() => setShowAssignModal(true)}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Assign Crew
+            </button>
+          )}
         </div>
         {project.crewAssignments.length === 0 ? (
           <div className="p-8 text-center">
@@ -398,12 +404,14 @@ export default function ProjectDetailPage() {
                     {assignment.crew.tradeTeam.name} • {assignment.crew._count.CrewMembers} members
                   </div>
                 </div>
-                <button
-                  onClick={() => handleRemoveCrew(assignment.crewId)}
-                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                {canManageProjects && (
+                  <button
+                    onClick={() => handleRemoveCrew(assignment.crewId)}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </li>
             ))}
           </ul>

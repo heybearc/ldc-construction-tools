@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Church, Plus, X, Edit, Trash2, Phone, Mail, User, Utensils, Shield, Users } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Congregation {
   id: string;
@@ -51,6 +52,7 @@ const initialFormData: FormData = {
 };
 
 export default function ProjectCongregations({ projectId }: Props) {
+  const { canManageProjects } = usePermissions();
   const [assignments, setAssignments] = useState<CongregationAssignment[]>([]);
   const [availableCongregations, setAvailableCongregations] = useState<Congregation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -221,22 +223,26 @@ export default function ProjectCongregations({ projectId }: Props) {
             {assignments.length}
           </span>
         </div>
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Add Congregation
-        </button>
+        {canManageProjects && (
+          <button
+            onClick={openAddModal}
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Congregation
+          </button>
+        )}
       </div>
 
       {assignments.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <Church className="h-12 w-12 mx-auto mb-3 text-gray-300" />
           <p>No supporting congregations assigned to this project.</p>
-          <button onClick={openAddModal} className="mt-2 text-blue-600 hover:underline">
-            Add the first congregation
-          </button>
+          {canManageProjects && (
+            <button onClick={openAddModal} className="mt-2 text-blue-600 hover:underline">
+              Add the first congregation
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -259,20 +265,22 @@ export default function ProjectCongregations({ projectId }: Props) {
                     </div>
                   )}
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => openEditModal(assignment)}
-                    className="p-1 text-gray-400 hover:text-blue-600"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(assignment)}
-                    className="p-1 text-gray-400 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                {canManageProjects && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => openEditModal(assignment)}
+                      className="p-1 text-gray-400 hover:text-blue-600"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(assignment)}
+                      className="p-1 text-gray-400 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
