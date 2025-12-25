@@ -1,5 +1,45 @@
 # LDC Tools Release Notes
 
+## v1.17.0 - Session Fix & Build Stability
+
+**Release Date:** December 24, 2025  
+**Status:** Ready for Production ✅
+
+### 🐛 Critical Bug Fixes
+
+**Session Authentication Fix**
+- ✅ Fixed `volunteerId` missing from NextAuth session
+- ✅ Added volunteerId to authorize callback, JWT token, and session object
+- ✅ Crew request authorization now works for Personnel Contact roles
+- ✅ Users must re-login after deployment for fix to take effect
+
+**Build Stability Fix**
+- ✅ Fixed missing `_error.js` causing 500 errors
+- ✅ Cleaned and rebuilt Next.js application
+- ✅ Resolved error page rendering issues
+
+### 📝 Technical Details
+
+**Auth Configuration Updates:**
+- Added `volunteerId` to `auth-config.ts` in 3 locations:
+  - Line 75: authorize() return object
+  - Line 101: jwt() callback token
+  - Line 114: session() callback user object
+
+**Impact:**
+- Personnel Contact roles (PC, PCA, PC-Support) can now submit crew requests on behalf of others
+- Session now includes volunteerId for organizational role fetching
+- Requires user re-login to get new session token with volunteerId
+
+### ⚠️ Important Notes
+
+**User Action Required:**
+- All users must log out and log back in after deployment
+- This updates their session token to include volunteerId
+- Required for crew request authorization to work properly
+
+---
+
 ## v1.16.0 - Crew Request Authorization Fix
 
 **Release Date:** December 24, 2025  
@@ -104,6 +144,68 @@ This release completes the organizational roles migration for volunteer manageme
 - ✅ Bulk import supports new roles system
 - ✅ User-volunteer linking fully operational
 - ⚠️ AddVolunteerModal UI issue requires manual role assignment via edit
+
+---
+
+## v1.14.0 - Organizational Role Management System
+
+**Release Date:** December 24, 2025  
+**Status:** Production Ready ✅
+
+### 🎉 Major Features
+
+**Complete Multi-Role Organizational Structure**
+- ✅ Volunteers can have multiple organizational roles simultaneously
+- ✅ Primary role designation with visual indicators (★)
+- ✅ 192 distinct role positions across all organizational levels
+- ✅ Hierarchical role structure (CG → Trade Team → Trade Crew)
+
+### ✨ New Features
+
+**Phone Number Formatting**
+- Real-time phone number formatting as user types
+- Standard US format: (XXX) XXX-XXXX
+- Applied to all volunteer phone input fields
+
+**Multi-Role Assignment System**
+- Real-time role updates in volunteer modal
+- "Make Primary" button to change primary role without re-assignment
+- Role cards display actual team/crew names
+
+**Trade Team/Crew Role Integration**
+- Automatic team/crew selection when assigning roles
+- Cascading dropdowns (Trade Team → Trade Crew)
+- Automatic volunteer assignment to selected team/crew
+
+**Enhanced Volunteers List**
+- New "Trade Team/Crew" column showing assignments
+- Displays team name for trade team roles
+- Displays team + crew name for crew roles
+
+**Dashboard Integration**
+- Crew detail pages display volunteers with organizational roles
+- Trade team dashboard uses organizational roles for counting
+- Accurate member counts and TCO requirements
+
+### 🔧 Technical Improvements
+
+**Database Schema**
+- Added `tradeTeamId` and `crewId` fields to `VolunteerRole` table
+- Proper foreign key relations to TradeTeam and Crew tables
+- Bidirectional relations for efficient querying
+
+**API Enhancements**
+- Volunteers API includes roles with team/crew IDs
+- Trade teams API uses organizational roles for counting
+- All endpoints properly return role data with relations
+
+### 🐛 Bug Fixes
+
+- Fixed clicking "Save Changes" overwriting team/crew assignments
+- Fixed crew detail pages not displaying volunteers with organizational roles
+- Fixed trade team dashboard showing incorrect member counts
+- Fixed "crews needing TCO" count using legacy flags
+- Fixed role cards reverting to generic labels
 
 ---
 
