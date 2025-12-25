@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { getCGScope } from '@/lib/cg-scope';
+import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
+import { canImportVolunteers } from '@/lib/permissions';
 
 // Map legacy role names to organizational role codes
 const ROLE_MAPPING: Record<string, { roleCode: string; roleCategory: string; roleName: string }> = {
@@ -24,6 +26,11 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check permissions - requires management role or admin
+    const userOrgRoles = await getUserOrgRoles(session);
+    const permissionError = checkPermission(canImportVolunteers(session, userOrgRoles));
+    if (permissionError) return permissionError;
 
     const cgScope = await getCGScope(session.user.id);
     if (!cgScope) {

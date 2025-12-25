@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 import ExcelJS from 'exceljs';
+import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
+import { canExportVolunteers } from '@/lib/permissions';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +12,11 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check permissions - requires management role
+    const userOrgRoles = await getUserOrgRoles(session);
+    const permissionError = checkPermission(canExportVolunteers(session, userOrgRoles));
+    if (permissionError) return permissionError;
 
     const searchParams = request.nextUrl.searchParams;
     const format = searchParams.get('format') || 'excel';
