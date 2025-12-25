@@ -26,6 +26,14 @@ interface UserInfo {
   name: string;
   email: string;
   role?: string;
+  volunteerId?: string;
+}
+
+interface VolunteerRole {
+  id: string;
+  roleCode: string;
+  roleCategory: string;
+  roleName: string;
 }
 
 interface Volunteer {
@@ -61,6 +69,7 @@ const initialFormData: FormData = {
 export default function CrewRequestPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [userRoles, setUserRoles] = useState<VolunteerRole[]>([]);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -84,8 +93,22 @@ export default function CrewRequestPage() {
         setUser({
           name: sessionData.user.name || sessionData.user.email,
           email: sessionData.user.email,
-          role: sessionData.user.role
+          role: sessionData.user.role,
+          volunteerId: sessionData.user.volunteerId
         });
+
+        // Fetch user's organizational roles if they have a volunteer record
+        if (sessionData.user.volunteerId) {
+          try {
+            const rolesRes = await fetch(`/api/v1/volunteer-roles?volunteerId=${sessionData.user.volunteerId}`);
+            if (rolesRes.ok) {
+              const rolesData = await rolesRes.json();
+              setUserRoles(rolesData.roles || []);
+            }
+          } catch (err) {
+            console.error('Failed to fetch user roles:', err);
+          }
+        }
 
         // Fetch trade teams and projects
         const [teamsRes, projectsRes] = await Promise.all([
@@ -152,12 +175,12 @@ export default function CrewRequestPage() {
   const selectedTeam = tradeTeams.find(t => t.id === formData.trade_team_id);
 
   // Check if user can submit on behalf of others
-  const canSubmitOnBehalfOf = user?.role && [
-    'SUPER_ADMIN',
-    'PERSONNEL_CONTACT',
-    'PERSONNEL_CONTACT_ASSISTANT',
-    'PERSONNEL_CONTACT_SUPPORT'
-  ].includes(user.role);
+  // Allow SUPER_ADMIN (old role system) OR any Personnel Contact organizational role
+  const canSubmitOnBehalfOf = 
+    (user?.role === 'SUPER_ADMIN') || 
+    userRoles.some(role => 
+      ['PC', 'PCA', 'PC-Support'].includes(role.roleCode)
+    );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
