@@ -98,17 +98,22 @@ export default function CrewRequestPage() {
           volunteerId: sessionData.user.volunteerId
         });
 
-        // Fetch user's organizational roles if they have a volunteer record
-        if (sessionData.user.volunteerId) {
-          try {
-            const rolesRes = await fetch(`/api/v1/volunteer-roles?volunteerId=${sessionData.user.volunteerId}`);
-            if (rolesRes.ok) {
-              const rolesData = await rolesRes.json();
-              setUserRoles(rolesData.roles || []);
-            }
-          } catch (err) {
-            console.error('Failed to fetch user roles:', err);
+        // Fetch user's organizational roles
+        try {
+          const rolesRes = await fetch('/api/v1/user/roles');
+          if (rolesRes.ok) {
+            const rolesData = await rolesRes.json();
+            // Convert role codes to VolunteerRole format for compatibility
+            const roleObjects = (rolesData.roles || []).map((code: string) => ({
+              id: code,
+              roleCode: code,
+              roleCategory: '',
+              roleName: code
+            }));
+            setUserRoles(roleObjects);
           }
+        } catch (err) {
+          console.error('Failed to fetch user roles:', err);
         }
 
         // Fetch trade teams and projects
