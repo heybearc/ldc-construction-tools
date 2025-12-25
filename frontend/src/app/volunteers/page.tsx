@@ -352,14 +352,16 @@ export default function VolunteersPage() {
               {importing ? 'Importing...' : 'Import CSV'}
             </button>
           )}
-          <a
-            href="/templates/volunteers_import_template.csv"
-            download
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Template
-          </a>
+          {canImport && (
+            <a
+              href="/templates/volunteers_import_template.csv"
+              download
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Template
+            </a>
+          )}
           {canExport && (
             <div className="relative">
               <button

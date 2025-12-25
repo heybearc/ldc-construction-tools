@@ -300,14 +300,16 @@ export default function ProjectsPage() {
           <p className="mt-1 text-gray-600">Construction projects and crew assignments</p>
         </div>
         <div className="flex gap-2">
-          <a
-            href="/templates/projects_import_template.csv"
-            download
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Template
-          </a>
+          {canManageProjects && (
+            <a
+              href="/templates/projects_import_template.csv"
+              download
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Template
+            </a>
+          )}
           {canManageProjects && (
             <label className="inline-flex items-center px-3 py-2 border border-blue-300 bg-blue-50 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-100 cursor-pointer">
               <Upload className="h-4 w-4 mr-2" />
