@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
+import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
+import { canManageProjects } from '@/lib/permissions';
 
 // GET /api/v1/projects/[id] - Get single project with crew assignments
 export async function GET(
@@ -62,6 +64,11 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check permissions - requires management role or admin
+    const userOrgRoles = await getUserOrgRoles(session);
+    const permissionError = checkPermission(canManageProjects(session, userOrgRoles));
+    if (permissionError) return permissionError;
+
     const body = await request.json();
     const { 
       name, 
@@ -116,6 +123,11 @@ export async function DELETE(
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check permissions - requires management role or admin
+    const userOrgRoles = await getUserOrgRoles(session);
+    const permissionError = checkPermission(canManageProjects(session, userOrgRoles));
+    if (permissionError) return permissionError;
 
     await prisma.project.update({
       where: { id: params.id },
