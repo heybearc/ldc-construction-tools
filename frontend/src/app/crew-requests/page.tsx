@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   ClipboardList, Search, Filter, CheckCircle, Clock, AlertCircle, 
   User, Mail, Users, Briefcase, MessageSquare, X, ChevronDown,
   UserPlus, UserMinus, FileText, RefreshCw, ExternalLink, Info,
   Plus, Save, Trash2
 } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface CrewRequest {
   id: string;
@@ -80,6 +82,8 @@ const initialVolunteerData: NewVolunteerData = {
 };
 
 export default function CrewRequestsPage() {
+  const router = useRouter();
+  const { session, canManageVolunteers, loading: permissionsLoading } = usePermissions();
   const [requests, setRequests] = useState<CrewRequest[]>([]);
   const [personnelUsers, setPersonnelUsers] = useState<PersonnelUser[]>([]);
   const [tradeTeams, setTradeTeams] = useState<TradeTeam[]>([]);
@@ -94,6 +98,13 @@ export default function CrewRequestsPage() {
   const [volunteerData, setVolunteerData] = useState<NewVolunteerData>(initialVolunteerData);
   const [addingVolunteer, setAddingVolunteer] = useState(false);
   const [volunteerError, setVolunteerError] = useState<string | null>(null);
+
+  // Redirect if user doesn't have permission to manage requests
+  useEffect(() => {
+    if (!permissionsLoading && !canManageVolunteers) {
+      router.push('/');
+    }
+  }, [permissionsLoading, canManageVolunteers, router]);
 
   const fetchRequests = useCallback(async () => {
     try {
@@ -309,12 +320,18 @@ export default function CrewRequestsPage() {
 
   const selectedTeam = tradeTeams.find(t => t.id === volunteerData.tradeTeamId);
 
-  if (loading) {
+  // Show loading while checking permissions
+  if (permissionsLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  // Don't render anything if user doesn't have permission (will redirect)
+  if (!canManageVolunteers) {
+    return null;
   }
 
   return (
