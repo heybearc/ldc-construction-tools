@@ -494,10 +494,16 @@ export default function VolunteersPage() {
                   {volunteer.phone}
                 </div>
               )}
-              {(volunteer.email_personal || volunteer.email_jw) && (
+              {volunteer.email_jw && (
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="h-4 w-4 mr-2" />
-                  {volunteer.email_jw || volunteer.email_personal}
+                  {volunteer.email_jw}
+                </div>
+              )}
+              {volunteer.email_personal && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <Mail className="h-4 w-4 mr-2" />
+                  {volunteer.email_personal}
                 </div>
               )}
             </div>
@@ -612,10 +618,16 @@ export default function VolunteersPage() {
                           {volunteer.phone}
                         </div>
                       )}
-                      {(volunteer.email_personal || volunteer.email_jw) && (
+                      {volunteer.email_jw && (
                         <div className="flex items-center">
                           <Mail className="h-3 w-3 mr-1" />
-                          {volunteer.email_jw || volunteer.email_personal}
+                          {volunteer.email_jw}
+                        </div>
+                      )}
+                      {volunteer.email_personal && (
+                        <div className="flex items-center">
+                          <Mail className="h-3 w-3 mr-1" />
+                          {volunteer.email_personal}
                         </div>
                       )}
                     </div>
