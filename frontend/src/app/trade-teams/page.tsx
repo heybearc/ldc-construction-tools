@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Wrench, Users, Settings, AlertCircle, Plus, X, Edit, Trash2, Eye, Grid3X3, CheckCircle, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface OversightStatus {
   tto: { filled: number; required: number };
@@ -36,6 +37,7 @@ interface TradeTeamFormData {
 }
 
 export default function TradeTeamsPage() {
+  const { canManageTradeTeams } = usePermissions();
   const [teams, setTeams] = useState<TradeTeam[]>([]);
   const [stats, setStats] = useState<TradeTeamsStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -240,10 +242,12 @@ export default function TradeTeamsPage() {
               <Grid3X3 className="h-4 w-4 mr-2" />
               Overview
             </Link>
-            <button onClick={openCreateModal} className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Trade Team
-            </button>
+            {canManageTradeTeams && (
+              <button onClick={openCreateModal} className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Trade Team
+              </button>
+            )}
           </div>
         </div>
 

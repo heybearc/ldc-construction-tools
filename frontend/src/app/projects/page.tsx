@@ -6,6 +6,7 @@ import { Search, Plus, Building2, Calendar, Users, MapPin, ChevronRight, Filter,
 import { Upload, Download, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Project {
   id: string;
@@ -66,6 +67,7 @@ const CONSTRUCTION_PHASES = [
 ];
 
 export default function ProjectsPage() {
+  const { canManageProjects } = usePermissions();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -306,24 +308,27 @@ export default function ProjectsPage() {
             <FileText className="h-4 w-4 mr-2" />
             Template
           </a>
-          <label className="inline-flex items-center px-3 py-2 border border-blue-300 bg-blue-50 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-100 cursor-pointer">
-            <Upload className="h-4 w-4 mr-2" />
-            Import CSV
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </label>
-          <div className="relative">
-            <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </button>
+          {canManageProjects && (
+            <label className="inline-flex items-center px-3 py-2 border border-blue-300 bg-blue-50 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-100 cursor-pointer">
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </label>
+          )}
+          {canManageProjects && (
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </button>
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                 <div className="p-3 border-b border-gray-200">
@@ -367,14 +372,17 @@ export default function ProjectsPage() {
                   </button>
               </div>
             )}
-          </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Project
-          </button>
+            </div>
+          )}
+          {canManageProjects && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Project
+            </button>
+          )}
         </div>
       </div>
 
