@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
+import { canManageTradeTeams } from '@/lib/permissions';
 
 // GET all crews for a trade team
 export async function GET(
@@ -7,6 +11,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const crews = await prisma.crew.findMany({
       where: {
         tradeTeamId: params.id
@@ -51,6 +60,16 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check permissions - requires management role or admin
+    const userOrgRoles = await getUserOrgRoles(session);
+    const permissionError = checkPermission(canManageTradeTeams(session, userOrgRoles));
+    if (permissionError) return permissionError;
+
     const body = await request.json();
 
     // Check if trade team exists
