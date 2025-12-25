@@ -39,7 +39,7 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !showRoleAssignment && !createdVolunteerId) {
       fetchUsers();
       resetForm();
     }
