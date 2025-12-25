@@ -7,6 +7,7 @@ import {
   Users, ArrowLeft, XCircle,
   FileText, Calendar, Tag, UserCheck, UserPlus, Building2
 } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Crew {
   id: string;
@@ -37,6 +38,7 @@ interface Volunteer {
 }
 
 export default function CrewDetailPage() {
+  const { canManageTradeTeams } = usePermissions();
   const params = useParams();
   const teamId = params.id as string;
   const crewId = params.crewId as string;
@@ -194,13 +196,15 @@ export default function CrewDetailPage() {
               <Users className="h-5 w-5 mr-2 text-gray-500" />
               Crew Oversight ({overseers.length + assistants.length + support.length})
             </h2>
-            <Link 
-              href="/volunteers" 
-              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-            >
-              <UserPlus className="h-4 w-4 mr-1" />
-              Add via Volunteers
-            </Link>
+            {canManageTradeTeams && (
+              <Link 
+                href="/volunteers" 
+                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+              >
+                <UserPlus className="h-4 w-4 mr-1" />
+                Add via Volunteers
+              </Link>
+            )}
           </div>
 
           {/* Overseers */}

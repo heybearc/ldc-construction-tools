@@ -7,6 +7,7 @@ import {
   Wrench, Users, ArrowLeft, Edit, Trash2, Plus, X, 
   CheckCircle, AlertCircle, UserPlus, Settings, Eye, Building2
 } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Crew {
   id: string;
@@ -46,6 +47,7 @@ interface CrewFormData {
 }
 
 export default function TradeTeamDetailPage() {
+  const { canManageTradeTeams } = usePermissions();
   const params = useParams();
   const router = useRouter();
   const teamId = params.id as string;
@@ -267,10 +269,12 @@ export default function TradeTeamDetailPage() {
               )}
             </div>
           </div>
-          <button onClick={openEditModal} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Team
-          </button>
+          {canManageTradeTeams && (
+            <button onClick={openEditModal} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Team
+            </button>
+          )}
         </div>
 
         {/* Stats */}
@@ -311,13 +315,15 @@ export default function TradeTeamDetailPage() {
               <Users className="h-5 w-5 mr-2 text-gray-500" />
               Trade Team Oversight ({overseers.length + assistants.length + support.length})
             </h2>
-            <Link 
-              href="/volunteers" 
-              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add
-            </Link>
+            {canManageTradeTeams && (
+              <Link 
+                href="/volunteers" 
+                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add
+              </Link>
+            )}
           </div>
 
           {/* Overseers */}
@@ -384,13 +390,15 @@ export default function TradeTeamDetailPage() {
               <Settings className="h-5 w-5 mr-2 text-gray-500" />
               Crews
             </h2>
-            <button
-              onClick={() => openCrewModal()}
-              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add Crew
-            </button>
+            {canManageTradeTeams && (
+              <button
+                onClick={() => openCrewModal()}
+                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Crew
+              </button>
+            )}
           </div>
 
           {team.crews.length === 0 ? (
@@ -423,20 +431,24 @@ export default function TradeTeamDetailPage() {
                     >
                       <Eye className="h-4 w-4" />
                     </Link>
-                    <button
-                      onClick={() => openCrewModal(crew)}
-                      className="p-2 text-gray-400 hover:text-blue-600 rounded"
-                      title="Edit Crew"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCrew(crew)}
-                      className="p-2 text-gray-400 hover:text-red-600 rounded"
-                      title="Delete Crew"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {canManageTradeTeams && (
+                      <>
+                        <button
+                          onClick={() => openCrewModal(crew)}
+                          className="p-2 text-gray-400 hover:text-blue-600 rounded"
+                          title="Edit Crew"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCrew(crew)}
+                          className="p-2 text-gray-400 hover:text-red-600 rounded"
+                          title="Delete Crew"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
