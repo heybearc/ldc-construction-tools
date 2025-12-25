@@ -1,5 +1,50 @@
 # LDC Tools Release Notes
 
+## v1.16.0 - Crew Request Authorization Fix
+
+**Release Date:** December 24, 2025  
+**Status:** Deployed to STANDBY ✅
+
+### 🎯 New Features
+
+**Personnel Contact Role Authorization**
+- ✅ Users with Personnel Contact organizational roles can submit crew requests on behalf of others
+- ✅ Supports PC (Personnel Contact), PCA (Personnel Contact Assistant), PC-Support roles
+- ✅ Maintains backward compatibility with SUPER_ADMIN role
+
+### 🔧 Improvements
+
+**Crew Request Submission**
+- Fetches user's organizational roles from volunteer-roles API
+- Checks for Personnel Contact role codes (PC, PCA, PC-Support)
+- Shows "Submit on Behalf Of" section for authorized users
+- Allows entering different requestor name/email for submissions
+
+**Authorization Logic**
+- Updated from old user.role field to organizational roles system
+- Added userRoles state to track volunteer organizational roles
+- Checks volunteerId in session to fetch roles
+- Combines SUPER_ADMIN (legacy) OR Personnel Contact roles
+
+### 🐛 Bug Fixes
+
+- Fixed crew request authorization to use organizational roles instead of old user.role field
+- Fixed Personnel Contact roles not being able to submit on behalf of others
+
+### 📝 Technical Details
+
+**Role Codes:**
+- **PC** - Personnel Contact (Region Support Services)
+- **PCA** - Personnel Contact Assistant (Region Support Services)
+- **PC-Support** - Personnel Contact Support (Region Support Services)
+
+**API Integration:**
+- Fetches roles from `/api/v1/volunteer-roles?volunteerId={id}`
+- Checks roleCode field for Personnel Contact roles
+- Falls back to SUPER_ADMIN for legacy authorization
+
+---
+
 ## v1.15.0 - Organizational Roles Enhancements
 
 **Release Date:** December 24, 2025  
