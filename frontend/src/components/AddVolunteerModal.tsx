@@ -323,17 +323,11 @@ export default function AddVolunteerModal({ isOpen, onClose, onSave }: AddVolunt
           </div>
 
           {/* Organizational Roles */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Organizational Roles (Optional)</h3>
-            <p className="text-sm text-gray-500">
-              Assign organizational roles now, or add them later by editing the volunteer.
-            </p>
-            <VolunteerRoleAssignment
-              volunteerId={null}
-              currentRoles={pendingRoles}
-              onRolesChange={handleRolesChange}
-            />
-          </div>
+          <VolunteerRoleAssignment
+            volunteerId={null}
+            currentRoles={pendingRoles}
+            onRolesChange={handleRolesChange}
+          />
 
           {/* Form Actions */}
           <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
