@@ -9,6 +9,7 @@ import SignOutButton from './SignOutButton';
 import ReleaseBanner from './ReleaseBanner';
 import { APP_VERSION } from '@/lib/version';
 import { canAccessAdmin } from '@/lib/permissions';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ interface ConditionalLayoutProps {
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { canManageVolunteers } = usePermissions();
   const [userLastSeenVersion, setUserLastSeenVersion] = useState<string | null>(null);
   const isAuthPage = pathname?.startsWith('/auth');
   const isHelpPage = pathname?.startsWith('/help') || pathname?.startsWith('/release-notes');
@@ -78,9 +80,11 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                 <Link href="/crew-request" className="text-gray-700 hover:text-blue-600 font-medium">
                   Submit Crew Request
                 </Link>
-                <Link href="/crew-requests" className="text-gray-700 hover:text-blue-600 font-medium">
-                  Manage Requests
-                </Link>
+                {canManageVolunteers && (
+                  <Link href="/crew-requests" className="text-gray-700 hover:text-blue-600 font-medium">
+                    Manage Requests
+                  </Link>
+                )}
                 {canAccessAdmin(session) && (
                   <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
                     Admin
