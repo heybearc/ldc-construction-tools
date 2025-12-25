@@ -44,7 +44,7 @@ export default function UserManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '', ldcRole: '', regionId: '', zoneId: '' });
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '' });
   const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -145,7 +145,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User invitation sent successfully!');
-        setInviteForm({ name: '', email: '', role: '', ldcRole: '', regionId: '', zoneId: '' });
+        setInviteForm({ name: '', email: '', role: '', regionId: '', zoneId: '' });
         setIsInviteModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -721,7 +721,7 @@ export default function UserManagementPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role *
+                  System Role *
                 </label>
                 <select
                   required
@@ -730,58 +730,13 @@ export default function UserManagementPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Role</option>
+                  <option value="USER">User</option>
+                  <option value="ADMIN">Admin</option>
                   <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="ZONE_OVERSEER">Zone Overseer</option>
-                  <option value="ZONE_OVERSEER_ASSISTANT">Zone Overseer Assistant</option>
-                  <option value="ZONE_OVERSEER_SUPPORT">Zone Overseer Support</option>
-                  <option value="CONSTRUCTION_GROUP_OVERSEER">Construction Group Overseer</option>
-                  <option value="CONSTRUCTION_GROUP_OVERSEER_ASSISTANT">Construction Group Overseer Assistant</option>
-                  <option value="CONSTRUCTION_GROUP_OVERSEER_SUPPORT">Construction Group Overseer Support</option>
-                  <option value="TRADE_TEAM_OVERSEER">Trade Team Overseer</option>
-                  <option value="TRADE_TEAM_OVERSEER_ASSISTANT">Trade Team Overseer Assistant</option>
-                  <option value="TRADE_TEAM_OVERSEER_SUPPORT">Trade Team Overseer Support</option>
-                  <option value="TRADE_CREW_OVERSEER">Trade Crew Overseer</option>
-                  <option value="TRADE_CREW_OVERSEER_ASSISTANT">Trade Crew Overseer Assistant</option>
-                  <option value="TRADE_CREW_OVERSEER_SUPPORT">Trade Crew Overseer Support</option>
-                  <option value="PERSONNEL_CONTACT">Personnel Contact</option>
-                  <option value="PERSONNEL_CONTACT_ASSISTANT">Personnel Contact Assistant</option>
-                  <option value="PERSONNEL_CONTACT_SUPPORT">Personnel Contact Support</option>
-                  <option value="FIELD_REP">Field Rep</option>
-                  <option value="FIELD_REP_ASSISTANT">Field Rep Assistant</option>
-                  <option value="FIELD_REP_SUPPORT">Field Rep Support</option>
-                  <option value="DESIGN_CONTACT">Design Contact</option>
-                  <option value="DESIGN_CONTACT_ASSISTANT">Design Contact Assistant</option>
-                  <option value="DESIGN_CONTACT_SUPPORT">Design Contact Support</option>
-                  <option value="PROJECT_CONSTRUCTION_COORDINATOR">Project Construction Coordinator</option>
-                  <option value="PROJECT_CONSTRUCTION_COORDINATOR_ASSISTANT">Project Construction Coordinator Assistant</option>
-                  <option value="PROJECT_CONSTRUCTION_COORDINATOR_SUPPORT">Project Construction Coordinator Support</option>
-                  <option value="SAFETY_COORDINATOR">Safety Coordinator</option>
-                  <option value="SAFETY_COORDINATOR_ASSISTANT">Safety Coordinator Assistant</option>
-                  <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
-                  <option value="READ_ONLY">Read Only</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  LDC Role (Organizational) - Optional
-                </label>
-                <select
-                  value={inviteForm.ldcRole}
-                  onChange={(e) => setInviteForm({...inviteForm, ldcRole: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">None</option>
-                  <option value="PERSONNEL_CONTACT">Personnel Contact</option>
-                  <option value="PERSONNEL_CONTACT_ASSISTANT">Personnel Contact Assistant</option>
-                  <option value="PERSONNEL_CONTACT_SUPPORT">Personnel Contact Support</option>
-                  <option value="ZONE_OVERSEER">Zone Overseer</option>
-                  <option value="CONSTRUCTION_GROUP_OVERSEER">Construction Group Overseer</option>
-                  <option value="TRADE_TEAM_OVERSEER">Trade Team Overseer</option>
-                  <option value="TRADE_CREW_OVERSEER">Trade Crew Overseer</option>
+                  <option value="READ_ONLY_ADMIN">Read Only Admin</option>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  Use when system role differs from organizational role (e.g., Super Admin who is also a Personnel Contact)
+                  System role controls platform access. Organizational roles are assigned through the volunteer record.
                 </p>
               </div>
               
