@@ -1,5 +1,67 @@
 # LDC Tools Release Notes
 
+## v1.15.0 - Organizational Roles Enhancements
+
+**Release Date:** December 24, 2025  
+**Status:** Deployed to STANDBY ⚠️
+
+### 🎯 New Features
+
+**User-Volunteer Linking**
+- ✅ Bidirectional linking between User and Volunteer records
+- ✅ Blue "User" badge on Volunteers page (grid and table views)
+- ✅ Purple "Volunteer" badge on Users page
+- ✅ Link persistence across edit operations
+- ✅ User account linking in AddVolunteerModal
+
+**Bulk Import with Organizational Roles**
+- ✅ CSV import creates VolunteerRole records automatically
+- ✅ Legacy role name mapping (Trade Team Overseer → TTO, etc.)
+- ✅ Backward compatibility with old CSV format
+- ✅ Multiple roles per volunteer support
+- ✅ Proper entityType and entityId assignment
+
+### 🔧 Improvements
+
+**AddVolunteerModal Rebuild**
+- Removed legacy role dropdown
+- Added VolunteerRoleAssignment component integration
+- Added user account linking dropdown
+- Professional multi-step workflow (create → assign roles → done)
+- Clean UI transitions between form and role assignment
+
+**API Updates**
+- Fixed volunteer creation to exclude legacy role fields
+- Updated Users API to return volunteerId for badge display
+- Fixed volunteer list and detail APIs for user linking
+- Removed role, isOverseer, isAssistant from creation payload
+
+### 🐛 Bug Fixes
+
+- Fixed "failed to create volunteer" error (removed legacy role field)
+- Fixed volunteer creation API to use organizational roles only
+- Fixed Users API to include volunteerId in response
+- Fixed volunteer GET endpoints to return user.id correctly
+
+### ⚠️ Known Issues
+
+**AddVolunteerModal Role Assignment UI**
+- Modal does not transition to role assignment view after volunteer creation
+- State is set correctly (console logs confirm) but UI doesn't update
+- Workaround: Edit volunteer to assign organizational roles
+- Issue: useEffect or React state batching preventing UI re-render
+- Status: Deferred for future fix
+
+### 📝 Notes
+
+This release completes the organizational roles migration for volunteer management:
+- ✅ All volunteer creation uses organizational roles
+- ✅ Bulk import supports new roles system
+- ✅ User-volunteer linking fully operational
+- ⚠️ AddVolunteerModal UI issue requires manual role assignment via edit
+
+---
+
 ## v1.12.0 - User Invitation System
 
 **Release Date:** December 23, 2025  
