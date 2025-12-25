@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ClipboardList, Send, CheckCircle, User, Mail, Users, Briefcase, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { canSubmitCrewRequestOnBehalf } from '@/lib/permissions';
 
 type RequestType = 'ADD_TO_CREW' | 'REMOVE_FROM_CREW' | 'ADD_TO_PROJECT_ROSTER' | 'ADD_TO_CREW_AND_PROJECT';
 
@@ -175,12 +176,11 @@ export default function CrewRequestPage() {
   const selectedTeam = tradeTeams.find(t => t.id === formData.trade_team_id);
 
   // Check if user can submit on behalf of others
-  // Allow SUPER_ADMIN (old role system) OR any Personnel Contact organizational role
-  const canSubmitOnBehalfOf = 
-    (user?.role === 'SUPER_ADMIN') || 
-    userRoles.some(role => 
-      ['PC', 'PCA', 'PC-Support'].includes(role.roleCode)
-    );
+  // Requires Personnel Contact organizational role (PC, PCA, or PC-Support)
+  const canSubmitOnBehalfOf = canSubmitCrewRequestOnBehalf(
+    user ? { user } as any : null,
+    userRoles.map(r => r.roleCode)
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

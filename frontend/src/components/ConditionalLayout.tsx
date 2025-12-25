@@ -8,6 +8,7 @@ import Link from 'next/link';
 import SignOutButton from './SignOutButton';
 import ReleaseBanner from './ReleaseBanner';
 import { APP_VERSION } from '@/lib/version';
+import { canAccessAdmin } from '@/lib/permissions';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -80,9 +81,11 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                 <Link href="/crew-requests" className="text-gray-700 hover:text-blue-600 font-medium">
                   Manage Requests
                 </Link>
-                <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
-                  Admin
-                </Link>
+                {canAccessAdmin(session) && (
+                  <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium">
+                    Admin
+                  </Link>
+                )}
                 <span className="text-gray-300">|</span>
                 <Link href="/help/my-feedback" className="text-gray-600 hover:text-blue-600 font-medium">
                   My Feedback
