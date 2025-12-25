@@ -15,15 +15,27 @@ import { Session } from 'next-auth';
 
 /**
  * Personnel Contact organizational role codes
- * These roles have special permissions for managing volunteers and crew requests
+ * These roles have full management access to everything except Admin portal
  */
 const PERSONNEL_CONTACT_ROLES = ['PC', 'PCA', 'PC-Support'];
 
 /**
  * Construction Group Oversight organizational role codes
- * These roles have oversight permissions
+ * These roles have full management access to everything except Admin portal
  */
 const CG_OVERSIGHT_ROLES = ['CGO', 'CGOA', 'CG-Support'];
+
+/**
+ * Construction Group Staff organizational role codes
+ * These roles have full management access to everything except Admin portal
+ */
+const CG_STAFF_ROLES = ['CGS', 'CGS-Support'];
+
+/**
+ * Management roles - Personnel Contact, CG Oversight, or CG Staff
+ * These roles can manage all application features except Admin portal
+ */
+const MANAGEMENT_ROLES = [...PERSONNEL_CONTACT_ROLES, ...CG_OVERSIGHT_ROLES, ...CG_STAFF_ROLES];
 
 /**
  * Trade Team oversight organizational role codes
@@ -96,6 +108,24 @@ export function hasPersonnelContactRole(userOrgRoles: string[]): boolean {
  */
 export function hasCGOversightRole(userOrgRoles: string[]): boolean {
   return userOrgRoles.some(role => CG_OVERSIGHT_ROLES.includes(role));
+}
+
+/**
+ * Check if user has any CG Staff organizational role
+ * @param userOrgRoles Array of organizational role codes
+ */
+export function hasCGStaffRole(userOrgRoles: string[]): boolean {
+  return userOrgRoles.some(role => CG_STAFF_ROLES.includes(role));
+}
+
+/**
+ * Check if user has any management organizational role
+ * Management roles: Personnel Contact, CG Oversight, or CG Staff
+ * These roles can manage all application features except Admin portal
+ * @param userOrgRoles Array of organizational role codes
+ */
+export function hasManagementRole(userOrgRoles: string[]): boolean {
+  return userOrgRoles.some(role => MANAGEMENT_ROLES.includes(role));
 }
 
 /**
@@ -198,24 +228,40 @@ export function canDeleteCrewRequests(session: Session | null): boolean {
  * Check if user can create, edit, or delete volunteers
  * 
  * Requirements:
- * - System Role: ADMIN or SUPER_ADMIN
+ * - System Role: ADMIN or SUPER_ADMIN, OR
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
+ * @param userOrgRoles Array of user's organizational role codes
  */
-export function canManageVolunteers(session: Session | null): boolean {
-  return canAccessAdmin(session);
+export function canManageVolunteers(
+  session: Session | null,
+  userOrgRoles: string[] = []
+): boolean {
+  if (!session?.user) return false;
+  
+  // Admin system role OR management organizational role
+  return canAccessAdmin(session) || hasManagementRole(userOrgRoles);
 }
 
 /**
  * Check if user can assign organizational roles to volunteers
  * 
  * Requirements:
- * - System Role: ADMIN or SUPER_ADMIN
+ * - System Role: ADMIN or SUPER_ADMIN, OR
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
+ * @param userOrgRoles Array of user's organizational role codes
  */
-export function canAssignOrganizationalRoles(session: Session | null): boolean {
-  return canAccessAdmin(session);
+export function canAssignOrganizationalRoles(
+  session: Session | null,
+  userOrgRoles: string[] = []
+): boolean {
+  if (!session?.user) return false;
+  
+  // Admin system role OR management organizational role
+  return canAccessAdmin(session) || hasManagementRole(userOrgRoles);
 }
 
 /**
@@ -223,7 +269,7 @@ export function canAssignOrganizationalRoles(session: Session | null): boolean {
  * 
  * Requirements:
  * - System Role: USER (minimum)
- * - Organizational Role: PC, PCA, PC-Support, CGO, or CGOA
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
  * @param userOrgRoles Array of user's organizational role codes
@@ -234,20 +280,28 @@ export function canExportVolunteers(
 ): boolean {
   if (!session?.user) return false;
   
-  // Personnel contacts or CG oversight can export
-  return hasPersonnelContactRole(userOrgRoles) || hasCGOversightRole(userOrgRoles);
+  // Management roles can export
+  return hasManagementRole(userOrgRoles);
 }
 
 /**
  * Check if user can import volunteers via CSV
  * 
  * Requirements:
- * - System Role: ADMIN or SUPER_ADMIN
+ * - System Role: ADMIN or SUPER_ADMIN, OR
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
+ * @param userOrgRoles Array of user's organizational role codes
  */
-export function canImportVolunteers(session: Session | null): boolean {
-  return canAccessAdmin(session);
+export function canImportVolunteers(
+  session: Session | null,
+  userOrgRoles: string[] = []
+): boolean {
+  if (!session?.user) return false;
+  
+  // Admin system role OR management organizational role
+  return canAccessAdmin(session) || hasManagementRole(userOrgRoles);
 }
 
 // ============================================================================
@@ -258,12 +312,20 @@ export function canImportVolunteers(session: Session | null): boolean {
  * Check if user can create, edit, or delete trade teams/crews
  * 
  * Requirements:
- * - System Role: ADMIN or SUPER_ADMIN
+ * - System Role: ADMIN or SUPER_ADMIN, OR
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
+ * @param userOrgRoles Array of user's organizational role codes
  */
-export function canManageTradeTeams(session: Session | null): boolean {
-  return canAccessAdmin(session);
+export function canManageTradeTeams(
+  session: Session | null,
+  userOrgRoles: string[] = []
+): boolean {
+  if (!session?.user) return false;
+  
+  // Admin system role OR management organizational role
+  return canAccessAdmin(session) || hasManagementRole(userOrgRoles);
 }
 
 /**
@@ -296,12 +358,20 @@ export function canAssignVolunteersToTeams(
  * Check if user can create, edit, or delete projects
  * 
  * Requirements:
- * - System Role: ADMIN or SUPER_ADMIN
+ * - System Role: ADMIN or SUPER_ADMIN, OR
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
+ * @param userOrgRoles Array of user's organizational role codes
  */
-export function canManageProjects(session: Session | null): boolean {
-  return canAccessAdmin(session);
+export function canManageProjects(
+  session: Session | null,
+  userOrgRoles: string[] = []
+): boolean {
+  if (!session?.user) return false;
+  
+  // Admin system role OR management organizational role
+  return canAccessAdmin(session) || hasManagementRole(userOrgRoles);
 }
 
 /**
@@ -309,7 +379,7 @@ export function canManageProjects(session: Session | null): boolean {
  * 
  * Requirements:
  * - System Role: USER (minimum)
- * - Organizational Role: CGO, CGOA, PC, PCA, or PC-Support
+ * - Organizational Role: PC, PCA, PC-Support, CGO, CGOA, CG-Support, CGS, CGS-Support
  * 
  * @param session NextAuth session
  * @param userOrgRoles Array of user's organizational role codes
@@ -320,8 +390,8 @@ export function canManageProjectRosters(
 ): boolean {
   if (!session?.user) return false;
   
-  // CG oversight or personnel contacts can manage rosters
-  return hasCGOversightRole(userOrgRoles) || hasPersonnelContactRole(userOrgRoles);
+  // Management roles can manage rosters
+  return hasManagementRole(userOrgRoles);
 }
 
 // ============================================================================
