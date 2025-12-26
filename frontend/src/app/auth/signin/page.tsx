@@ -10,11 +10,8 @@ export default function SignInPage() {
           <img src="/logo.svg" alt="LDC Logo" className="h-24 w-24" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Sign in to LDC Construction Tools
+          Sign in to LDC Tools
         </h2>
-        <p className="text-gray-600">
-          Region 01.12
-        </p>
       </div>
       
       <Suspense fallback={
