@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       });
 
       try {
-        const { name, email, role, ldcRole, regionId, zoneId, status } = row;
+        const { name, email, role, regionId, zoneId, status } = row;
         
         if (!email || !role) {
           errors.push(`Row ${i + 1}: Missing required fields (email, role)`);
@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
             name: name || null,
             email,
             role,
-            ldcRole: ldcRole || null,
             status: userStatus as 'ACTIVE' | 'INVITED' | 'INACTIVE',
             zoneId: zoneId || cgScope?.zoneId || '01',
             regionId: regionId || cgScope?.regionId || '01.12',

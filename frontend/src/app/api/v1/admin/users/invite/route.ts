@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, role, ldcRole, zoneId, regionId } = body;
+    const { name, email, role, zoneId, regionId } = body;
     
     if (!email || !role) {
       return NextResponse.json(
@@ -61,7 +61,6 @@ export async function POST(request: NextRequest) {
         name: name || null,
         email,
         role,
-        ldcRole: ldcRole || null,
         status: 'INVITED',
         zoneId: zoneId || cgScope.zoneId || '01',
         regionId: regionId || cgScope.regionId || '01.12',

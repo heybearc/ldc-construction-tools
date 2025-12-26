@@ -22,12 +22,12 @@ export async function PATCH(
     }
     
     const body = await request.json();
-    const { name, email, role, ldcRole, constructionGroupId, adminLevel, status, password } = body;
+    const { name, email, role, constructionGroupId, adminLevel, status, password } = body;
     
     // Get current user data for audit log
     const currentUser = await prisma.user.findUnique({
       where: { id: params.id },
-      select: { name: true, email: true, role: true, ldcRole: true, constructionGroupId: true, adminLevel: true, status: true, emailVerified: true }
+      select: { name: true, email: true, role: true, constructionGroupId: true, adminLevel: true, status: true, emailVerified: true }
     });
     
     // Build update data
@@ -35,7 +35,6 @@ export async function PATCH(
       name,
       email,
       role,
-      ldcRole: ldcRole === '' ? null : ldcRole,
       constructionGroupId: constructionGroupId === '' ? null : constructionGroupId,
       adminLevel: adminLevel === '' ? null : adminLevel,
       status,
