@@ -2,30 +2,67 @@
   <!-- Background Circle -->
   <circle cx="100" cy="100" r="95" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
   
-  <!-- Construction Hard Hat -->
-  <path d="M100 60 L140 80 L140 95 C140 106 122 115 100 115 C78 115 60 106 60 95 L60 80 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
-  <ellipse cx="100" cy="80" rx="40" ry="8" fill="#fcd34d"/>
-  <rect x="95" y="55" width="10" height="10" rx="2" fill="#f59e0b"/>
+  <!-- LDC TOOLS Text in Arch at Top -->
+  <defs>
+    <path id="archPath" d="M 30,100 A 70,70 0 0,1 170,100" />
+  </defs>
+  <text font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" letter-spacing="2">
+    <textPath href="#archPath" startOffset="50%" text-anchor="middle">
+      LDC TOOLS
+    </textPath>
+  </text>
   
-  <!-- Building/Structure -->
-  <rect x="70" y="120" width="60" height="50" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
-  <rect x="75" y="125" width="20" height="20" fill="#60a5fa" stroke="#3b82f6" stroke-width="1"/>
-  <rect x="105" y="125" width="20" height="20" fill="#60a5fa" stroke="#3b82f6" stroke-width="1"/>
-  <rect x="90" y="150" width="20" height="20" fill="#93c5fd" stroke="#3b82f6" stroke-width="1"/>
+  <!-- Modern Kingdom Hall Building -->
+  <!-- Main building body (beige/tan color like real KH) -->
+  <rect x="50" y="95" width="100" height="55" fill="#e8d4b8" stroke="#c4a57b" stroke-width="2"/>
   
-  <!-- Tools (Hammer and Wrench crossed) -->
-  <g transform="translate(145, 135)">
-    <!-- Hammer -->
-    <rect x="-2" y="5" width="4" height="25" fill="#6b7280" rx="1"/>
-    <rect x="-6" y="2" width="12" height="8" fill="#9ca3af" rx="1"/>
-    
-    <!-- Wrench -->
-    <g transform="rotate(45 0 15)">
-      <rect x="-1.5" y="5" width="3" height="20" fill="#6b7280" rx="1"/>
-      <circle cx="0" cy="5" r="4" fill="none" stroke="#9ca3af" stroke-width="2"/>
-    </g>
+  <!-- Flat roof with overhang (characteristic modern KH design) -->
+  <rect x="45" y="90" width="110" height="8" fill="#9ca3af" stroke="#6b7280" stroke-width="1.5"/>
+  <!-- Roof overhang shadow -->
+  <rect x="45" y="97" width="110" height="2" fill="#6b7280" opacity="0.3"/>
+  
+  <!-- Entrance area (recessed) -->
+  <rect x="65" y="105" width="25" height="45" fill="#d4bfa0" stroke="#c4a57b" stroke-width="1.5"/>
+  
+  <!-- Glass entrance doors -->
+  <rect x="68" y="110" width="8" height="35" fill="#60a5fa" stroke="#3b82f6" stroke-width="1"/>
+  <rect x="79" y="110" width="8" height="35" fill="#60a5fa" stroke="#3b82f6" stroke-width="1"/>
+  
+  <!-- Windows (modern rectangular) -->
+  <rect x="100" y="105" width="20" height="15" fill="#60a5fa" stroke="#3b82f6" stroke-width="1.5"/>
+  <rect x="125" y="105" width="20" height="15" fill="#60a5fa" stroke="#3b82f6" stroke-width="1.5"/>
+  
+  <!-- JW.ORG sign -->
+  <rect x="130" y="125" width="12" height="8" fill="#4f46e5" stroke="#4338ca" stroke-width="1"/>
+  <text x="136" y="131" font-family="Arial, sans-serif" font-size="5" font-weight="bold" fill="white" text-anchor="middle">JW</text>
+  
+  <!-- Red accent stripe at bottom (like real KH) -->
+  <rect x="50" y="145" width="100" height="5" fill="#dc2626"/>
+  
+  <!-- Construction Scaffolding (right side) -->
+  <g stroke="#f59e0b" stroke-width="2" fill="none">
+    <line x1="155" y1="95" x2="155" y2="150"/>
+    <line x1="162" y1="95" x2="162" y2="150"/>
+    <line x1="155" y1="105" x2="162" y2="105"/>
+    <line x1="155" y1="120" x2="162" y2="120"/>
+    <line x1="155" y1="135" x2="162" y2="135"/>
   </g>
   
-  <!-- LDC Text -->
-  <text x="100" y="190" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">LDC</text>
+  <!-- Construction Equipment -->
+  <!-- Hard hat on ground -->
+  <g transform="translate(35, 145)">
+    <ellipse cx="0" cy="5" rx="7" ry="2.5" fill="#fbbf24"/>
+    <path d="M-7 5 L0 -2 L7 5 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+  </g>
+  
+  <!-- Tool box -->
+  <rect x="165" y="145" width="15" height="8" fill="#dc2626" stroke="#991b1b" stroke-width="1"/>
+  <rect x="170" y="143" width="5" height="2" fill="#6b7280"/>
+  
+  <!-- Construction cone -->
+  <g transform="translate(55, 150)">
+    <path d="M0 0 L-3 8 L3 8 Z" fill="#f97316" stroke="#ea580c" stroke-width="1"/>
+    <rect x="-3.5" y="8" width="7" height="2" fill="#1f2937"/>
+  </g>
+  
 </svg>
