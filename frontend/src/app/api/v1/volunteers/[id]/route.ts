@@ -152,15 +152,19 @@ export async function PATCH(
     });
 
     // Handle user linking - update User.volunteerId instead of Volunteer.userId
+    console.log('[PATCH /volunteers/:id] Handling user link - user_id:', body.user_id, 'volunteer_id:', params.id);
     if (body.user_id !== undefined) {
       if (body.user_id) {
         // Link user to this volunteer
+        console.log('[PATCH /volunteers/:id] Linking user', body.user_id, 'to volunteer', params.id);
         await prisma.user.update({
           where: { id: body.user_id },
           data: { volunteerId: params.id },
         });
+        console.log('[PATCH /volunteers/:id] User linked successfully');
       } else {
         // Unlink any user from this volunteer
+        console.log('[PATCH /volunteers/:id] Unlinking user from volunteer', params.id);
         const linkedUser = await prisma.user.findFirst({
           where: { volunteerId: params.id },
         });
@@ -169,8 +173,11 @@ export async function PATCH(
             where: { id: linkedUser.id },
             data: { volunteerId: null },
           });
+          console.log('[PATCH /volunteers/:id] User unlinked successfully');
         }
       }
+    } else {
+      console.log('[PATCH /volunteers/:id] No user_id in request body - skipping user link');
     }
 
     return NextResponse.json({
