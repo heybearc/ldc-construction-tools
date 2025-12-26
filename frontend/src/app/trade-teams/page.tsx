@@ -321,12 +321,16 @@ export default function TradeTeamsPage() {
                     <Link href={`/trade-teams/${team.id}`} className="p-1 text-gray-400 hover:text-blue-600" title="View">
                       <Eye className="h-4 w-4" />
                     </Link>
-                    <button onClick={() => openEditModal(team)} className="p-1 text-gray-400 hover:text-blue-600" title="Edit">
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => handleDelete(team)} className="p-1 text-gray-400 hover:text-red-600" title="Delete">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {canManageTradeTeams && (
+                      <>
+                        <button onClick={() => openEditModal(team)} className="p-1 text-gray-400 hover:text-blue-600" title="Edit">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDelete(team)} className="p-1 text-gray-400 hover:text-red-600" title="Delete">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
