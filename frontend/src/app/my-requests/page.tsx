@@ -56,7 +56,7 @@ export default function MyRequestsPage() {
 
   const loadMyRequests = async () => {
     try {
-      const response = await fetch('/api/v1/crew-requests?assigned_to_me=true');
+      const response = await fetch('/api/v1/crew-requests?my_requests=true');
       if (response.ok) {
         const data = await response.json();
         setRequests(data || []);
