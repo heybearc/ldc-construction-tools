@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
+    const assignedToMe = searchParams.get('assigned_to_me') === 'true';
 
     const where: any = {
       constructionGroupId: user.constructionGroupId,
@@ -29,6 +30,18 @@ export async function GET(request: NextRequest) {
 
     if (status && status !== 'ALL') {
       where.status = status;
+    }
+
+    // Filter to requests assigned to current user
+    if (assignedToMe) {
+      const currentUser = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true }
+      });
+      
+      if (currentUser) {
+        where.assignedToId = currentUser.id;
+      }
     }
 
     const requests = await prisma.crewChangeRequest.findMany({

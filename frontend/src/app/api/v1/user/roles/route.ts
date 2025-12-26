@@ -11,11 +11,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const roles = await getUserOrgRoles(session);
+    const orgRoles = await getUserOrgRoles(session);
     
-    console.log('[API] /api/v1/user/roles - User:', session.user.email, 'Roles:', roles);
+    console.log('[API] /api/v1/user/roles - User:', session.user.email, 'OrgRoles:', orgRoles);
     
-    return NextResponse.json({ roles });
+    return NextResponse.json({ 
+      orgRoles,
+      // Legacy support
+      roles: orgRoles 
+    });
   } catch (error) {
     console.error('Error fetching user roles:', error);
     return NextResponse.json({ error: 'Failed to fetch user roles' }, { status: 500 });

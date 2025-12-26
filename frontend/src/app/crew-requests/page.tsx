@@ -125,14 +125,10 @@ export default function CrewRequestsPage() {
 
   const fetchPersonnelUsers = async () => {
     try {
-      const response = await fetch('/api/v1/admin/users');
+      const response = await fetch('/api/v1/admin/users/personnel');
       if (response.ok) {
         const data = await response.json();
-        // Filter to Personnel roles (check both role and ldcRole fields)
-        const personnel = (data.users || []).filter((u: PersonnelUser) => 
-          u.role?.includes('PERSONNEL') || (u as any).ldcRole?.includes('PERSONNEL')
-        );
-        setPersonnelUsers(personnel);
+        setPersonnelUsers(data.users || []);
       }
     } catch (err) {
       console.error('Failed to fetch personnel users:', err);
