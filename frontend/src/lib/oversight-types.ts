@@ -65,10 +65,38 @@ export const PERSONNEL_CONTACT_CONFIG = {
   }
 } as const;
 
+export const CG_STAFF_CONFIG = {
+  CGO: {
+    name: 'Construction Group Overseer',
+    shortName: 'CGO',
+    maxPerEntity: 1,
+    description: 'Primary overseer responsible for Construction Group operations'
+  },
+  CGOA: {
+    name: 'Construction Group Overseer Assistant',
+    shortName: 'CGOA',
+    maxPerEntity: 2,
+    description: 'Assists the Construction Group Overseer'
+  },
+  CG_SECRETARY: {
+    name: 'Construction Group Secretary',
+    shortName: 'CG Secretary',
+    maxPerEntity: 1,
+    description: 'Handles administrative duties for the Construction Group'
+  },
+  CG_SAFETY: {
+    name: 'Construction Group Safety Officer',
+    shortName: 'CG Safety',
+    maxPerEntity: 1,
+    description: 'Oversees safety protocols and compliance'
+  }
+} as const;
+
 // Type exports for use in components
 export type TradeTeamOversightRole = keyof typeof TRADE_TEAM_OVERSIGHT_CONFIG;
 export type TradeCrewOversightRole = keyof typeof TRADE_CREW_OVERSIGHT_CONFIG;
 export type PersonnelContactRole = keyof typeof PERSONNEL_CONTACT_CONFIG;
+export type CGStaffRole = keyof typeof CG_STAFF_CONFIG;
 
 // Generic oversight assignment interface
 export interface OversightAssignment {

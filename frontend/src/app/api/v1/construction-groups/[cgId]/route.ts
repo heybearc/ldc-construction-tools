@@ -31,7 +31,11 @@ export async function GET(
             users: true,
             tradeTeams: true,
             crews: true,
-            projects: true
+            projects: {
+              where: {
+                constructionGroupId: params.cgId
+              }
+            }
           }
         }
       }
@@ -96,7 +100,11 @@ export async function PATCH(
             users: true,
             tradeTeams: true,
             crews: true,
-            projects: true
+            projects: {
+              where: {
+                constructionGroupId: params.cgId
+              }
+            }
           }
         }
       }
