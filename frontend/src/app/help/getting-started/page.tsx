@@ -40,9 +40,27 @@ export default async function GettingStartedPage() {
           <ol>
             <li><strong>Log In</strong> - Navigate to the login page and enter your credentials</li>
             <li><strong>Explore the Dashboard</strong> - See an overview of your projects and teams</li>
-            <li><strong>Navigate the Menu</strong> - Use the sidebar to access different features</li>
-            <li><strong>Get Help</strong> - Click "Help Center" anytime you need assistance</li>
+            <li><strong>Navigate the Menu</strong> - Use the dropdown menus at the top to access different features (People, Projects, Requests, Admin, Help)</li>
+            <li><strong>Get Help</strong> - Click "Help" dropdown anytime you need assistance</li>
           </ol>
+
+          {/* Navigation */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 my-6">
+            <h3 className="text-lg font-semibold text-green-900 mt-0 mb-3">🎯 Using the Navigation Menu</h3>
+            <p className="text-green-800 mb-3">
+              The main menu is organized into dropdown menus to help you find features quickly:
+            </p>
+            <ul className="text-green-800 space-y-2">
+              <li><strong>People</strong> → Volunteers, Trade Teams, Congregations</li>
+              <li><strong>Projects</strong> → Projects List, Calendar</li>
+              <li><strong>Requests</strong> → Submit Request, My Requests, Manage Requests</li>
+              <li><strong>Admin</strong> → Admin Dashboard (administrators only)</li>
+              <li><strong>Help</strong> → Help Center, My Feedback, Release Notes</li>
+            </ul>
+            <p className="text-green-800 mt-3 mb-0">
+              Simply click on any menu item to see the dropdown options, then click your desired page.
+            </p>
+          </div>
 
           {/* First Login */}
           <h2>🔐 Your First Login</h2>
