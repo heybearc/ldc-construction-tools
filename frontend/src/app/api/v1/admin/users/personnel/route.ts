@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { isAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
-import { getCGScope, withCGFilter } from '@/lib/cg-scope';
+import { getCGScope } from '@/lib/cg-scope';
+import { getUserOrgRoles } from '@/lib/api-permissions';
 
 /**
  * GET /api/v1/admin/users/personnel
@@ -15,10 +15,21 @@ export async function GET(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     
-    if (!isAdmin(session)) {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
+        { error: 'Unauthorized - Please sign in' },
         { status: 401 }
+      );
+    }
+    
+    // Check if user has personnel contact roles (can manage crew requests)
+    const userOrgRoles = await getUserOrgRoles(session);
+    const hasPersonnelRole = userOrgRoles.some(role => ['PC', 'PCA', 'PC-Support'].includes(role));
+    
+    if (!hasPersonnelRole) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Personnel Contact role required' },
+        { status: 403 }
       );
     }
 
