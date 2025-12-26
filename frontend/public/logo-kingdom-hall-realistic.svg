@@ -2,6 +2,16 @@
   <!-- Background Circle -->
   <circle cx="100" cy="100" r="95" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
   
+  <!-- LDC TOOLS Text in Arch at Top -->
+  <defs>
+    <path id="archPath" d="M 30,100 A 70,70 0 0,1 170,100" />
+  </defs>
+  <text font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" letter-spacing="2">
+    <textPath href="#archPath" startOffset="50%" text-anchor="middle">
+      LDC TOOLS
+    </textPath>
+  </text>
+  
   <!-- Modern Kingdom Hall Building -->
   <!-- Main building body (beige/tan color like real KH) -->
   <rect x="50" y="95" width="100" height="55" fill="#e8d4b8" stroke="#c4a57b" stroke-width="2"/>
@@ -55,6 +65,4 @@
     <rect x="-3.5" y="8" width="7" height="2" fill="#1f2937"/>
   </g>
   
-  <!-- LDC Text -->
-  <text x="100" y="180" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">LDC TOOLS</text>
 </svg>
