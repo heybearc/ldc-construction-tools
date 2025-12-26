@@ -21,10 +21,14 @@ export function usePermissions() {
       }
       
       try {
-        const response = await fetch('/api/v1/user/roles');
+        // Add cache-busting timestamp to force fresh data
+        const response = await fetch(`/api/v1/user/roles?t=${Date.now()}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('[usePermissions] Fetched roles for', session.user.email, ':', data.roles);
           setUserOrgRoles(data.roles || []);
+        } else {
+          console.error('[usePermissions] Failed to fetch roles:', response.status);
         }
       } catch (error) {
         console.error('Error fetching user roles:', error);

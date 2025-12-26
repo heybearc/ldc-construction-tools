@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
  */
 export async function getUserOrgRoles(session: Session | null): Promise<string[]> {
   if (!session?.user?.email) {
+    console.log('[getUserOrgRoles] No session or email');
     return [];
   }
 
@@ -16,7 +17,10 @@ export async function getUserOrgRoles(session: Session | null): Promise<string[]
       where: { email: session.user.email }
     });
 
+    console.log('[getUserOrgRoles] User found:', user?.email, 'VolunteerId:', user?.volunteerId);
+
     if (!user?.volunteerId) {
+      console.log('[getUserOrgRoles] No volunteerId for user');
       return [];
     }
 
@@ -27,6 +31,8 @@ export async function getUserOrgRoles(session: Session | null): Promise<string[]
       WHERE "volunteerId" = ${user.volunteerId} 
       AND "isActive" = true
     `;
+
+    console.log('[getUserOrgRoles] Roles found:', roles.map(r => r.roleCode));
 
     // Extract role codes
     return roles.map(role => role.roleCode);

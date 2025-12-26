@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
 
     const roles = await getUserOrgRoles(session);
     
+    console.log('[API] /api/v1/user/roles - User:', session.user.email, 'Roles:', roles);
+    
     return NextResponse.json({ roles });
   } catch (error) {
     console.error('Error fetching user roles:', error);
