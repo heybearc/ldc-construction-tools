@@ -27,7 +27,7 @@ export async function getUserOrgRoles(session: Session | null): Promise<string[]
     // Fetch active roles for this volunteer
     const roles = await prisma.$queryRaw<Array<{ roleCode: string }>>`
       SELECT "roleCode" 
-      FROM "VolunteerRole" 
+      FROM "volunteer_roles" 
       WHERE "volunteerId" = ${user.volunteerId} 
       AND "isActive" = true
     `;
