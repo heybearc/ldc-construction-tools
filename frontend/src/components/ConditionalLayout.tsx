@@ -55,7 +55,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             <div className="flex items-center space-x-3">
               <img src="/logo.svg" alt="LDC Logo" className="h-10 w-10" />
               <h1 className="text-2xl font-bold text-gray-900">
-                LDC Construction Tools
+                LDC Tools
               </h1>
             </div>
             <div className="flex items-center space-x-6">

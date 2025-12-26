@@ -21,7 +21,7 @@ export default function UserRolesHelpPage() {
             👥 Understanding User Roles
           </h1>
           <p className="text-gray-600">
-            Learn about System Roles and LDC Roles in LDC Construction Tools
+            Learn about System Roles and LDC Roles in LDC Tools
           </p>
         </div>
 
@@ -29,7 +29,7 @@ export default function UserRolesHelpPage() {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">📋 Overview</h2>
           <p className="text-gray-700 mb-4">
-            LDC Construction Tools uses two types of roles to manage both system permissions and organizational structure:
+            LDC Tools uses two types of roles to manage both system permissions and organizational structure:
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">

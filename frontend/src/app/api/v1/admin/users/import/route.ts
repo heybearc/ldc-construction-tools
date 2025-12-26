@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
               await transporter.sendMail({
                 from: `"${emailConfig.fromName}" <${emailConfig.fromEmail}>`,
                 to: email,
-                subject: 'Invitation to LDC Construction Tools',
+                subject: 'Invitation to LDC Tools',
                 html: `
                   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
                       </p>
                       
                       <p style="color: #4b5563; line-height: 1.6;">
-                        You've been invited to join the LDC Construction Tools platform. Click the button below to accept your invitation and set up your account.
+                        You've been invited to join the LDC Tools platform. Click the button below to accept your invitation and set up your account.
                       </p>
                       
                       <div style="text-align: center; margin: 30px 0;">
