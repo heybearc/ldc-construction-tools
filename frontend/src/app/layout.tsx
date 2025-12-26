@@ -8,8 +8,13 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'LDC Tools',
+  title: 'LDC Construction Tools',
   description: 'Personnel contact and project management system for LDC Region 01.12',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 }
 
 export default function RootLayout({
