@@ -81,6 +81,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                 <Link href="/crew-request" className="text-gray-700 hover:text-blue-600 font-medium">
                   Submit Crew Request
                 </Link>
+                <Link href="/my-requests" className="text-gray-700 hover:text-blue-600 font-medium">
+                  My Requests
+                </Link>
                 {canManageVolunteers && (
                   <Link href="/crew-requests" className="text-gray-700 hover:text-blue-600 font-medium">
                     Manage Requests
