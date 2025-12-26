@@ -1,0 +1,26 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
+  
+  <!-- Hard Hat -->
+  <!-- Hat brim (ellipse at bottom) -->
+  <ellipse cx="100" cy="105" rx="50" ry="10" fill="#fcd34d"/>
+  
+  <!-- Hat body (dome shape) -->
+  <path d="M50 105 C50 75, 150 75, 150 105 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+  
+  <!-- Hat ridge/seam -->
+  <ellipse cx="100" cy="85" rx="45" ry="6" fill="#f59e0b" opacity="0.3"/>
+  
+  <!-- Suspension mount on top -->
+  <rect x="95" y="70" width="10" height="12" rx="2" fill="#f59e0b"/>
+  <circle cx="100" cy="70" r="4" fill="#dc2626"/>
+  
+  <!-- Hat details (ventilation slots) -->
+  <line x1="75" y1="95" x2="85" y2="95" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="115" y1="95" x2="125" y2="95" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- LDC Text (larger, more prominent) -->
+  <text x="100" y="145" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">LDC</text>
+  <text x="100" y="170" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#93c5fd" text-anchor="middle">TOOLS</text>
+</svg>
