@@ -72,6 +72,12 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                 <Link href="/projects" className="text-gray-700 hover:text-blue-600 font-medium">
                   Projects
                 </Link>
+                <Link href="/calendar" className="text-gray-700 hover:text-blue-600 font-medium">
+                  Calendar
+                </Link>
+                <Link href="/congregations" className="text-gray-700 hover:text-blue-600 font-medium">
+                  Congregations
+                </Link>
                 <Link href="/crew-request" className="text-gray-700 hover:text-blue-600 font-medium">
                   Submit Request
                 </Link>

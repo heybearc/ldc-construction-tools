@@ -36,43 +36,47 @@ export async function GET(request: NextRequest) {
     // Get CG scope for data filtering
     const cgScope = await getCGScope();
     
-    // Use raw query to efficiently find users with PCA or PC organizational roles
-    // This joins users with their volunteer records and checks volunteer_roles table
-    const personnelUsers = await prisma.$queryRaw<Array<{
-      id: string;
-      name: string | null;
-      email: string;
-      role: string;
+    // Query volunteers with Personnel roles (PCA, PC, PC-Support)
+    // Then get their associated user accounts
+    const personnelVolunteers = await prisma.$queryRaw<Array<{
+      userId: string;
+      userName: string | null;
+      userEmail: string;
+      volunteerId: string;
+      volunteerName: string;
       roleCode: string;
     }>>`
       SELECT DISTINCT 
-        u.id,
-        u.name,
-        u.email,
-        u.role,
+        u.id as "userId",
+        u.name as "userName",
+        u.email as "userEmail",
+        v.id as "volunteerId",
+        CONCAT(v."firstName", ' ', v."lastName") as "volunteerName",
         vr."roleCode"
-      FROM "User" u
-      INNER JOIN "Volunteer" v ON u."volunteerId" = v.id
-      INNER JOIN "volunteer_roles" vr ON v.id = vr."volunteerId"
+      FROM volunteer_roles vr
+      INNER JOIN volunteers v ON vr."volunteerId" = v.id
+      LEFT JOIN "User" u ON v.id = u."volunteerId"
       WHERE vr."isActive" = true
-        AND (vr."roleCode" = 'PCA' OR vr."roleCode" = 'PC')
-      ${cgScope?.constructionGroupId ? prisma.$queryRawUnsafe(`AND u."constructionGroupId" = '${cgScope.constructionGroupId}'`) : prisma.$queryRawUnsafe('')}
-      ORDER BY u.name
+        AND vr."roleCode" IN ('PCA', 'PC', 'PC-Support')
+      ORDER BY "volunteerName"
     `;
     
-    // Transform results to include org roles grouped by user
+    // Transform results - use volunteer name if user name is missing
     const userMap = new Map<string, any>();
-    for (const row of personnelUsers) {
-      if (!userMap.has(row.id)) {
-        userMap.set(row.id, {
-          id: row.id,
-          name: row.name || row.email,
-          email: row.email,
-          role: row.role,
+    for (const row of personnelVolunteers) {
+      // Skip if no user account exists
+      if (!row.userId) continue;
+      
+      if (!userMap.has(row.userId)) {
+        userMap.set(row.userId, {
+          id: row.userId,
+          name: row.userName || row.volunteerName || row.userEmail,
+          email: row.userEmail,
+          volunteerId: row.volunteerId,
           orgRoles: [row.roleCode],
         });
       } else {
-        userMap.get(row.id).orgRoles.push(row.roleCode);
+        userMap.get(row.userId).orgRoles.push(row.roleCode);
       }
     }
     
