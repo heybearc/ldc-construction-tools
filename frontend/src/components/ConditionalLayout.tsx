@@ -1,6 +1,7 @@
 'use client';
 
 import AnnouncementBanner from '@/components/AnnouncementBanner';
+import FeedbackUpdateBanner from '@/components/FeedbackUpdateBanner';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect, useRef } from 'react';
@@ -214,6 +215,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
           </div>
         </div>
       </header>
+      <FeedbackUpdateBanner />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AnnouncementBanner />
         {children}
