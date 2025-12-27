@@ -94,6 +94,20 @@ const helpTopics: HelpTopic[] = [
     icon: '💡'
   },
   {
+    id: 'feedback-notifications',
+    title: 'Feedback Notifications',
+    description: 'Email alerts, in-app banners, and screenshot paste features',
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
+    icon: '🔔'
+  },
+  {
+    id: 'schedule-notifications',
+    title: 'Schedule Change Notifications',
+    description: 'Notify your team when project schedules are updated',
+    roles: ['SUPER_ADMIN', 'ZONE_OVERSEER', 'PERSONNEL_CONTACT', 'READ_ONLY'],
+    icon: '📅'
+  },
+  {
     id: 'troubleshooting',
     title: 'Troubleshooting',
     description: 'Common issues and how to resolve them',
