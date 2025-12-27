@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { isAdmin } from '@/lib/auth-helpers';
+import { sendEmail, generateFeedbackStatusChangeEmail } from '@/lib/email';
 
 export async function PATCH(
   request: NextRequest,
@@ -23,10 +24,52 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 });
     }
 
+    // Get current feedback with submitter info
+    const currentFeedback = await prisma.feedback.findUnique({
+      where: { id: params.id },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    if (!currentFeedback) {
+      return NextResponse.json({ success: false, error: 'Feedback not found' }, { status: 404 });
+    }
+
+    const oldStatus = currentFeedback.status;
+    const newStatus = status.toUpperCase();
+
     const feedback = await prisma.feedback.update({
       where: { id: params.id },
-      data: { status: status.toUpperCase() }
+      data: { status: newStatus }
     });
+
+    // Send email notification if status changed
+    if (oldStatus !== newStatus && currentFeedback.user?.email) {
+      try {
+        const emailHtml = generateFeedbackStatusChangeEmail(
+          currentFeedback.title,
+          oldStatus,
+          newStatus,
+          currentFeedback.id,
+          currentFeedback.user.name || 'User'
+        );
+
+        await sendEmail({
+          to: currentFeedback.user.email,
+          subject: `Feedback Status Updated: ${currentFeedback.title}`,
+          html: emailHtml
+        });
+      } catch (emailError) {
+        console.error('Failed to send status change email:', emailError);
+        // Don't fail the request if email fails
+      }
+    }
 
     return NextResponse.json({ success: true, data: feedback });
   } catch (error) {
