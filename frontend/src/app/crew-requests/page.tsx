@@ -98,6 +98,8 @@ export default function CrewRequestsPage() {
   const [volunteerData, setVolunteerData] = useState<NewVolunteerData>(initialVolunteerData);
   const [addingVolunteer, setAddingVolunteer] = useState(false);
   const [volunteerError, setVolunteerError] = useState<string | null>(null);
+  const [editingRequest, setEditingRequest] = useState<CrewRequest | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<CrewRequest>>({});
 
   // Redirect if user doesn't have permission to manage requests
   useEffect(() => {
@@ -283,6 +285,85 @@ export default function CrewRequestsPage() {
       crewId: request.crew_id || '',
     });
     setShowAddVolunteer(true);
+  };
+
+  const handleEditRequest = (request: CrewRequest) => {
+    setEditingRequest(request);
+    setEditFormData({
+      volunteer_name: request.volunteer_name,
+      volunteer_ba_id: request.volunteer_ba_id,
+      crew_name: request.crew_name,
+      project_roster_name: request.project_roster_name,
+      comments: request.comments,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRequest) return;
+    
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/v1/crew-requests/${editingRequest.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update request');
+      }
+
+      await fetchRequests();
+      setEditingRequest(null);
+      setEditFormData({});
+      alert('Request updated successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update request');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCloneRequest = (request: CrewRequest) => {
+    // Navigate to crew request form with pre-filled data
+    const params = new URLSearchParams({
+      clone: 'true',
+      volunteer_name: request.volunteer_name,
+      volunteer_ba_id: request.volunteer_ba_id || '',
+      crew_name: request.crew_name || '',
+      project_roster_name: request.project_roster_name || '',
+      comments: request.comments || '',
+      request_type: request.request_type,
+    });
+    router.push(`/crew-request?${params.toString()}`);
+  };
+
+  const handleReopenRequest = async (requestId: string) => {
+    const reason = prompt('Please provide a reason for reopening this request:');
+    if (!reason) return;
+
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/v1/crew-requests/${requestId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          status: 'IN_PROGRESS',
+          resolution_notes: `REOPENED: ${reason}`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reopen request');
+      }
+
+      await fetchRequests();
+      alert('Request reopened successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to reopen request');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const filteredRequests = requests.filter(r => {
@@ -577,10 +658,17 @@ export default function CrewRequestsPage() {
                           ))}
                         </select>
                         <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditRequest(request)}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                            title="Edit request"
+                          >
+                            Edit
+                          </button>
                           {request.request_type === 'ADD_TO_CREW' && (
                             <button
                               onClick={() => prefillVolunteerFromRequest(request)}
-                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center"
+                              className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 flex items-center"
                             >
                               <Plus className="h-3 w-3 mr-1" />
                               Add Volunteer
@@ -602,13 +690,29 @@ export default function CrewRequestsPage() {
                         </div>
                       </>
                     ) : (
-                      <button
-                        onClick={() => handleDelete(request.id)}
-                        className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
-                        title="Delete completed request"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleCloneRequest(request)}
+                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          title="Clone and resubmit"
+                        >
+                          Clone
+                        </button>
+                        <button
+                          onClick={() => handleReopenRequest(request.id)}
+                          className="px-3 py-1 bg-amber-600 text-white text-sm rounded hover:bg-amber-700"
+                          title="Reopen request"
+                        >
+                          Reopen
+                        </button>
+                        <button
+                          onClick={() => handleDelete(request.id)}
+                          className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
+                          title="Delete completed request"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -681,6 +785,102 @@ export default function CrewRequestsPage() {
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
               >
                 {isUpdating ? 'Completing...' : 'Mark Complete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Request Modal */}
+      {editingRequest && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Edit Request</h3>
+              <button onClick={() => { setEditingRequest(null); setEditFormData({}); }} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Volunteer Name
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.volunteer_name || ''}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, volunteer_name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  BA ID
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.volunteer_ba_id || ''}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, volunteer_ba_id: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              {editingRequest.request_type === 'ADD_TO_CREW' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Crew Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.crew_name || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, crew_name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              )}
+
+              {editingRequest.request_type === 'ADD_TO_PROJECT_ROSTER' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Project Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.project_roster_name || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, project_roster_name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Comments
+                </label>
+                <textarea
+                  rows={3}
+                  value={editFormData.comments || ''}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, comments: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => { setEditingRequest(null); setEditFormData({}); }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={isUpdating}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isUpdating ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
