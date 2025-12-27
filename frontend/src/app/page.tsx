@@ -32,6 +32,7 @@ export default function DashboardPage() {
     try {
       let volunteerCount = 0;
       let teamCount = 0;
+      let projectCount = 0;
 
       // Fetch volunteers data
       try {
@@ -55,10 +56,22 @@ export default function DashboardPage() {
         console.error('Error fetching trade teams:', error);
       }
 
+      // Fetch projects data
+      try {
+        const projectsRes = await fetch('/api/v1/projects');
+        if (projectsRes.ok) {
+          const projects = await projectsRes.json();
+          // Count only active projects
+          projectCount = projects.filter((p: any) => p.isActive && p.status === 'ACTIVE').length || 0;
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+
       setStats({
         totalVolunteers: volunteerCount,
         totalTeams: teamCount,
-        activeProjects: 0, // Will be populated when projects have data
+        activeProjects: projectCount,
         upcomingEvents: 0  // Will be populated when calendar is implemented
       });
     } catch (error) {
