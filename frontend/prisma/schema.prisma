@@ -847,27 +847,31 @@ model Feedback {
 }
 
 model FeedbackAttachment {
-  id         String   @id @default(cuid())
-  feedbackId String
+  id         String            @id @default(cuid())
+  feedbackId String?
+  commentId  String?
   filename   String
-  filePath   String
+  fileData   String            @db.Text  // Base64 encoded image data
   fileSize   Int
   mimeType   String
-  createdAt  DateTime @default(now())
-  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  createdAt  DateTime          @default(now())
+  feedback   Feedback?         @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  comment    FeedbackComment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@index([feedbackId])
+  @@index([commentId])
   @@map("feedback_attachments")
 }
 
 model FeedbackComment {
-  id         String   @id @default(cuid())
-  feedbackId String
-  authorId   String
-  content    String
-  createdAt  DateTime @default(now())
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  id          String               @id @default(cuid())
+  feedbackId  String
+  authorId    String
+  content     String
+  createdAt   DateTime             @default(now())
+  author      User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  feedback    Feedback             @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  attachments FeedbackAttachment[]
 
   @@index([feedbackId])
   @@map("feedback_comments")
