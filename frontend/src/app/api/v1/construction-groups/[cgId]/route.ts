@@ -33,7 +33,8 @@ export async function GET(
             crews: true,
             projects: {
               where: {
-                constructionGroupId: params.cgId
+                constructionGroupId: params.cgId,
+                isActive: true
               }
             }
           }
@@ -102,7 +103,8 @@ export async function PATCH(
             crews: true,
             projects: {
               where: {
-                constructionGroupId: params.cgId
+                constructionGroupId: params.cgId,
+                isActive: true
               }
             }
           }
