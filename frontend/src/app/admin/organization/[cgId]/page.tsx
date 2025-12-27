@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import OversightSection from '@/components/oversight/OversightSection';
-import { PERSONNEL_CONTACT_CONFIG, CG_STAFF_CONFIG } from '@/lib/oversight-types';
+import { PERSONNEL_CONTACT_CONFIG, CG_STAFF_CONFIG, REGIONAL_STAFF_CONFIG } from '@/lib/oversight-types';
 import { Building2, ArrowLeft, Users, Wrench, FolderKanban, MapPin, Calendar, AlertCircle, RefreshCw, Save, ExternalLink } from "lucide-react";
 
 interface ConstructionGroup {
@@ -223,6 +223,16 @@ export default function ConstructionGroupDetailPage() {
           </div>
         </div>
 
+        {/* Construction Group Staff Section */}
+        <OversightSection
+          title="Construction Group Staff"
+          entityId={cgId}
+          apiBasePath={`/api/v1/construction-groups/${cgId}/cg-staff`}
+          roleConfig={CG_STAFF_CONFIG}
+          roleOrder={['CGO', 'CGOA', 'CG_SECRETARY', 'CG_SAFETY']}
+          availableUsers={availableUsers}
+        />
+
         {/* Personnel Contacts Section */}
         <OversightSection
           title="Personnel Contacts"
@@ -233,13 +243,13 @@ export default function ConstructionGroupDetailPage() {
           availableUsers={availableUsers}
         />
 
-        {/* Construction Group Staff Section */}
+        {/* Regional Staff Section */}
         <OversightSection
-          title="Construction Group Staff"
-          entityId={cgId}
-          apiBasePath={`/api/v1/construction-groups/${cgId}/cg-staff`}
-          roleConfig={CG_STAFF_CONFIG}
-          roleOrder={['CGO', 'CGOA', 'CG_SECRETARY', 'CG_SAFETY']}
+          title="Regional Staff"
+          entityId={cg.region?.id || cgId}
+          apiBasePath={`/api/v1/regions/${cg.region?.id}/regional-staff`}
+          roleConfig={REGIONAL_STAFF_CONFIG}
+          roleOrder={['ZO', 'ZOA', 'RO', 'ROA']}
           availableUsers={availableUsers}
         />
 

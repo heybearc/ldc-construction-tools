@@ -92,11 +92,39 @@ export const CG_STAFF_CONFIG = {
   }
 } as const;
 
+export const REGIONAL_STAFF_CONFIG = {
+  ZO: {
+    name: 'Zone Overseer',
+    shortName: 'ZO',
+    maxPerEntity: 1,
+    description: 'Oversees multiple regions within a zone'
+  },
+  ZOA: {
+    name: 'Zone Overseer Assistant',
+    shortName: 'ZOA',
+    maxPerEntity: 2,
+    description: 'Assists the Zone Overseer'
+  },
+  RO: {
+    name: 'Regional Overseer',
+    shortName: 'RO',
+    maxPerEntity: 1,
+    description: 'Oversees Construction Groups within a region'
+  },
+  ROA: {
+    name: 'Regional Overseer Assistant',
+    shortName: 'ROA',
+    maxPerEntity: 2,
+    description: 'Assists the Regional Overseer'
+  }
+} as const;
+
 // Type exports for use in components
 export type TradeTeamOversightRole = keyof typeof TRADE_TEAM_OVERSIGHT_CONFIG;
 export type TradeCrewOversightRole = keyof typeof TRADE_CREW_OVERSIGHT_CONFIG;
 export type PersonnelContactRole = keyof typeof PERSONNEL_CONTACT_CONFIG;
 export type CGStaffRole = keyof typeof CG_STAFF_CONFIG;
+export type RegionalStaffRole = keyof typeof REGIONAL_STAFF_CONFIG;
 
 // Generic oversight assignment interface
 export interface OversightAssignment {
