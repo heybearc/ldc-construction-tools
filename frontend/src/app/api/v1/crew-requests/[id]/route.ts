@@ -149,7 +149,7 @@ export async function PATCH(
   }
 }
 
-// DELETE - Delete a crew request (SUPER_ADMIN only)
+// DELETE - Delete a crew request (Personnel Contact roles only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -160,14 +160,34 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user to check if SUPER_ADMIN
+    // Get user and their volunteer record to check organizational roles
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { role: true }
+      select: { 
+        id: true,
+        volunteerId: true
+      }
     });
 
-    if (user?.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Only SUPER_ADMIN can delete requests' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Check if user has Personnel Contact role (PC, PCA, PC-Support)
+    if (user.volunteerId) {
+      const personnelRoles = await prisma.volunteerRole.findFirst({
+        where: {
+          volunteerId: user.volunteerId,
+          roleCode: { in: ['PC', 'PCA', 'PC_SUPPORT'] },
+          endDate: null
+        }
+      });
+
+      if (!personnelRoles) {
+        return NextResponse.json({ error: 'Only Personnel Contact roles can delete requests' }, { status: 403 });
+      }
+    } else {
+      return NextResponse.json({ error: 'Only Personnel Contact roles can delete requests' }, { status: 403 });
     }
 
     // Delete the request

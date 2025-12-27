@@ -595,7 +595,7 @@ export default function CrewRequestsPage() {
                           <button
                             onClick={() => handleDelete(request.id)}
                             className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
-                            title="Delete request (SUPER_ADMIN only)"
+                            title="Delete request"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
