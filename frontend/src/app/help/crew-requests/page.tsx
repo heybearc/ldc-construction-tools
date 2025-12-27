@@ -155,6 +155,36 @@ export default function CrewRequestsHelpPage() {
             </div>
 
             <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Managing Active Requests</h3>
+              <p className="text-gray-700 mb-2">For requests that are NEW or IN_PROGRESS, you can:</p>
+              <ul className="text-gray-700 ml-4 space-y-2">
+                <li>• <strong>Edit:</strong> Click the Edit button to modify volunteer name, BA ID, crew/project name, or comments</li>
+                <li>• <strong>Complete:</strong> Mark the request as complete with optional resolution notes</li>
+                <li>• <strong>Delete:</strong> Remove the request if it's no longer needed</li>
+              </ul>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
+                <p className="text-sm text-green-800">
+                  <strong>✨ New:</strong> You can now edit active requests before completing them! Make corrections without having to delete and resubmit.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Managing Completed Requests</h3>
+              <p className="text-gray-700 mb-2">For requests that are COMPLETED or REJECTED, you can:</p>
+              <ul className="text-gray-700 ml-4 space-y-2">
+                <li>• <strong>Clone:</strong> Create a new request with the same details for resubmission</li>
+                <li>• <strong>Reopen:</strong> Change status back to IN_PROGRESS if work needs to be undone (requires reason)</li>
+                <li>• <strong>Delete:</strong> Remove the completed request from the list</li>
+              </ul>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
+                <p className="text-sm text-green-800">
+                  <strong>✨ New:</strong> Clone completed requests to quickly submit similar requests, or reopen them if corrections are needed!
+                </p>
+              </div>
+            </div>
+
+            <div>
               <h3 className="font-semibold text-gray-900 mb-2">Completing Requests</h3>
               <ol className="text-gray-700 ml-4 space-y-2">
                 <li>1. Click the <strong>Complete</strong> button on the request</li>
