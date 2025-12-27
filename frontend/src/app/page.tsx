@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { 
   Users, 
   Wrench, 
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
   const [stats, setStats] = useState({
     totalVolunteers: 0,
     totalTeams: 0,
@@ -87,44 +89,53 @@ export default function DashboardPage() {
       description: 'Add volunteers to crews or project rosters',
       href: '/crew-request',
       icon: UserPlus,
-      color: 'bg-indigo-500'
+      color: 'bg-indigo-500',
+      requiresAdmin: false
     },
     {
       title: 'Trade Teams',
       description: 'Manage construction trade teams and crews',
       href: '/trade-teams',
       icon: Wrench,
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
+      requiresAdmin: false
     },
     {
       title: 'Volunteers',
       description: 'Personnel directory and volunteer management',
       href: '/volunteers',
       icon: Users,
-      color: 'bg-green-500'
+      color: 'bg-green-500',
+      requiresAdmin: false
     },
     {
       title: 'Projects',
       description: 'Project management and assignments',
       href: '/projects',
       icon: FolderOpen,
-      color: 'bg-purple-500'
+      color: 'bg-purple-500',
+      requiresAdmin: false
     },
     {
       title: 'Calendar',
       description: 'Schedule and event management',
       href: '/calendar',
       icon: Calendar,
-      color: 'bg-orange-500'
+      color: 'bg-orange-500',
+      requiresAdmin: false
     },
     {
       title: 'Admin',
       description: 'System administration and settings',
       href: '/admin',
       icon: Settings,
-      color: 'bg-gray-500'
+      color: 'bg-gray-500',
+      requiresAdmin: true
     }
   ];
+
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+  const visibleActions = quickActions.filter(action => !action.requiresAdmin || isSuperAdmin);
 
   if (loading) {
     return (
@@ -195,7 +206,7 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quickActions.map((action) => {
+            {visibleActions.map((action) => {
               const Icon = action.icon;
               return (
                 <Link
