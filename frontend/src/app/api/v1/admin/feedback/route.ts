@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
                 name: true,
                 role: true
               }
-            }
+            },
+            attachments: true
           },
           orderBy: { createdAt: 'asc' }
         }
@@ -56,17 +57,23 @@ export async function GET(request: NextRequest) {
       },
       submittedAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
-      comments: item.comments.map(comment => ({
+      comments: item.comments.map((comment: any) => ({
         id: comment.id,
         content: comment.content,
         author: comment.author.name || `${comment.author.firstName || ''} ${comment.author.lastName || ''}`.trim() || 'Unknown',
-        createdAt: comment.createdAt.toISOString()
+        createdAt: comment.createdAt.toISOString(),
+        attachments: comment.attachments?.map((att: any) => ({
+          id: att.id,
+          filename: att.filename,
+          fileData: att.fileData,
+          mimeType: att.mimeType
+        })) || []
       })),
-      attachments: item.attachments.map(attachment => ({
+      attachments: item.attachments.map((attachment: any) => ({
         id: attachment.id,
         filename: attachment.filename,
-        url: attachment.filePath,
-        size: attachment.fileSize
+        fileData: attachment.fileData,
+        mimeType: attachment.mimeType
       }))
     }));
 
