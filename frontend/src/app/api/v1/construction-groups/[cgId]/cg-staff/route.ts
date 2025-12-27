@@ -1,6 +1,7 @@
 // API route for CG Staff management (CG-level)
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { CG_STAFF_CONFIG, validateRoleLimit } from '@/lib/oversight-types';
 
 // GET: List all CG staff for a construction group
@@ -26,7 +27,7 @@ export async function GET(
       user_email: string;
       user_first_name: string | null;
       user_last_name: string | null;
-    }>>`
+    }>>(Prisma.sql`
       SELECT 
         vr.id,
         vr."volunteerId" as volunteer_id,
@@ -56,7 +57,7 @@ export async function GET(
           WHEN 'CG_SAFETY' THEN 4
         END,
         vr."startDate" ASC
-    `;
+    `);
 
     // Transform to match OversightSection expected format
     const staff = staffRoles.map(row => ({
@@ -122,14 +123,14 @@ export async function POST(
     }
 
     // Check current count for this role
-    const currentCount = await prisma.$queryRaw<Array<{ count: bigint }>>`
+    const currentCount = await prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
       SELECT COUNT(*) as count
       FROM "VolunteerRole"
       WHERE "roleCode" = ${role}
         AND "entityType" = 'Construction Group'
         AND "entityId" = ${cgId}
         AND "endDate" IS NULL
-    `;
+    `);
 
     const count = Number(currentCount[0]?.count || 0);
     const validation = validateRoleLimit(CG_STAFF_CONFIG, role, count);
@@ -138,7 +139,7 @@ export async function POST(
     }
 
     // Check if user already has this role
-    const existing = await prisma.$queryRaw<Array<{ id: string }>>`
+    const existing = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
       SELECT vr.id
       FROM "VolunteerRole" vr
       JOIN "Volunteer" v ON vr."volunteerId" = v.id
@@ -148,7 +149,7 @@ export async function POST(
         AND vr."entityId" = ${cgId}
         AND vr."endDate" IS NULL
       LIMIT 1
-    `;
+    `);
 
     if (existing.length > 0) {
       return NextResponse.json(
