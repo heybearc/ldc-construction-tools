@@ -44,7 +44,7 @@ export async function GET(
         u."lastName" as user_last_name
       FROM volunteer_roles vr
       JOIN volunteers v ON vr."volunteerId" = v.id
-      JOIN "User" u ON v."userId" = u.id
+      LEFT JOIN "User" u ON u."volunteerId" = v.id
       WHERE vr."roleCode" IN ('CGO', 'CGOA', 'CG_SECRETARY', 'CG_SAFETY')
         AND vr."entityType" = 'Construction Group'
         AND vr."entityId" = ${cgId}
@@ -143,7 +143,8 @@ export async function POST(
       SELECT vr.id
       FROM volunteer_roles vr
       JOIN volunteers v ON vr."volunteerId" = v.id
-      WHERE v."userId" = ${userId}
+      LEFT JOIN "User" u ON u."volunteerId" = v.id
+      WHERE u.id = ${userId}
         AND vr."roleCode" = ${role}
         AND vr."entityType" = 'Construction Group'
         AND vr."entityId" = ${cgId}
