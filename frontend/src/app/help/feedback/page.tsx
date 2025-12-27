@@ -51,23 +51,15 @@ export default function FeedbackPage() {
     setError('');
 
     try {
-      // Build description with image references
-      let fullDescription = description;
-      if (pastedImages.length > 0) {
-        fullDescription += '\n\n--- Screenshots ---\n';
-        pastedImages.forEach((_, index) => {
-          fullDescription += `Screenshot ${index + 1} attached\n`;
-        });
-      }
-
       const response = await fetch('/api/v1/feedback/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: feedbackType.toUpperCase(),
           title,
-          description: fullDescription,
-          priority: priority.toUpperCase()
+          description: description.trim(),
+          priority: priority.toUpperCase(),
+          screenshots: pastedImages
         })
       });
 

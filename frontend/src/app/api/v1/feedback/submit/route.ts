@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { type, title, description, priority } = body;
+    const { type, title, description, priority, screenshots = [] } = body;
 
     if (!type || !title || !description) {
       return NextResponse.json({ 
@@ -46,7 +46,15 @@ export async function POST(request: NextRequest) {
         title: title.trim(),
         description: description.trim(),
         priority: (priority || 'MEDIUM').toUpperCase(),
-        submittedBy: user.id
+        submittedBy: user.id,
+        attachments: {
+          create: screenshots.map((screenshot: string, index: number) => ({
+            filename: `screenshot-${index + 1}.png`,
+            fileData: screenshot,
+            fileSize: screenshot.length,
+            mimeType: 'image/png'
+          }))
+        }
       }
     });
 

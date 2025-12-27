@@ -17,17 +17,23 @@ interface FeedbackItem {
   };
   submittedAt: string;
   updatedAt: string;
+  attachments: Array<{
+    id: string;
+    filename: string;
+    fileData: string;
+    mimeType: string;
+  }>;
   comments: Array<{
     id: string;
     content: string;
     author: string;
     createdAt: string;
-  }>;
-  attachments: Array<{
-    id: string;
-    filename: string;
-    url: string;
-    size: number;
+    attachments?: Array<{
+      id: string;
+      filename: string;
+      fileData: string;
+      mimeType: string;
+    }>;
   }>;
 }
 
@@ -51,6 +57,7 @@ export default function FeedbackManagementPage() {
   const [newStatus, setNewStatus] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [commentScreenshots, setCommentScreenshots] = useState<string[]>([]);
 
   useEffect(() => {
     fetchFeedback();
@@ -115,6 +122,30 @@ export default function FeedbackManagementPage() {
     return item.status === filter;
   });
 
+  const handleCommentPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        e.preventDefault();
+        const blob = items[i].getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const imageData = event.target?.result as string;
+            setCommentScreenshots(prev => [...prev, imageData]);
+          };
+          reader.readAsDataURL(blob);
+        }
+      }
+    }
+  };
+
+  const removeCommentScreenshot = (index: number) => {
+    setCommentScreenshots(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleAddComment = async () => {
     if (!selectedFeedback || !newComment.trim()) return;
     
@@ -124,12 +155,16 @@ export default function FeedbackManagementPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ content: newComment.trim() })
+        body: JSON.stringify({ 
+          content: newComment.trim(),
+          screenshots: commentScreenshots
+        })
       });
 
       if (response.ok) {
         await fetchFeedback();
         setNewComment('');
+        setCommentScreenshots([]);
         setShowCommentModal(false);
       } else {
         alert('Failed to add comment');

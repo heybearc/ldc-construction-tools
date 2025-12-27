@@ -25,7 +25,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { content } = body;
+    const { content, screenshots = [] } = body;
 
     if (!content?.trim()) {
       return NextResponse.json({ success: false, error: 'Comment content is required' }, { status: 400 });
@@ -52,7 +52,15 @@ export async function POST(
       data: {
         feedbackId: params.id,
         authorId: user.id,
-        content: content.trim()
+        content: content.trim(),
+        attachments: {
+          create: screenshots.map((screenshot: string, index: number) => ({
+            filename: `screenshot-${index + 1}.png`,
+            fileData: screenshot,
+            fileSize: screenshot.length,
+            mimeType: 'image/png'
+          }))
+        }
       }
     });
 
