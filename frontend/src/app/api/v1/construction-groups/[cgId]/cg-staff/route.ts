@@ -42,8 +42,8 @@ export async function GET(
         u.email as user_email,
         u."firstName" as user_first_name,
         u."lastName" as user_last_name
-      FROM "VolunteerRole" vr
-      JOIN "Volunteer" v ON vr."volunteerId" = v.id
+      FROM volunteer_roles vr
+      JOIN volunteers v ON vr."volunteerId" = v.id
       JOIN "User" u ON v."userId" = u.id
       WHERE vr."roleCode" IN ('CGO', 'CGOA', 'CG_SECRETARY', 'CG_SAFETY')
         AND vr."entityType" = 'Construction Group'
@@ -125,7 +125,7 @@ export async function POST(
     // Check current count for this role
     const currentCount = await prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
       SELECT COUNT(*) as count
-      FROM "VolunteerRole"
+      FROM volunteer_roles
       WHERE "roleCode" = ${role}
         AND "entityType" = 'Construction Group'
         AND "entityId" = ${cgId}
@@ -141,8 +141,8 @@ export async function POST(
     // Check if user already has this role
     const existing = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
       SELECT vr.id
-      FROM "VolunteerRole" vr
-      JOIN "Volunteer" v ON vr."volunteerId" = v.id
+      FROM volunteer_roles vr
+      JOIN volunteers v ON vr."volunteerId" = v.id
       WHERE v."userId" = ${userId}
         AND vr."roleCode" = ${role}
         AND vr."entityType" = 'Construction Group'
