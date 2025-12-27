@@ -564,7 +564,7 @@ export default function CrewRequestsPage() {
                   </div>
                   
                   <div className="flex flex-col items-end gap-2 ml-4">
-                    {request.status !== 'COMPLETED' && request.status !== 'REJECTED' && (
+                    {request.status !== 'COMPLETED' && request.status !== 'REJECTED' ? (
                       <>
                         <select
                           value={request.assigned_to?.id || ''}
@@ -601,6 +601,14 @@ export default function CrewRequestsPage() {
                           </button>
                         </div>
                       </>
+                    ) : (
+                      <button
+                        onClick={() => handleDelete(request.id)}
+                        className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
+                        title="Delete completed request"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </div>
