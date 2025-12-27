@@ -395,6 +395,28 @@ export default function FeedbackManagementPage() {
                   </div>
                 </div>
 
+                {/* Feedback Screenshots */}
+                {selectedFeedback.attachments && selectedFeedback.attachments.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Screenshots ({selectedFeedback.attachments.length})</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedFeedback.attachments.map((attachment) => (
+                        <div key={attachment.id} className="border border-gray-300 rounded-lg overflow-hidden">
+                          <img 
+                            src={attachment.fileData} 
+                            alt={attachment.filename}
+                            className="w-full h-auto cursor-pointer hover:opacity-90"
+                            onClick={() => window.open(attachment.fileData, '_blank')}
+                          />
+                          <div className="bg-gray-100 px-3 py-2 text-sm text-gray-700">
+                            {attachment.filename}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Submitted By</h3>
                   <div className="bg-gray-50 rounded-lg p-4">
@@ -428,7 +450,21 @@ export default function FeedbackManagementPage() {
                               <p className="font-medium text-gray-900">👨‍💼 {comment.author}</p>
                               <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleString()}</p>
                             </div>
-                            <p className="text-gray-700">{comment.content}</p>
+                            <p className="text-gray-700 mb-3">{comment.content}</p>
+                            {comment.attachments && comment.attachments.length > 0 && (
+                              <div className="mt-3 grid grid-cols-2 gap-2">
+                                {comment.attachments.map((attachment) => (
+                                  <div key={attachment.id} className="border border-gray-200 rounded overflow-hidden">
+                                    <img 
+                                      src={attachment.fileData} 
+                                      alt={attachment.filename}
+                                      className="w-full h-auto cursor-pointer hover:opacity-90"
+                                      onClick={() => window.open(attachment.fileData, '_blank')}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -484,13 +520,47 @@ export default function FeedbackManagementPage() {
               </div>
               
               <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Comment
+                </label>
                 <textarea
                   rows={4}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
+                  onPaste={handleCommentPaste}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your comment..."
+                  placeholder="Enter your comment... (Ctrl/Cmd+V to paste screenshots)"
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  💡 Tip: You can paste screenshots directly with Ctrl/Cmd+V
+                </p>
+                
+                {/* Comment Screenshot Previews */}
+                {commentScreenshots.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Screenshots ({commentScreenshots.length}):</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {commentScreenshots.map((screenshot, index) => (
+                        <div key={index} className="relative border border-gray-300 rounded-lg overflow-hidden">
+                          <img src={screenshot} alt={`Screenshot ${index + 1}`} className="w-full h-auto" />
+                          <button
+                            type="button"
+                            onClick={() => removeCommentScreenshot(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                            aria-label="Remove screenshot"
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1">
+                            Screenshot {index + 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end space-x-3">
