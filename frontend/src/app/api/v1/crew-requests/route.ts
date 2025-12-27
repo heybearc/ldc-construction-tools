@@ -138,18 +138,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user can submit on behalf of others (Personnel Contact roles + SUPER_ADMIN)
+    // Check if user can submit on behalf of others (Personnel Contact organizational roles + SUPER_ADMIN)
     const userRecord = await prisma.user.findUnique({
       where: { id: user.id },
-      select: { role: true }
+      select: { 
+        role: true,
+        volunteerId: true
+      }
     });
 
-    const canSubmitOnBehalfOf = userRecord?.role && [
-      'SUPER_ADMIN',
-      'PERSONNEL_CONTACT',
-      'PERSONNEL_CONTACT_ASSISTANT',
-      'PERSONNEL_CONTACT_SUPPORT'
-    ].includes(userRecord.role);
+    // Check for SUPER_ADMIN system role OR Personnel Contact organizational role
+    let canSubmitOnBehalfOf = userRecord?.role === 'SUPER_ADMIN';
+    
+    if (!canSubmitOnBehalfOf && userRecord?.volunteerId) {
+      const personnelRoles = await prisma.volunteerRole.findFirst({
+        where: {
+          volunteerId: userRecord.volunteerId,
+          roleCode: { in: ['PC', 'PCA', 'PC_SUPPORT'] },
+          endDate: null
+        }
+      });
+      canSubmitOnBehalfOf = !!personnelRoles;
+    }
     
     const hasOverride = override_requestor_name && override_requestor_email;
 
