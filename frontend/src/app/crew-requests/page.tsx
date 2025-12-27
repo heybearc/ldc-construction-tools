@@ -669,7 +669,7 @@ export default function CrewRequestsPage() {
                           >
                             Edit
                           </button>
-                          {request.request_type === 'ADD_TO_CREW' && (
+                          {(request.request_type === 'ADD_TO_CREW' || request.crew_name) && (
                             <button
                               onClick={() => prefillVolunteerFromRequest(request)}
                               className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 flex items-center"
