@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { Image as ImageIcon, X } from 'lucide-react';
 
 export default function FeedbackPage() {
   const { data: session } = useSession();
@@ -13,6 +14,36 @@ export default function FeedbackPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pastedImages, setPastedImages] = useState<string[]>([]);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        e.preventDefault();
+        const blob = items[i].getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const imageData = event.target?.result as string;
+            setPastedImages(prev => [...prev, imageData]);
+            
+            // Add reference to description
+            const imageRef = `\n\n[Screenshot ${pastedImages.length + 1} pasted below]\n`;
+            setDescription(prev => prev + imageRef);
+          };
+          reader.readAsDataURL(blob);
+        }
+      }
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setPastedImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,13 +51,22 @@ export default function FeedbackPage() {
     setError('');
 
     try {
+      // Build description with image references
+      let fullDescription = description;
+      if (pastedImages.length > 0) {
+        fullDescription += '\n\n--- Screenshots ---\n';
+        pastedImages.forEach((_, index) => {
+          fullDescription += `Screenshot ${index + 1} attached\n`;
+        });
+      }
+
       const response = await fetch('/api/v1/feedback/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: feedbackType.toUpperCase(),
           title,
-          description,
+          description: fullDescription,
           priority: priority.toUpperCase()
         })
       });
@@ -187,11 +227,13 @@ export default function FeedbackPage() {
               Description *
             </label>
             <textarea
+              ref={descriptionRef}
               id="description"
               required
               rows={6}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              onPaste={handlePaste}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder={
                 feedbackType === 'bug' 
@@ -201,11 +243,40 @@ export default function FeedbackPage() {
                   : "Please describe the new feature you'd like to see and how it would help you..."
               }
             />
-            <p className="mt-2 text-sm text-gray-500">
-              {feedbackType === 'bug' && "Tip: Include steps to reproduce the issue and what you expected to happen."}
-              {feedbackType === 'enhancement' && "Tip: Explain how this improvement would help your workflow."}
-              {feedbackType === 'feature' && "Tip: Describe the problem this feature would solve."}
-            </p>
+            <div className="mt-2 flex items-start space-x-2">
+              <ImageIcon className="h-4 w-4 text-gray-400 mt-0.5" />
+              <p className="text-sm text-gray-500">
+                {feedbackType === 'bug' && "Tip: Include steps to reproduce the issue and what you expected to happen. "}
+                {feedbackType === 'enhancement' && "Tip: Explain how this improvement would help your workflow. "}
+                {feedbackType === 'feature' && "Tip: Describe the problem this feature would solve. "}
+                <strong>You can paste screenshots directly (Ctrl/Cmd+V)!</strong>
+              </p>
+            </div>
+            
+            {/* Pasted Images Preview */}
+            {pastedImages.length > 0 && (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm font-medium text-gray-700">Pasted Screenshots ({pastedImages.length}):</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {pastedImages.map((image, index) => (
+                    <div key={index} className="relative border border-gray-300 rounded-lg overflow-hidden">
+                      <img src={image} alt={`Screenshot ${index + 1}`} className="w-full h-auto" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        aria-label="Remove screenshot"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1">
+                        Screenshot {index + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Priority */}
