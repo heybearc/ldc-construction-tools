@@ -486,6 +486,10 @@ export default function CrewRequestsPage() {
               </li>
               <li className="flex items-start">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">5</span>
+                <span><strong>For Project Roster requests:</strong> Add volunteer to the specific project roster in the CG Project system.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">6</span>
                 <span>Mark the request as Complete. An email notification will be sent to the requestor.</span>
               </li>
             </ol>
