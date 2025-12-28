@@ -310,29 +310,29 @@ export default function VolunteersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Volunteers</h1>
-          <p className="mt-1 text-gray-600">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Volunteers</h1>
+          <p className="mt-1 text-sm sm:text-base text-gray-600">
             {stats?.total_volunteers || 0} volunteers in your Construction Group
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex border border-gray-300 rounded-md">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`p-2 min-h-[44px] min-w-[44px] flex items-center justify-center ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
               title="Grid view"
             >
-              <Grid3x3 className="h-4 w-4" />
+              <Grid3x3 className="h-5 w-5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`p-2 min-h-[44px] min-w-[44px] flex items-center justify-center ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
               title="List view"
             >
-              <List className="h-4 w-4" />
+              <List className="h-5 w-5" />
             </button>
           </div>
           <input
@@ -346,30 +346,31 @@ export default function VolunteersPage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={importing}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex items-center px-3 py-2 min-h-[44px] border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               <Upload className="h-4 w-4 mr-2" />
-              {importing ? 'Importing...' : 'Import CSV'}
+              <span className="hidden sm:inline">{importing ? 'Importing...' : 'Import CSV'}</span>
+              <span className="sm:hidden">{importing ? 'Importing...' : 'Import'}</span>
             </button>
           )}
           {canImport && (
             <a
               href="/templates/volunteers_import_template.csv"
               download
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-3 py-2 min-h-[44px] border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               <FileText className="h-4 w-4 mr-2" />
-              Template
+              <span className="hidden sm:inline">Template</span>
             </a>
           )}
           {canExport && (
             <div className="relative">
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
-                className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
+                className="inline-flex items-center px-3 py-2 min-h-[44px] border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
               >
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </button>
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 border border-gray-200">
@@ -414,17 +415,18 @@ export default function VolunteersPage() {
           {canManage && (
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 min-h-[44px] bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Volunteer
+              <span className="hidden sm:inline">Add Volunteer</span>
+              <span className="sm:hidden">Add</span>
             </button>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -432,14 +434,14 @@ export default function VolunteersPage() {
               placeholder="Search by name, BA ID, or congregation..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-3 min-h-[44px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-3 min-h-[44px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             >
               <option value="">All Roles</option>
               {stats?.role_breakdown.map((role) => (
@@ -451,7 +453,7 @@ export default function VolunteersPage() {
             <select
               value={congregationFilter}
               onChange={(e) => setCongregationFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-3 min-h-[44px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             >
               <option value="">All Congregations</option>
               {stats?.congregation_breakdown.map((cong) => (
@@ -573,8 +575,8 @@ export default function VolunteersPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-lg shadow overflow-hidden overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
