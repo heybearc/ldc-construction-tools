@@ -178,7 +178,7 @@ export async function DELETE(
       const personnelRoles = await prisma.volunteerRole.findFirst({
         where: {
           volunteerId: user.volunteerId,
-          roleCode: { in: ['PC', 'PCA', 'PC_SUPPORT'] },
+          roleCode: { in: ['PC', 'PCA', 'PC-Support'] },
           endDate: null
         }
       });

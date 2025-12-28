@@ -12,16 +12,41 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions);
     
-    if (!isAdmin(session)) {
+    if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user?.email || '' }
+      where: { email: session.user.email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        volunteerId: true
+      }
     });
 
     if (!user) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    // Check if user is admin OR has Personnel Contact role (PC, PCA, PC-Support)
+    const isAdminUser = isAdmin(session);
+    let hasPersonnelRole = false;
+
+    if (user.volunteerId) {
+      const personnelRoles = await prisma.volunteerRole.findFirst({
+        where: {
+          volunteerId: user.volunteerId,
+          roleCode: { in: ['PC', 'PCA', 'PC-Support'] },
+          endDate: null
+        }
+      });
+      hasPersonnelRole = !!personnelRoles;
+    }
+
+    if (!isAdminUser && !hasPersonnelRole) {
+      return NextResponse.json({ success: false, error: 'Only admins and Personnel Contact roles can add comments' }, { status: 403 });
     }
 
     const body = await request.json();
