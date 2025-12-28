@@ -58,8 +58,7 @@ export async function POST(
 
     // Check permissions: Allow if user is:
     // 1. The original feedback submitter (can respond to admin comments)
-    // 2. Admin or Super Admin (can respond to user feedback)
-    // 3. Personnel Contact role (can help manage feedback)
+    // 2. Admin or Super Admin (can respond to user feedback and manage)
     // Exclude: READ_ONLY_ADMIN (cannot add comments)
     
     const isReadOnly = user.adminLevel?.toUpperCase() === 'READ_ONLY_ADMIN';
@@ -69,21 +68,9 @@ export async function POST(
 
     const isSubmitter = feedback.user?.id === user.id;
     const isAdminUser = isAdmin(session);
-    let hasPersonnelRole = false;
 
-    if (user.volunteerId) {
-      const personnelRoles = await prisma.volunteerRole.findFirst({
-        where: {
-          volunteerId: user.volunteerId,
-          roleCode: { in: ['PC', 'PCA', 'PC-Support'] },
-          endDate: null
-        }
-      });
-      hasPersonnelRole = !!personnelRoles;
-    }
-
-    if (!isSubmitter && !isAdminUser && !hasPersonnelRole) {
-      return NextResponse.json({ success: false, error: 'You do not have permission to add comments to this feedback' }, { status: 403 });
+    if (!isSubmitter && !isAdminUser) {
+      return NextResponse.json({ success: false, error: 'Only the feedback submitter or admins can add comments' }, { status: 403 });
     }
 
     const comment = await prisma.feedbackComment.create({
