@@ -227,25 +227,26 @@ export default function TradeTeamsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex items-center">
-            <Wrench className="h-8 w-8 text-blue-600 mr-3" />
+            <Wrench className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mr-3" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Trade Teams</h1>
-              <p className="text-gray-600">Construction trade team management and crew organization</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Trade Teams</h1>
+              <p className="text-sm sm:text-base text-gray-600">Construction trade team management and crew organization</p>
             </div>
           </div>
-          <div className="flex space-x-3">
-            <Link href="/trade-teams/overview" className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          <div className="flex flex-wrap gap-2 sm:space-x-3">
+            <Link href="/trade-teams/overview" className="inline-flex items-center px-4 py-2 min-h-[44px] border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
               <Grid3X3 className="h-4 w-4 mr-2" />
-              Overview
+              <span className="hidden sm:inline">Overview</span>
             </Link>
             {canManageTradeTeams && (
-              <button onClick={openCreateModal} className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+              <button onClick={openCreateModal} className="inline-flex items-center px-4 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Trade Team
+                <span className="hidden sm:inline">Add Trade Team</span>
+                <span className="sm:hidden">Add</span>
               </button>
             )}
           </div>
@@ -253,40 +254,40 @@ export default function TradeTeamsPage() {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-blue-50 rounded-lg p-6 border border-blue-100">
-              <div className="flex items-center">
-                <Wrench className="h-8 w-8 text-blue-500 mr-3" />
-                <div>
-                  <p className="text-sm text-blue-600 font-medium">Total Teams</p>
-                  <p className="text-3xl font-bold text-blue-700">{stats.total_teams}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+            <div className="bg-blue-50 rounded-lg p-4 sm:p-6 border border-blue-100">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <Wrench className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mb-2 sm:mb-0 sm:mr-3" />
+                <div className="text-center sm:text-left">
+                  <p className="text-xs sm:text-sm text-blue-600 font-medium">Total Teams</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-700">{stats.total_teams}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-amber-50 rounded-lg p-6 border border-amber-100">
-              <div className="flex items-center">
-                <Settings className="h-8 w-8 text-amber-500 mr-3" />
-                <div>
-                  <p className="text-sm text-amber-600 font-medium">Total Crews</p>
-                  <p className="text-3xl font-bold text-amber-700">{stats.total_crews}</p>
+            <div className="bg-amber-50 rounded-lg p-4 sm:p-6 border border-amber-100">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <Settings className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 mb-2 sm:mb-0 sm:mr-3" />
+                <div className="text-center sm:text-left">
+                  <p className="text-xs sm:text-sm text-amber-600 font-medium">Total Crews</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-amber-700">{stats.total_crews}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-green-50 rounded-lg p-6 border border-green-100">
-              <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-green-500 mr-3" />
-                <div>
-                  <p className="text-sm text-green-600 font-medium">Active Crews</p>
-                  <p className="text-3xl font-bold text-green-700">{stats.active_crews}</p>
+            <div className="bg-green-50 rounded-lg p-4 sm:p-6 border border-green-100">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 mb-2 sm:mb-0 sm:mr-3" />
+                <div className="text-center sm:text-left">
+                  <p className="text-xs sm:text-sm text-green-600 font-medium">Active Crews</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-green-700">{stats.active_crews}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-red-50 rounded-lg p-6 border border-red-100">
-              <div className="flex items-center">
-                <AlertCircle className="h-8 w-8 text-red-500 mr-3" />
-                <div>
-                  <p className="text-sm text-red-600 font-medium">Inactive Crews</p>
-                  <p className="text-3xl font-bold text-red-700">{stats.inactive_crews}</p>
+            <div className="bg-red-50 rounded-lg p-4 sm:p-6 border border-red-100">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 mb-2 sm:mb-0 sm:mr-3" />
+                <div className="text-center sm:text-left">
+                  <p className="text-xs sm:text-sm text-red-600 font-medium">Inactive Crews</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-red-700">{stats.inactive_crews}</p>
                 </div>
               </div>
             </div>
@@ -294,7 +295,7 @@ export default function TradeTeamsPage() {
         )}
 
         {/* Search */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
