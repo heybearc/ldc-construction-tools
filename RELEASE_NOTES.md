@@ -1,5 +1,56 @@
 # LDC Tools Release Notes
 
+## v1.22.0 - Complete Mobile Optimization
+
+**Release Date:** December 28, 2025  
+**Status:** Ready for Production ✅
+
+### 📱 New Features
+
+**Complete Mobile & Tablet Support**
+- Full mobile responsiveness across entire application
+- Touch-friendly controls (44px minimum tap targets)
+- Responsive layouts for all pages (Dashboard, Volunteers, Projects, Trade Teams, Crew Requests)
+- Mobile-optimized admin pages (User Management, Announcements, Feedback, Organization)
+- Hamburger menus for mobile navigation
+- Horizontal scrolling for wide tables
+- Icon-only buttons on small screens
+
+**Smart Release Announcements**
+- Release banner now dynamically pulls highlights from RELEASE_NOTES.md
+- Automatically shows latest feature for each new version
+- No more static announcement text
+
+### 🧹 Technical Improvements
+
+**Code Cleanup**
+- Removed 4,669 lines of unused FastAPI backend code
+- Consolidated 3 .env files into single .env.local
+- Simplified configuration management
+- Improved build performance
+
+**Infrastructure**
+- Expanded container disk space from 10GB to 20GB
+- Fixed Prisma client synchronization
+- Improved deployment reliability
+
+### 📝 Technical Details
+
+**Mobile Optimization Coverage:**
+- All navigation components responsive
+- Global mobile CSS utilities added
+- Consistent touch-friendly sizing throughout
+- Responsive grids (1-2 cols mobile, 4 cols desktop)
+- Mobile sidebar patterns implemented
+
+**Files Modified:**
+- 15+ page components optimized for mobile
+- Global CSS utilities added
+- Admin layout with mobile drawer
+- Dynamic release banner system
+
+---
+
 ## v1.17.0 - Session Fix & Build Stability
 
 **Release Date:** December 24, 2025  
