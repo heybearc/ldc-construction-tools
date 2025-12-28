@@ -214,67 +214,67 @@ export default function FeedbackManagementPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">💡 Feedback Management</h1>
-          <p className="text-gray-600">Manage user feedback, bug reports, and feature requests</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">💡 Feedback Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage user feedback, bug reports, and feature requests</p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-2 sm:mb-0 flex-shrink-0">
               <span className="text-white text-sm font-bold">{stats.total}</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Feedback</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+            <div className="sm:ml-4 text-center sm:text-left">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Feedback</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start">
+            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mb-2 sm:mb-0 flex-shrink-0">
               <span className="text-white text-sm font-bold">{stats.new}</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">New</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.new}</p>
+            <div className="sm:ml-4 text-center sm:text-left">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">New</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.new}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start">
+            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mb-2 sm:mb-0 flex-shrink-0">
               <span className="text-white text-sm font-bold">{stats.inProgress}</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">In Progress</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
+            <div className="sm:ml-4 text-center sm:text-left">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">In Progress</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.inProgress}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mb-2 sm:mb-0 flex-shrink-0">
               <span className="text-white text-sm font-bold">{stats.resolved}</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Resolved</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.resolved}</p>
+            <div className="sm:ml-4 text-center sm:text-left">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Resolved</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.resolved}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex space-x-4">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className="flex flex-wrap gap-2 sm:space-x-4">
           {[
             { key: 'all', label: 'All Feedback' },
             { key: 'new', label: 'New' },
@@ -285,7 +285,7 @@ export default function FeedbackManagementPage() {
             <button
               key={filterOption.key}
               onClick={() => setFilter(filterOption.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors flex-1 sm:flex-none ${
                 filter === filterOption.key
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
