@@ -336,54 +336,54 @@ export default function UserManagementPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-            <Users className="mr-3 h-8 w-8 text-blue-600" />
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+            <Users className="mr-3 h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
             User Management
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             Manage user accounts, roles, and invitations
           </p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setIsInviteModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center justify-center px-4 py-2 min-h-[44px] border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
           >
-            <Mail className="mr-2 h-4 w-4" />
-            Invite User
+            <Mail className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline ml-2">Invite User</span>
           </button>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+            className="inline-flex items-center justify-center px-4 py-2 min-h-[44px] border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 flex-1 sm:flex-none"
           >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Create User
+            <UserPlus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline ml-2">Create User</span>
           </button>
           <button
             onClick={() => setIsBulkImportOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center justify-center px-4 py-2 min-h-[44px] border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 flex-1 sm:flex-none"
           >
-            <Upload className="mr-2 h-4 w-4" />
-            Bulk Import
+            <Upload className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline ml-2">Bulk Import</span>
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Users className="h-6 w-6 text-gray-400" />
+            <div className="p-3 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex-shrink-0 mb-2 sm:mb-0">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="sm:ml-5 w-full sm:w-0 sm:flex-1 text-center sm:text-left">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                    <dd className="text-lg sm:text-lg font-medium text-gray-900">{stats.total}</dd>
                   </dl>
                 </div>
               </div>
@@ -391,15 +391,15 @@ export default function UserManagementPage() {
           </div>
 
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <UserCheck className="h-6 w-6 text-green-400" />
+            <div className="p-3 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex-shrink-0 mb-2 sm:mb-0">
+                  <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="sm:ml-5 w-full sm:w-0 sm:flex-1 text-center sm:text-left">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.active}</dd>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Active</dt>
+                    <dd className="text-lg sm:text-lg font-medium text-gray-900">{stats.active}</dd>
                   </dl>
                 </div>
               </div>
@@ -407,15 +407,15 @@ export default function UserManagementPage() {
           </div>
 
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Mail className="h-6 w-6 text-yellow-400" />
+            <div className="p-3 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex-shrink-0 mb-2 sm:mb-0">
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="sm:ml-5 w-full sm:w-0 sm:flex-1 text-center sm:text-left">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Invited</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.invited}</dd>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Invited</dt>
+                    <dd className="text-lg sm:text-lg font-medium text-gray-900">{stats.invited}</dd>
                   </dl>
                 </div>
               </div>
@@ -423,15 +423,15 @@ export default function UserManagementPage() {
           </div>
 
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <UserX className="h-6 w-6 text-red-400" />
+            <div className="p-3 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex-shrink-0 mb-2 sm:mb-0">
+                  <UserX className="h-5 w-5 sm:h-6 sm:w-6 text-red-400" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="sm:ml-5 w-full sm:w-0 sm:flex-1 text-center sm:text-left">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Inactive</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.inactive}</dd>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Inactive</dt>
+                    <dd className="text-lg sm:text-lg font-medium text-gray-900">{stats.inactive}</dd>
                   </dl>
                 </div>
               </div>
@@ -441,8 +441,8 @@ export default function UserManagementPage() {
       )}
 
       {/* Filters */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Search Users
@@ -454,7 +454,7 @@ export default function UserManagementPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by name or email..."
-                className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-10 w-full px-3 py-2 min-h-[44px] text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -466,7 +466,7 @@ export default function UserManagementPage() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 min-h-[44px] text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Roles</option>
               <option value="SUPER_ADMIN">Super Admin</option>
@@ -483,7 +483,7 @@ export default function UserManagementPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 min-h-[44px] text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Statuses</option>
               <option value="ACTIVE">Active</option>
