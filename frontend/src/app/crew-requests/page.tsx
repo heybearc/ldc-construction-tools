@@ -582,7 +582,7 @@ export default function CrewRequestsPage() {
                 key={request.id}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${REQUEST_TYPE_LABELS[request.request_type]?.color || 'bg-gray-100 text-gray-700'}`}>
@@ -648,23 +648,23 @@ export default function CrewRequestsPage() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col items-end gap-2 ml-4">
+                  <div className="flex flex-col sm:items-end gap-2 mt-3 sm:mt-0 sm:ml-4 w-full sm:w-auto">
                     {request.status !== 'COMPLETED' && request.status !== 'REJECTED' ? (
                       <>
                         <select
                           value={request.assigned_to?.id || ''}
                           onChange={(e) => handleAssign(request.id, e.target.value || null)}
-                          className="text-sm px-2 py-1 border border-gray-300 rounded min-w-[150px]"
+                          className="text-sm px-2 py-2 min-h-[44px] border border-gray-300 rounded w-full sm:min-w-[150px]"
                         >
                           <option value="">Assign to...</option>
                           {personnelUsers.map(u => (
                             <option key={u.id} value={u.id}>{u.name || u.email}</option>
                           ))}
                         </select>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => handleEditRequest(request)}
-                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                            className="px-3 py-2 min-h-[44px] bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex-1 sm:flex-none"
                             title="Edit request"
                           >
                             Edit
@@ -672,7 +672,7 @@ export default function CrewRequestsPage() {
                           {(request.request_type === 'ADD_TO_CREW' || request.crew_name) && (
                             <button
                               onClick={() => prefillVolunteerFromRequest(request)}
-                              className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 flex items-center"
+                              className="px-3 py-2 min-h-[44px] bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 flex items-center justify-center flex-1 sm:flex-none"
                             >
                               <Plus className="h-3 w-3 mr-1" />
                               Add Volunteer
@@ -680,13 +680,13 @@ export default function CrewRequestsPage() {
                           )}
                           <button
                             onClick={() => setSelectedRequest(request)}
-                            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                            className="px-3 py-2 min-h-[44px] bg-green-600 text-white text-sm rounded hover:bg-green-700 flex-1 sm:flex-none"
                           >
                             Complete
                           </button>
                           <button
                             onClick={() => handleDelete(request.id)}
-                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
+                            className="px-3 py-2 min-h-[44px] min-w-[44px] bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center justify-center"
                             title="Delete request"
                           >
                             <Trash2 className="h-3 w-3" />
@@ -694,24 +694,24 @@ export default function CrewRequestsPage() {
                         </div>
                       </>
                     ) : (
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleCloneRequest(request)}
-                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          className="px-3 py-2 min-h-[44px] bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex-1 sm:flex-none"
                           title="Clone and resubmit"
                         >
                           Clone
                         </button>
                         <button
                           onClick={() => handleReopenRequest(request.id)}
-                          className="px-3 py-1 bg-amber-600 text-white text-sm rounded hover:bg-amber-700"
+                          className="px-3 py-2 min-h-[44px] bg-amber-600 text-white text-sm rounded hover:bg-amber-700 flex-1 sm:flex-none"
                           title="Reopen request"
                         >
                           Reopen
                         </button>
                         <button
                           onClick={() => handleDelete(request.id)}
-                          className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center"
+                          className="px-3 py-2 min-h-[44px] min-w-[44px] bg-red-600 text-white text-sm rounded hover:bg-red-700 flex items-center justify-center"
                           title="Delete completed request"
                         >
                           <Trash2 className="h-3 w-3" />

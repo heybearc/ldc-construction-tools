@@ -156,12 +156,12 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-blue-100">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 sm:p-6 text-white">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-sm sm:text-base text-blue-100">
           Welcome to the LDC Tools Admin Control Center. Monitor system health, manage users, and oversee operations.
         </p>
-        <div className="mt-4 flex items-center space-x-4 text-sm">
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
           <span className="flex items-center">
             <Server className="h-4 w-4 mr-1" />
             Version {stats?.system.version}
@@ -180,20 +180,20 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Users Card */}
-        <Link href="/admin/users" className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link href="/admin/users" className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow active:bg-gray-50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Total Users</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.users.total || 0}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500">Total Users</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats?.users.total || 0}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Users className="h-6 w-6 text-blue-600" />
+            <div className="p-2 sm:p-3 bg-blue-100 rounded-full flex-shrink-0">
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <span className="flex items-center text-green-600 mr-3">
+          <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 text-xs sm:text-sm">
+            <span className="flex items-center text-green-600 sm:mr-3">
               <UserCheck className="h-4 w-4 mr-1" />
               {stats?.users.active || 0} active
             </span>
@@ -205,14 +205,14 @@ export default function AdminDashboardPage() {
         </Link>
 
         {/* Feedback Card */}
-        <Link href="/admin/feedback" className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link href="/admin/feedback" className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow active:bg-gray-50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Feedback</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.feedback.total || 0}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500">Feedback</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats?.feedback.total || 0}</p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <MessageSquare className="h-6 w-6 text-purple-600" />
+            <div className="p-2 sm:p-3 bg-purple-100 rounded-full flex-shrink-0">
+              <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
@@ -230,38 +230,38 @@ export default function AdminDashboardPage() {
         </Link>
 
         {/* System Health Card */}
-        <Link href="/admin/health" className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link href="/admin/health" className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow active:bg-gray-50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">System Health</p>
-              <p className="text-3xl font-bold text-green-600 capitalize">{stats?.system.status || 'Unknown'}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500">System Health</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600 capitalize">{stats?.system.status || 'Unknown'}</p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <Activity className="h-6 w-6 text-green-600" />
+            <div className="p-2 sm:p-3 bg-green-100 rounded-full flex-shrink-0">
+              <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm text-gray-500">
+          <div className="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm text-gray-500">
             <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
             All systems operational
           </div>
         </Link>
 
         {/* Quick Actions Card */}
-        <div className="bg-white rounded-lg border border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-medium text-gray-500">Quick Actions</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Quick Actions</p>
             <Settings className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-2">
             <Link 
               href="/admin/users" 
-              className="block w-full text-left px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
+              className="block w-full text-left px-3 py-2 min-h-[44px] flex items-center text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors active:bg-blue-200"
             >
               + Invite User
             </Link>
             <Link 
               href="/admin/system" 
-              className="block w-full text-left px-3 py-2 text-sm bg-gray-50 text-gray-700 rounded hover:bg-gray-100 transition-colors"
+              className="block w-full text-left px-3 py-2 min-h-[44px] flex items-center text-sm bg-gray-50 text-gray-700 rounded hover:bg-gray-100 transition-colors active:bg-gray-200"
             >
               System Operations
             </Link>

@@ -213,63 +213,66 @@ export default function TradeTeamsOverviewPage() {
     <div className="min-h-screen bg-gray-100">
       {/* Header - hidden in print */}
       <div className="bg-white shadow-sm border-b border-gray-200 print:hidden">
-        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/trade-teams"
-                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to Trade Teams
-              </Link>
-              <h1 className="text-xl font-bold text-gray-900">Trade Teams Overview</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={fetchOverviewData}
-                className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
-                title="Refresh"
-              >
-                <RefreshCw className="h-5 w-5" />
-              </button>
-              <div className="flex border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100'}`}
-                  title="Grid View"
+        <div className="max-w-full mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="py-3 sm:py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <Link
+                  href="/trade-teams"
+                  className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 min-h-[44px]"
                 >
-                  <Grid3X3 className="h-5 w-5" />
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Back to Trade Teams</span>
+                  <span className="sm:hidden">Back</span>
+                </Link>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">Trade Teams Overview</h1>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+                <button
+                  onClick={fetchOverviewData}
+                  className="p-2 min-h-[44px] min-w-[44px] text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 flex-shrink-0"
+                  title="Refresh"
+                >
+                  <RefreshCw className="h-5 w-5" />
+                </button>
+                <div className="flex border rounded-lg overflow-hidden flex-shrink-0">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 min-h-[44px] min-w-[44px] ${viewMode === 'grid' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100'}`}
+                    title="Grid View"
+                  >
+                    <Grid3X3 className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('table')}
+                    className={`p-2 min-h-[44px] min-w-[44px] ${viewMode === 'table' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100'}`}
+                    title="Table View"
+                  >
+                    <Table className="h-5 w-5" />
+                  </button>
+                </div>
+                <button
+                  onClick={handlePrint}
+                  className="inline-flex items-center px-3 py-2 min-h-[44px] border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 flex-shrink-0"
+                >
+                  <Printer className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Print</span>
                 </button>
                 <button
-                  onClick={() => setViewMode('table')}
-                  className={`p-2 ${viewMode === 'table' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100'}`}
-                  title="Table View"
+                  onClick={exportToPDF}
+                  className="inline-flex items-center px-3 py-2 min-h-[44px] border border-green-300 bg-green-50 text-green-700 text-sm font-medium rounded-md hover:bg-green-100 flex-shrink-0"
                 >
-                  <Table className="h-5 w-5" />
+                  <Download className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Export PDF</span>
+                </button>
+                <button
+                  onClick={exportToCSV}
+                  className="inline-flex items-center px-3 py-2 min-h-[44px] border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                >
+                  <Download className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Export CSV</span>
                 </button>
               </div>
-              <button
-                onClick={handlePrint}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </button>
-              <button
-                onClick={exportToPDF}
-                className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 text-sm font-medium rounded-md hover:bg-green-100"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
-              </button>
-              <button
-                onClick={exportToCSV}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </button>
             </div>
           </div>
         </div>
@@ -282,7 +285,7 @@ export default function TradeTeamsOverviewPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-auto">
         {viewMode === 'grid' ? (
           /* Grid View - Vertical stack of team cards */
           <div className="space-y-6">
