@@ -7,9 +7,10 @@ import Link from 'next/link';
 interface ReleaseBannerProps {
   currentVersion: string;
   userLastSeenVersion?: string | null;
+  releaseHighlight?: string;
 }
 
-export default function ReleaseBanner({ currentVersion, userLastSeenVersion }: ReleaseBannerProps) {
+export default function ReleaseBanner({ currentVersion, userLastSeenVersion, releaseHighlight }: ReleaseBannerProps) {
   const { data: session } = useSession();
   const [dismissed, setDismissed] = useState(false);
 
@@ -34,6 +35,9 @@ export default function ReleaseBanner({ currentVersion, userLastSeenVersion }: R
 
   if (!shouldShow) return null;
 
+  // Default highlight if none provided
+  const highlight = releaseHighlight || 'Check out the latest updates and improvements!';
+
   return (
     <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -47,7 +51,7 @@ export default function ReleaseBanner({ currentVersion, userLastSeenVersion }: R
             <p className="ml-3 font-medium">
               <span className="md:hidden">New in v{currentVersion}!</span>
               <span className="hidden md:inline">
-                🎉 New in v{currentVersion}: My Feedback feature - Track your submitted feedback and see admin responses!
+                🎉 New in v{currentVersion}: {highlight}
               </span>
             </p>
           </div>

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import AuthProvider from '../components/AuthProvider'
 import ConditionalLayout from '../components/ConditionalLayout'
+import { getLatestReleaseHighlight } from '@/lib/releaseNotes'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -28,11 +29,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Get the latest release highlight from RELEASE_NOTES.md
+  const releaseHighlight = getLatestReleaseHighlight();
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <ConditionalLayout>
+          <ConditionalLayout releaseHighlight={releaseHighlight}>
             {children}
           </ConditionalLayout>
         </AuthProvider>

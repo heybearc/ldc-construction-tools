@@ -15,9 +15,10 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
+  releaseHighlight?: string;
 }
 
-export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
+export default function ConditionalLayout({ children, releaseHighlight }: ConditionalLayoutProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { canManageVolunteers } = usePermissions();
@@ -61,6 +62,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
       <ReleaseBanner 
         currentVersion={APP_VERSION}
         userLastSeenVersion={userLastSeenVersion}
+        releaseHighlight={releaseHighlight}
       />
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
