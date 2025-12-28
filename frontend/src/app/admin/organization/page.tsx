@@ -309,48 +309,48 @@ export default function OrganizationPage() {
       )}
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Globe className="w-5 h-5 text-purple-600" />
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white rounded-lg border p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
+            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
+              <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data?.branches.length || 0}</p>
-              <p className="text-sm text-gray-500">Branches</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Layers className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data?.zones.length || 0}</p>
-              <p className="text-sm text-gray-500">Zones</p>
+            <div className="text-center sm:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{data?.branches.length || 0}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Branches</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <MapPin className="w-5 h-5 text-green-600" />
+        <div className="bg-white rounded-lg border p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data?.regions.length || 0}</p>
-              <p className="text-sm text-gray-500">Regions</p>
+            <div className="text-center sm:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{data?.zones.length || 0}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Zones</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Building2 className="w-5 h-5 text-orange-600" />
+        <div className="bg-white rounded-lg border p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
+            <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data?.constructionGroups.length || 0}</p>
-              <p className="text-sm text-gray-500">Construction Groups</p>
+            <div className="text-center sm:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{data?.regions.length || 0}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Regions</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
+            <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
+              <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+            </div>
+            <div className="text-center sm:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{data?.constructionGroups.length || 0}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Construction Groups</p>
             </div>
           </div>
         </div>
