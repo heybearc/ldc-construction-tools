@@ -1,5 +1,42 @@
 # LDC Tools Release Notes
 
+## v1.22.1 - Permission Fixes & Code Cleanup
+
+**Release Date:** December 28, 2025  
+**Status:** Ready for Production ✅
+
+### 🐛 Bug Fixes
+
+**Feedback Comment Permissions**
+- Fixed: Feedback submitters can now respond to admin comments on their own submissions
+- Admins (ADMIN/SUPER_ADMIN) can respond to any feedback
+- READ_ONLY_ADMIN users cannot add comments (view only)
+- Permission system now based on system roles only
+
+**Crew Request Delete Permission**
+- Fixed: Personnel Support (PC-Support) role users can now delete crew requests
+- Corrected role code from PC_SUPPORT to PC-Support (hyphen instead of underscore)
+
+**Release Notes Display**
+- Fixed: v1.22.0 release notes now display correctly on /release-notes page
+- Added proper frontmatter metadata to release notes files
+
+### 🧹 Code Cleanup
+
+**Removed Duplicate Files**
+- Removed duplicate /release-notes/ directory (root level)
+- Removed unused /frontend/RELEASE_NOTES.md file
+- Cleaner codebase structure
+
+### 📝 Technical Details
+
+**Files Modified:**
+- Feedback comment API route - Updated permission logic
+- Crew request delete API route - Fixed role code
+- Release notes files - Added frontmatter and proper structure
+
+---
+
 ## v1.22.0 - Complete Mobile Optimization
 
 **Release Date:** December 28, 2025  
