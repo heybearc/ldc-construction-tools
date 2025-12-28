@@ -292,28 +292,28 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-          <p className="mt-1 text-gray-600">Construction projects and crew assignments</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Projects</h1>
+          <p className="mt-1 text-sm sm:text-base text-gray-600">Construction projects and crew assignments</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {canManageProjects && (
             <a
               href="/templates/projects_import_template.csv"
               download
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-3 py-2 min-h-[44px] border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               <FileText className="h-4 w-4 mr-2" />
-              Template
+              <span className="hidden sm:inline">Template</span>
             </a>
           )}
           {canManageProjects && (
-            <label className="inline-flex items-center px-3 py-2 border border-blue-300 bg-blue-50 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-100 cursor-pointer">
+            <label className="inline-flex items-center px-3 py-2 min-h-[44px] border border-blue-300 bg-blue-50 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-100 cursor-pointer">
               <Upload className="h-4 w-4 mr-2" />
-              Import CSV
+              <span className="hidden sm:inline">Import CSV</span>
+              <span className="sm:hidden">Import</span>
               <input
                 type="file"
                 accept=".csv"
@@ -326,10 +326,10 @@ export default function ProjectsPage() {
             <div className="relative">
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
-                className="inline-flex items-center px-3 py-2 border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
+                className="inline-flex items-center px-3 py-2 min-h-[44px] border border-green-300 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100"
               >
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </button>
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 border border-gray-200">
@@ -379,56 +379,57 @@ export default function ProjectsPage() {
           {canManageProjects && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 min-h-[44px] bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               <Plus className="h-4 w-4 mr-2" />
-              New Project
+              <span className="hidden sm:inline">New Project</span>
+              <span className="sm:hidden">New</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Total Projects</div>
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+          <div className="text-xs sm:text-sm text-gray-500">Total Projects</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Active</div>
-          <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+        <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+          <div className="text-xs sm:text-sm text-gray-500">Active</div>
+          <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.active}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Planning</div>
-          <div className="text-2xl font-bold text-yellow-600">{stats.planning}</div>
+        <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+          <div className="text-xs sm:text-sm text-gray-500">Planning</div>
+          <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.planning}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Completed</div>
-          <div className="text-2xl font-bold text-blue-600">{stats.completed}</div>
+        <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+          <div className="text-xs sm:text-sm text-gray-500">Completed</div>
+          <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.completed}</div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <form onSubmit={handleSearch} className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search projects..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 min-h-[44px] text-base border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </form>
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-400" />
+            <Filter className="h-5 w-5 text-gray-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 border border-gray-300 rounded-md px-3 py-3 min-h-[44px] text-base focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Statuses</option>
               <option value="PLANNING">Planning</option>
