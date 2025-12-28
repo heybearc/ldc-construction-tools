@@ -22,31 +22,13 @@ export async function POST(
         id: true,
         name: true,
         email: true,
-        volunteerId: true
+        volunteerId: true,
+        adminLevel: true
       }
     });
 
     if (!user) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
-    }
-
-    // Check if user is admin OR has Personnel Contact role (PC, PCA, PC-Support)
-    const isAdminUser = isAdmin(session);
-    let hasPersonnelRole = false;
-
-    if (user.volunteerId) {
-      const personnelRoles = await prisma.volunteerRole.findFirst({
-        where: {
-          volunteerId: user.volunteerId,
-          roleCode: { in: ['PC', 'PCA', 'PC-Support'] },
-          endDate: null
-        }
-      });
-      hasPersonnelRole = !!personnelRoles;
-    }
-
-    if (!isAdminUser && !hasPersonnelRole) {
-      return NextResponse.json({ success: false, error: 'Only admins and Personnel Contact roles can add comments' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -62,6 +44,7 @@ export async function POST(
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             email: true
           }
@@ -73,21 +56,56 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Feedback not found' }, { status: 404 });
     }
 
+    // Check permissions: Allow if user is:
+    // 1. The original feedback submitter (can respond to admin comments)
+    // 2. Admin or Super Admin (can respond to user feedback)
+    // 3. Personnel Contact role (can help manage feedback)
+    // Exclude: READ_ONLY_ADMIN (cannot add comments)
+    
+    const isReadOnly = user.adminLevel?.toUpperCase() === 'READ_ONLY_ADMIN';
+    if (isReadOnly) {
+      return NextResponse.json({ success: false, error: 'Read-only admins cannot add comments' }, { status: 403 });
+    }
+
+    const isSubmitter = feedback.user?.id === user.id;
+    const isAdminUser = isAdmin(session);
+    let hasPersonnelRole = false;
+
+    if (user.volunteerId) {
+      const personnelRoles = await prisma.volunteerRole.findFirst({
+        where: {
+          volunteerId: user.volunteerId,
+          roleCode: { in: ['PC', 'PCA', 'PC-Support'] },
+          endDate: null
+        }
+      });
+      hasPersonnelRole = !!personnelRoles;
+    }
+
+    if (!isSubmitter && !isAdminUser && !hasPersonnelRole) {
+      return NextResponse.json({ success: false, error: 'You do not have permission to add comments to this feedback' }, { status: 403 });
+    }
+
     const comment = await prisma.feedbackComment.create({
       data: {
         feedbackId: params.id,
         authorId: user.id,
-        content: content.trim(),
-        attachments: {
-          create: screenshots.map((screenshot: string, index: number) => ({
-            filename: `screenshot-${index + 1}.png`,
-            fileData: screenshot,
-            fileSize: screenshot.length,
-            mimeType: 'image/png'
-          }))
-        }
+        content: content.trim()
       }
     });
+
+    // Add attachments if provided
+    if (screenshots && screenshots.length > 0) {
+      await prisma.feedbackAttachment.createMany({
+        data: screenshots.map((screenshot: string, index: number) => ({
+          commentId: comment.id,
+          filename: `screenshot-${index + 1}.png`,
+          fileData: screenshot,
+          fileSize: screenshot.length,
+          mimeType: 'image/png'
+        }))
+      });
+    }
 
     // Send email notification to feedback submitter
     if (feedback.user?.email && feedback.user.email !== user.email) {
