@@ -22,49 +22,47 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Top Navigation Bar with Gradient */}
+      <nav className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">LDC</span>
-                  </div>
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">LDC</span>
                 </div>
-                <div className="ml-3">
-                  <h1 className="text-lg font-semibold text-gray-900">
+                <div>
+                  <h1 className="text-xl font-bold text-white">
                     {title || 'LDC Tools'}
                   </h1>
                 </div>
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               {/* Navigation Links */}
               <Link
                 href="/help"
-                className={`text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  pathname === '/help' ? 'text-blue-600 bg-blue-50' : ''
+                className={`text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  pathname === '/help' ? 'bg-white/20 text-white' : ''
                 }`}
               >
-                Help Center
+                📚 Help Center
               </Link>
               <Link
                 href="/release-notes"
-                className={`text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  pathname === '/release-notes' ? 'text-blue-600 bg-blue-50' : ''
+                className={`text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  pathname === '/release-notes' ? 'bg-white/20 text-white' : ''
                 }`}
               >
-                Release Notes
+                📋 Release Notes
               </Link>
 
               {/* User Menu */}
-              <div className="flex items-center space-x-4 border-l border-gray-200 pl-4">
+              <div className="flex items-center space-x-3 border-l border-white/20 pl-4 ml-2">
                 {session?.user?.name && (
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-white/90 hidden md:inline">
                     {session.user.name}
                   </span>
                 )}
@@ -72,14 +70,14 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
                 {/* Back to App Button */}
                 <Link
                   href={session?.user?.role === 'SUPER_ADMIN' ? '/admin' : '/'}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md"
                 >
-                  Back to App
+                  ← Back to App
                 </Link>
                 
                 <button
                   onClick={handleSignOut}
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white/90 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-medium transition-all"
                 >
                   Sign Out
                 </button>
@@ -90,21 +88,29 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-gray-500">
-            <p>LDC Tools v{version}</p>
-            <p className="mt-1">Personnel Contact & Project Management System</p>
-            <p className="mt-2 text-xs">
-              <Link href="/help" className="text-blue-600 hover:text-blue-800">Help Center</Link>
-              {' • '}
-              <Link href="/release-notes" className="text-blue-600 hover:text-blue-800">Release Notes</Link>
-            </p>
+      <footer className="bg-white/80 backdrop-blur-sm border-t border-gray-200 mt-16">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="flex items-center justify-center space-x-2 mb-3">
+              <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">LDC</span>
+              </div>
+              <span className="text-lg font-semibold text-gray-900">LDC Tools</span>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">Personnel Contact & Project Management System</p>
+            <p className="text-xs text-gray-500 mb-4">Version {version}</p>
+            <div className="flex items-center justify-center space-x-4 text-sm">
+              <Link href="/help" className="text-blue-600 hover:text-blue-800 font-medium">📚 Help Center</Link>
+              <span className="text-gray-300">•</span>
+              <Link href="/release-notes" className="text-blue-600 hover:text-blue-800 font-medium">📋 Release Notes</Link>
+              <span className="text-gray-300">•</span>
+              <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium">🏠 Dashboard</Link>
+            </div>
           </div>
         </div>
       </footer>
