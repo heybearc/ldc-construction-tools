@@ -64,10 +64,9 @@ export default function CGSelector() {
         body: JSON.stringify({ constructionGroupId: cgId }),
       });
 
-      // Force navigation to current page with cache bust to refresh all data
-      const currentPath = pathname || '/';
-      router.push(currentPath + '?refresh=' + Date.now());
-      router.refresh();
+      // Use window.location.href to force hard navigation to current page
+      // This preserves the URL and forces all components to remount and refetch data
+      window.location.href = window.location.pathname;
     } catch (error) {
       console.error('Failed to set CG filter:', error);
     }
