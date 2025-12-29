@@ -129,7 +129,14 @@ export function withCGFilter(
 ): Record<string, unknown> {
   const { allowCrossZone = false, cgField = 'constructionGroupId' } = options;
 
-  // Super admin sees everything
+  // If a specific CG is set (e.g., SUPER_ADMIN filtered to a specific CG), use it
+  if (scope.constructionGroupId) {
+    return {
+      [cgField]: scope.constructionGroupId,
+    };
+  }
+
+  // Super admin with no CG filter sees everything
   if (scope.canViewAllBranches) {
     return {};
   }
@@ -142,13 +149,6 @@ export function withCGFilter(
           zoneId: scope.zoneId,
         },
       },
-    };
-  }
-
-  // Default: filter to user's own CG
-  if (scope.constructionGroupId) {
-    return {
-      [cgField]: scope.constructionGroupId,
     };
   }
 
