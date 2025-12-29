@@ -1,5 +1,42 @@
 # LDC Tools Release Notes
 
+## v1.22.2 - UI Modernization & Admin Dashboard Fix
+
+**Release Date:** December 29, 2025  
+**Status:** Ready for Production ✅
+
+### 🎨 UI Improvements
+
+**Modern Help Center Design**
+- Redesigned Help Center and all help pages with modern blue gradient design
+- Improved navigation with hover effects and better readability
+- Consistent design across all help pages matching main app style
+
+**Modern Release Notes Page**
+- Clean, card-based layout for release entries
+- Better visual hierarchy with gradient accents
+- Easier to read and navigate
+
+**Correct Logo Display**
+- Fixed logo display in help pages to show proper LDC Tools logo
+- Consistent branding throughout the application
+
+### 🐛 Bug Fixes
+
+**Admin Dashboard Timestamps**
+- Fixed "NaNd ago" display issue in Recent Activity section
+- Timestamps now properly show "Just now", "5m ago", "2h ago", etc.
+- Accurate activity tracking for administrators
+
+### 📝 Technical Details
+
+**Files Modified:**
+- HelpLayout component - Modern gradient design with correct logo
+- Release notes page - Card-based modern layout
+- Admin dashboard - Fixed timestamp field mapping
+
+---
+
 ## v1.22.1 - Permission Fixes & Code Cleanup
 
 **Release Date:** December 28, 2025  
