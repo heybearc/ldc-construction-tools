@@ -17,8 +17,11 @@ import {
   Trash2,
   X,
   Save,
-  AlertCircle
+  AlertCircle,
+  MoreVertical
 } from 'lucide-react';
+import EditCGModal from '@/components/EditCGModal';
+import DeleteCGModal from '@/components/DeleteCGModal';
 
 interface Branch {
   id: string;
@@ -83,6 +86,9 @@ export default function OrganizationPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
+  const [isEditCGModalOpen, setIsEditCGModalOpen] = useState(false);
+  const [isDeleteCGModalOpen, setIsDeleteCGModalOpen] = useState(false);
+  const [selectedCG, setSelectedCG] = useState<ConstructionGroup | null>(null);
   const [formData, setFormData] = useState({ code: '', name: '' });
   const [saving, setSaving] = useState(false);
 
@@ -195,6 +201,28 @@ export default function OrganizationPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const openEditCGModal = (cg: ConstructionGroup) => {
+    setSelectedCG(cg);
+    setIsEditCGModalOpen(true);
+  };
+
+  const openDeleteCGModal = (cg: ConstructionGroup) => {
+    setSelectedCG(cg);
+    setIsDeleteCGModalOpen(true);
+  };
+
+  const handleCGEditSuccess = () => {
+    setIsEditCGModalOpen(false);
+    setSelectedCG(null);
+    fetchHierarchy();
+  };
+
+  const handleCGDeleteSuccess = () => {
+    setIsDeleteCGModalOpen(false);
+    setSelectedCG(null);
+    fetchHierarchy();
   };
 
   if (loading) {
@@ -448,27 +476,52 @@ export default function OrganizationPage() {
                             {expandedRegions.has(region.id) && (
                               <div className="ml-6 mt-2 space-y-2">
                                 {getCGsForRegion(region.id).map(cg => (
-                                  <Link
-                                    key={cg.id}
-                                    href={`/admin/organization/${cg.id}`}
-                                    className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
-                                  >
-                                    <Building2 className="w-5 h-5 text-orange-600" />
-                                    <span className="font-medium text-orange-900">{cg.name}</span>
-                                    <span className="text-sm text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
-                                      {cg.code}
-                                    </span>
-                                    {cg._count && (
-                                      <div className="ml-auto flex items-center gap-3 text-sm text-gray-500">
-                                        <span className="flex items-center gap-1">
-                                          <Users className="w-4 h-4" />
-                                          {cg._count.users}
-                                        </span>
-                                        <span>{cg._count.tradeTeams} teams</span>
-                                        <span>{cg._count.projects} projects</span>
+                                  <div key={cg.id} className="flex items-center gap-2">
+                                    <Link
+                                      href={`/admin/organization/${cg.id}`}
+                                      className="flex-1 flex items-center gap-2 p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                                    >
+                                      <Building2 className="w-5 h-5 text-orange-600" />
+                                      <span className="font-medium text-orange-900">{cg.name}</span>
+                                      <span className="text-sm text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
+                                        {cg.code}
+                                      </span>
+                                      {cg._count && (
+                                        <div className="ml-auto flex items-center gap-3 text-sm text-gray-500">
+                                          <span className="flex items-center gap-1">
+                                            <Users className="w-4 h-4" />
+                                            {cg._count.users}
+                                          </span>
+                                          <span>{cg._count.tradeTeams} teams</span>
+                                          <span>{cg._count.projects} projects</span>
+                                        </div>
+                                      )}
+                                    </Link>
+                                    {canManage && (
+                                      <div className="flex gap-1">
+                                        <button
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            openEditCGModal(cg);
+                                          }}
+                                          className="p-2 text-orange-600 hover:bg-orange-100 rounded-lg"
+                                          title="Edit Construction Group"
+                                        >
+                                          <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            openDeleteCGModal(cg);
+                                          }}
+                                          className="p-2 text-red-600 hover:bg-red-100 rounded-lg"
+                                          title="Delete Construction Group"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </button>
                                       </div>
                                     )}
-                                  </Link>
+                                  </div>
                                 ))}
                                 {getCGsForRegion(region.id).length === 0 && (
                                   <p className="text-sm text-gray-500 italic p-3">
@@ -584,6 +637,27 @@ export default function OrganizationPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Edit CG Modal */}
+      {isEditCGModalOpen && selectedCG && data?.regions && (
+        <EditCGModal
+          isOpen={isEditCGModalOpen}
+          onClose={() => setIsEditCGModalOpen(false)}
+          onSuccess={handleCGEditSuccess}
+          constructionGroup={selectedCG}
+          regions={data.regions}
+        />
+      )}
+
+      {/* Delete CG Modal */}
+      {isDeleteCGModalOpen && selectedCG && (
+        <DeleteCGModal
+          isOpen={isDeleteCGModalOpen}
+          onClose={() => setIsDeleteCGModalOpen(false)}
+          onSuccess={handleCGDeleteSuccess}
+          constructionGroup={selectedCG}
+        />
       )}
     </div>
   );
