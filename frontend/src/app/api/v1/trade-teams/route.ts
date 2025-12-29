@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
 import { canManageTradeTeams } from '@/lib/permissions';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,10 +13,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const scope = await getCGScope();
+    if (!scope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const includeCrews = searchParams.get('include_crews') === 'true';
 
     const tradeTeams = await prisma.tradeTeam.findMany({
+      where: {
+        ...withCGFilter(scope),
+        isActive: true,
+      },
       include: {
         crews: {
           where: { isActive: true },
@@ -137,6 +147,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const scope = await getCGScope();
+    if (!scope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
+    }
+
+    if (!scope.constructionGroupId) {
+      return NextResponse.json({ error: 'No construction group assigned' }, { status: 403 });
+    }
+
     // Check permissions - requires management role or admin
     const userOrgRoles = await getUserOrgRoles(session);
     const permissionError = checkPermission(canManageTradeTeams(session, userOrgRoles));
@@ -148,7 +167,8 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name,
         description: body.description,
-        isActive: body.isActive ?? true
+        isActive: body.isActive ?? true,
+        constructionGroupId: scope.constructionGroupId,
       },
       include: {
         _count: {

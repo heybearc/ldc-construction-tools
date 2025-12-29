@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
 import { canManageTradeTeams } from '@/lib/permissions';
+import { getCGScope, canAccessCG } from '@/lib/cg-scope';
 
 // GET all crews for a trade team
 export async function GET(
@@ -16,9 +17,25 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const scope = await getCGScope();
+    if (!scope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
+    }
+
+    // Verify trade team belongs to user's accessible CGs
+    const tradeTeam = await prisma.tradeTeam.findUnique({
+      where: { id: params.id },
+      select: { constructionGroupId: true }
+    });
+
+    if (!tradeTeam || !tradeTeam.constructionGroupId || !canAccessCG(scope, tradeTeam.constructionGroupId)) {
+      return NextResponse.json({ error: 'Trade team not found or access denied' }, { status: 404 });
+    }
+
     const crews = await prisma.crew.findMany({
       where: {
-        tradeTeamId: params.id
+        tradeTeamId: params.id,
+        isActive: true
       },
       include: {
         tradeTeam: {
