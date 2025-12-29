@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 // GET - List all crew change requests (for personnel team)
 export async function GET(request: NextRequest) {
@@ -11,13 +12,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { constructionGroupId: true, role: true }
-    });
-
-    if (!user?.constructionGroupId) {
-      return NextResponse.json({ error: 'No construction group assigned' }, { status: 403 });
+    const cgScope = await getCGScope();
+    if (!cgScope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -26,7 +23,7 @@ export async function GET(request: NextRequest) {
     const myRequests = searchParams.get('my_requests') === 'true';
 
     const where: any = {
-      constructionGroupId: user.constructionGroupId,
+      ...withCGFilter(cgScope),
     };
 
     if (status && status !== 'ALL') {
@@ -105,13 +102,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized - Please sign in' }, { status: 401 });
     }
 
+    const cgScope = await getCGScope();
+    if (!cgScope || !cgScope.constructionGroupId) {
+      return NextResponse.json({ error: 'No construction group assigned' }, { status: 403 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, constructionGroupId: true, name: true }
+      select: { id: true, name: true }
     });
 
-    if (!user?.constructionGroupId) {
-      return NextResponse.json({ error: 'No construction group assigned' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -186,7 +188,7 @@ export async function POST(request: NextRequest) {
         comments: comments || null,
         batchId: batch_id || null,
         status: 'NEW',
-        constructionGroupId: user.constructionGroupId,
+        constructionGroupId: cgScope.constructionGroupId,
       }
     });
 
