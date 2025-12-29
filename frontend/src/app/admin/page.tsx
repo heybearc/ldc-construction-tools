@@ -101,8 +101,8 @@ export default function AdminDashboardPage() {
         recentActivity: (auditData?.logs || []).slice(0, 5).map((log: any) => ({
           id: log.id,
           action: log.action,
-          user: log.userEmail || 'System',
-          timestamp: log.createdAt,
+          user: log.userName || 'System',
+          timestamp: log.timestamp,
           type: log.action.toLowerCase().includes('login') ? 'login' : 
                 log.action.toLowerCase().includes('create') ? 'create' :
                 log.action.toLowerCase().includes('delete') ? 'delete' : 'update'
