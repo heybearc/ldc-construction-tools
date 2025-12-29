@@ -4,6 +4,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
 
 export interface CGScope {
   userId: string;
@@ -44,6 +45,7 @@ const CG_MANAGER_ROLES = [
 /**
  * Get the current user's CG scope from their session
  * Returns null if not authenticated
+ * For SUPER_ADMIN: checks cg_filter cookie to allow viewing specific CG or all CGs
  */
 export async function getCGScope(): Promise<CGScope | null> {
   const session = await getServerSession(authOptions);
@@ -68,8 +70,35 @@ export async function getCGScope(): Promise<CGScope | null> {
 
   if (!user) return null;
 
-  const cg = user.constructionGroup;
   const role = user.role;
+  let cg = user.constructionGroup;
+
+  // For SUPER_ADMIN, check if they have a CG filter set
+  if (role === 'SUPER_ADMIN') {
+    const cookieStore = await cookies();
+    const cgFilter = cookieStore.get('cg_filter');
+    
+    if (cgFilter?.value) {
+      // SUPER_ADMIN has selected a specific CG to view
+      const selectedCG = await prisma.constructionGroup.findUnique({
+        where: { id: cgFilter.value },
+        include: {
+          region: {
+            include: {
+              zone: {
+                include: { branch: true },
+              },
+            },
+          },
+        },
+      });
+      
+      if (selectedCG) {
+        cg = selectedCG;
+      }
+    }
+    // If no filter cookie, SUPER_ADMIN sees all CGs (cg remains null or their assigned CG)
+  }
 
   return {
     userId: user.id,
