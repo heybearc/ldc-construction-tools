@@ -29,9 +29,7 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">LDC</span>
-                </div>
+                <img src="/logo.svg" alt="LDC Logo" className="h-10 w-10" />
                 <div>
                   <h1 className="text-xl font-bold text-white">
                     {title || 'LDC Tools'}
@@ -97,9 +95,7 @@ function HelpLayoutContent({ children, title }: HelpLayoutProps) {
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-3">
-              <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">LDC</span>
-              </div>
+              <img src="/logo.svg" alt="LDC Logo" className="h-8 w-8" />
               <span className="text-lg font-semibold text-gray-900">LDC Tools</span>
             </div>
             <p className="text-sm text-gray-600 mb-3">Personnel Contact & Project Management System</p>
