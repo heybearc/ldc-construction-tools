@@ -1,12 +1,26 @@
 // API route for Trade Teams Overview with all oversight data
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const scope = await getCGScope();
+    if (!scope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
+    }
+
     // Get all trade teams with crews and oversight assignments
     const tradeTeams = await prisma.tradeTeam.findMany({
       where: {
+        ...withCGFilter(scope),
         isActive: true
       },
       orderBy: {

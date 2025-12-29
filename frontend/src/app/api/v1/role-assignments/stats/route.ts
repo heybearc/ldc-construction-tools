@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';;
 import { getServerSession } from 'next-auth';
 import { authConfig } from '../../../../../../auth.config';
+import { getCGScope } from '@/lib/cg-scope';
 
 
 // GET /api/v1/role-assignments/stats - Get role statistics
@@ -13,14 +14,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const cgScope = await getCGScope();
+    if (!cgScope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const regionId = searchParams.get('regionId');
     const scope = searchParams.get('scope');
 
-    // Build filter conditions
-    const where: any = { isActive: true };
+    // Build filter conditions with CG scoping
+    const where: any = { 
+      isActive: true,
+      user: {
+        constructionGroupId: cgScope.constructionGroupId
+      }
+    };
     if (regionId) {
-      where.user = { regionId };
+      where.user.regionId = regionId;
     }
     if (scope) {
       where.scope = scope;

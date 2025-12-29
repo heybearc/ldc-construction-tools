@@ -5,12 +5,18 @@ import prisma from '@/lib/prisma';
 import ExcelJS from 'exceljs';
 import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
 import { canExportVolunteers } from '@/lib/permissions';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const scope = await getCGScope();
+    if (!scope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
     }
 
     // Check permissions - requires management role
@@ -24,7 +30,9 @@ export async function GET(request: NextRequest) {
     const tradeCrew = searchParams.get('trade_crew');
     const role = searchParams.get('role');
 
-    const where: any = {};
+    const where: any = {
+      ...withCGFilter(scope),
+    };
     
     if (tradeTeam) {
       where.tradeCrew = {

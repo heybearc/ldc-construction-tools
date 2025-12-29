@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 import ExcelJS from 'exceljs';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,10 +12,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const scope = await getCGScope();
+    if (!scope) {
+      return NextResponse.json({ error: 'Unable to determine CG scope' }, { status: 403 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const format = searchParams.get('format') || 'excel';
 
     const projects = await prisma.project.findMany({
+      where: {
+        ...withCGFilter(scope),
+      },
       orderBy: { name: 'asc' },
     });
 
