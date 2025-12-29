@@ -102,11 +102,12 @@ export default function CrewRequestsPage() {
   const [editFormData, setEditFormData] = useState<Partial<CrewRequest>>({});
 
   // Redirect if user doesn't have permission to manage requests
+  // Only redirect after permissions have loaded AND user doesn't have access
   useEffect(() => {
-    if (!permissionsLoading && !canManageVolunteers) {
+    if (!permissionsLoading && !loading && !canManageVolunteers) {
       router.push('/');
     }
-  }, [permissionsLoading, canManageVolunteers, router]);
+  }, [permissionsLoading, loading, canManageVolunteers, router]);
 
   const fetchRequests = useCallback(async () => {
     try {
