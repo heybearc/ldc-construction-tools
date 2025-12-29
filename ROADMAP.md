@@ -38,38 +38,42 @@ Build a comprehensive multi-tenant construction management system for LDC (Local
 
 ## 🚀 UPCOMING PHASES
 
-### **Phase 2: Enhanced Multi-Tenant Features** (Priority: HIGH)
+### **Phase 2: CG Management & Audit Logging** (Priority: HIGH) ⭐ REVISED
 
-**Estimated Duration**: 2-3 weeks  
-**Dependencies**: Phase 1 deployed to production
+**Estimated Duration**: 1 week (5-7 days)  
+**Dependencies**: Phase 1 deployed to production  
+**Status**: 📋 APPROVED - Ready to implement
 
-#### 2.1 Zone-Level Access for ZONE_OVERSEER
-- [ ] Implement zone-level filtering for ZONE_OVERSEER users
-- [ ] Zone selector dropdown (similar to CG selector)
-- [ ] View all CGs within assigned zone
-- [ ] Zone-level reporting and analytics
+**Key Decisions:**
+- ✅ Regional roles = 1:1 with CG (no separate region selector)
+- ✅ Zone selector moved to backlog (premature)
+- ✅ Leverage existing Organization Hierarchy page
+- ✅ User CG auto-derives from linked volunteer
+- ✅ Remove redundant zone/region fields from User model
 
-#### 2.2 Region-Level Access
-- [ ] Region-level filtering for regional roles
-- [ ] Region selector for appropriate roles
-- [ ] Cross-region visibility controls
+#### 2.1 Organization Hierarchy Enhancements (2-3 days)
+- [ ] Add Edit CG functionality to existing `/admin/organization` page
+- [ ] Add Delete/Deactivate CG functionality
+- [ ] Enhanced CG form validation
+- [ ] Cannot delete CG with active users/volunteers
 
-#### 2.3 Construction Group Management UI
-- [ ] SUPER_ADMIN interface to create/edit CGs
-- [ ] CG hierarchy visualization (Branch → Zone → Region → CG)
-- [ ] CG activation/deactivation controls
-- [ ] CG metadata management (code, name, description)
+#### 2.2 User-Volunteer CG Synchronization (1-2 days)
+- [ ] Remove `zoneId` and `regionId` from User model
+- [ ] Auto-derive `constructionGroupId` from linked volunteer
+- [ ] Update user creation/update APIs
+- [ ] Single source of truth: Volunteer determines CG
+- [ ] Special case: Super admin break-glass account (no volunteer)
 
-#### 2.4 User CG Assignment Interface
-- [ ] Bulk user CG assignment tool
-- [ ] User transfer between CGs workflow
-- [ ] CG assignment history tracking
-
-#### 2.5 Audit Logging for Multi-Tenant Operations
+#### 2.3 Multi-Tenant Audit Logging (3-4 days)
+- [ ] Create MultiTenantAuditLog database table
 - [ ] Log CG filter changes by SUPER_ADMIN
+- [ ] Log user-volunteer linking (CG assignments)
 - [ ] Track cross-CG data access
-- [ ] CG assignment change audit trail
+- [ ] Searchable audit log viewer UI
+- [ ] Export audit logs to CSV
 - [ ] Compliance reporting for data access
+
+**Detailed Plan**: See `docs/PHASE_2_REVISED.md`
 
 ---
 
