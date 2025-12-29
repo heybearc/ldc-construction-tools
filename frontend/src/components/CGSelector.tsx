@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Building2, ChevronDown } from 'lucide-react';
 
 interface ConstructionGroup {
@@ -12,6 +13,7 @@ interface ConstructionGroup {
 
 export default function CGSelector() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [constructionGroups, setConstructionGroups] = useState<ConstructionGroup[]>([]);
   const [selectedCG, setSelectedCG] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -61,7 +63,8 @@ export default function CGSelector() {
         body: JSON.stringify({ constructionGroupId: cgId }),
       });
 
-      window.location.reload();
+      // Use router.refresh() to reload data without changing the current page
+      router.refresh();
     } catch (error) {
       console.error('Failed to set CG filter:', error);
     }
