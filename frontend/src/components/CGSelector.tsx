@@ -48,6 +48,7 @@ export default function CGSelector() {
   }, [isSuperAdmin]);
 
   const handleCGChange = async (cgId: string | null) => {
+    const previousCG = selectedCG;
     setSelectedCG(cgId);
     setIsOpen(false);
 
@@ -58,17 +59,26 @@ export default function CGSelector() {
     }
 
     try {
-      await fetch('/api/v1/user/set-cg-filter', {
+      const response = await fetch('/api/v1/user/set-cg-filter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ constructionGroupId: cgId }),
       });
 
-      // Use window.location.href to force hard navigation to current page
-      // This preserves the URL and forces all components to remount and refetch data
-      window.location.href = window.location.pathname;
+      if (!response.ok) {
+        console.error('Failed to set CG filter:', response.status);
+        setSelectedCG(previousCG); // Revert on error
+        return;
+      }
+
+      // Add a small delay to ensure cookie is set, then reload
+      setTimeout(() => {
+        // Use location.replace to navigate to current page without adding to history
+        window.location.replace(window.location.pathname + window.location.search);
+      }, 100);
     } catch (error) {
       console.error('Failed to set CG filter:', error);
+      setSelectedCG(previousCG); // Revert on error
     }
   };
 
