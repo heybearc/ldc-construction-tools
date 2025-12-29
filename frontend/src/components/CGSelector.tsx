@@ -63,8 +63,8 @@ export default function CGSelector() {
         body: JSON.stringify({ constructionGroupId: cgId }),
       });
 
-      // Use router.refresh() to reload data without changing the current page
-      router.refresh();
+      // Force a full page reload to refresh all data (preserves current URL)
+      window.location.reload();
     } catch (error) {
       console.error('Failed to set CG filter:', error);
     }
