@@ -26,32 +26,35 @@ interface APIStats {
 
 // Define endpoints to test
 const ENDPOINTS_TO_TEST = [
+  // Core User & Volunteer Management
   {
-    name: 'User Management',
+    name: 'Volunteers API',
     path: '/api/v1/volunteers',
     method: 'GET',
-    description: 'User listing and management',
+    description: 'Volunteer listing and management',
     requiresAuth: true,
   },
   {
-    name: 'Trade Teams',
-    path: '/api/v1/trade-teams',
+    name: 'Admin Users API',
+    path: '/api/v1/admin/users',
     method: 'GET',
-    description: 'Trade team data retrieval',
+    description: 'User management and administration',
     requiresAuth: true,
   },
   {
-    name: 'Projects API',
-    path: '/api/v1/projects',
+    name: 'User Profile',
+    path: '/api/v1/user/profile',
     method: 'GET',
-    description: 'Project management endpoints',
+    description: 'Current user profile data',
     requiresAuth: true,
   },
+  
+  // Role Management
   {
     name: 'Roles API',
     path: '/api/v1/roles',
     method: 'GET',
-    description: 'Role management endpoints',
+    description: 'Role definitions and management',
     requiresAuth: true,
   },
   {
@@ -62,10 +65,140 @@ const ENDPOINTS_TO_TEST = [
     requiresAuth: true,
   },
   {
+    name: 'User Roles',
+    path: '/api/v1/user/roles',
+    method: 'GET',
+    description: 'Current user role information',
+    requiresAuth: true,
+  },
+  
+  // Trade Teams & Crews
+  {
+    name: 'Trade Teams',
+    path: '/api/v1/trade-teams',
+    method: 'GET',
+    description: 'Trade team data retrieval',
+    requiresAuth: true,
+  },
+  {
+    name: 'Trade Teams Overview',
+    path: '/api/v1/trade-teams/overview',
+    method: 'GET',
+    description: 'Trade team overview and statistics',
+    requiresAuth: true,
+  },
+  
+  // Projects
+  {
+    name: 'Projects API',
+    path: '/api/v1/projects',
+    method: 'GET',
+    description: 'Project management endpoints',
+    requiresAuth: true,
+  },
+  
+  // Crew Change Requests
+  {
+    name: 'Crew Requests',
+    path: '/api/v1/crew-requests',
+    method: 'GET',
+    description: 'Crew change request management',
+    requiresAuth: true,
+  },
+  {
+    name: 'My Crew Requests',
+    path: '/api/v1/crew-requests/my-requests',
+    method: 'GET',
+    description: 'User-specific crew requests',
+    requiresAuth: true,
+  },
+  
+  // Feedback System
+  {
+    name: 'Feedback API',
+    path: '/api/v1/admin/feedback',
+    method: 'GET',
+    description: 'Feedback management (admin)',
+    requiresAuth: true,
+  },
+  {
+    name: 'My Feedback',
+    path: '/api/v1/feedback/my-feedback',
+    method: 'GET',
+    description: 'User-submitted feedback',
+    requiresAuth: true,
+  },
+  
+  // Announcements
+  {
+    name: 'Announcements',
+    path: '/api/v1/announcements',
+    method: 'GET',
+    description: 'System announcements',
+    requiresAuth: true,
+  },
+  
+  // Organization Hierarchy (Phase 2)
+  {
+    name: 'Hierarchy API',
+    path: '/api/v1/admin/hierarchy',
+    method: 'GET',
+    description: 'Organization hierarchy data',
+    requiresAuth: true,
+  },
+  {
+    name: 'Construction Groups',
+    path: '/api/v1/admin/hierarchy/construction-groups',
+    method: 'GET',
+    description: 'Construction group management',
+    requiresAuth: true,
+  },
+  {
+    name: 'CG Filter API',
+    path: '/api/v1/user/set-cg-filter',
+    method: 'POST',
+    description: 'SUPER_ADMIN CG filter control',
+    requiresAuth: true,
+  },
+  
+  // Audit Logging (Phase 2.3)
+  {
+    name: 'Multi-Tenant Audit Logs',
+    path: '/api/v1/admin/audit/multi-tenant',
+    method: 'GET',
+    description: 'Multi-tenant audit log viewer',
+    requiresAuth: true,
+  },
+  
+  // Admin & System
+  {
     name: 'Admin Email Config',
     path: '/api/v1/admin/email/config',
     method: 'GET',
     description: 'Email configuration management',
+    requiresAuth: true,
+  },
+  {
+    name: 'System Info',
+    path: '/api/v1/admin/system/info',
+    method: 'GET',
+    description: 'System information and stats',
+    requiresAuth: true,
+  },
+  {
+    name: 'Health Status',
+    path: '/api/v1/admin/health/status',
+    method: 'GET',
+    description: 'Application health check',
+    requiresAuth: true,
+  },
+  
+  // Congregations
+  {
+    name: 'Congregations',
+    path: '/api/v1/congregations',
+    method: 'GET',
+    description: 'Congregation data',
     requiresAuth: true,
   },
 ];
