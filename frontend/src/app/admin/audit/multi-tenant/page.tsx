@@ -336,8 +336,7 @@ export default function MultiTenantAuditPage() {
                 logs.map((log) => (
                   <tr
                     key={log.id}
-                    className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
+                    className="hover:bg-gray-50"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center gap-2">
