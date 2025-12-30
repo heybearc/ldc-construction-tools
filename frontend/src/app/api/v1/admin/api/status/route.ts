@@ -153,13 +153,7 @@ const ENDPOINTS_TO_TEST = [
     description: 'Construction group management',
     requiresAuth: true,
   },
-  {
-    name: 'CG Filter API',
-    path: '/api/v1/user/set-cg-filter',
-    method: 'POST',
-    description: 'SUPER_ADMIN CG filter control',
-    requiresAuth: true,
-  },
+  // Note: CG Filter API removed from monitoring - it's a POST endpoint that requires a request body
   
   // Audit Logging (Phase 2.3)
   {
