@@ -39,8 +39,49 @@ export async function GET(request: NextRequest) {
             email: true,
             firstName: true,
             lastName: true,
-            regionId: true,
-            zoneId: true
+            constructionGroupId: true,
+            volunteer: {
+              select: {
+                constructionGroup: {
+                  select: {
+                    id: true,
+                    code: true,
+                    name: true,
+                    region: {
+                      select: {
+                        code: true,
+                        name: true,
+                        zone: {
+                          select: {
+                            code: true,
+                            name: true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            constructionGroup: {
+              select: {
+                id: true,
+                code: true,
+                name: true,
+                region: {
+                  select: {
+                    code: true,
+                    name: true,
+                    zone: {
+                      select: {
+                        code: true,
+                        name: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         role: {
