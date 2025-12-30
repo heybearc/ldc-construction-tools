@@ -51,14 +51,35 @@ export async function GET(request: NextRequest) {
         role: true,
         adminLevel: true,
         status: true,
-        regionId: true,
-        zoneId: true,
         createdAt: true,
         updatedAt: true,
         emailVerified: true,
         lastLogin: true,
         volunteerId: true,
         constructionGroupId: true,
+        volunteer: {
+          select: {
+            constructionGroup: {
+              select: {
+                id: true,
+                code: true,
+                name: true,
+                region: {
+                  select: {
+                    code: true,
+                    name: true,
+                    zone: {
+                      select: {
+                        code: true,
+                        name: true,
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         constructionGroup: {
           select: {
             id: true,
@@ -96,29 +117,25 @@ export async function GET(request: NextRequest) {
         displayStatus = 'INACTIVE';
       }
       
+      // Derive CG from volunteer or direct assignment
+      const effectiveCG = user.volunteer?.constructionGroup || user.constructionGroup;
+      
       return {
         id: user.id,
-        name: user.name || 'Unknown',
-        email: user.email || '',
+        name: user.name || '',
+        email: user.email,
         role: user.role || 'READ_ONLY',
         adminLevel: user.adminLevel || undefined,
         status: displayStatus,
-        regionId: user.regionId || '',
-        zoneId: user.zoneId || '',
+        regionId: effectiveCG?.region?.code || '',
+        zoneId: effectiveCG?.region?.zone?.code || '',
         volunteerId: user.volunteerId || null,
         lastLogin: user.lastLogin?.toISOString(),
         createdAt: user.createdAt.toISOString(),
-        // Multi-tenant fields
-        constructionGroupId: user.constructionGroupId,
-        constructionGroup: user.constructionGroup ? {
-          id: user.constructionGroup.id,
-          code: user.constructionGroup.code,
-          name: user.constructionGroup.name,
-          regionCode: user.constructionGroup.region?.code,
-          regionName: user.constructionGroup.region?.name,
-          zoneCode: user.constructionGroup.region?.zone?.code,
-          zoneName: user.constructionGroup.region?.zone?.name,
-        } : null,
+        updatedAt: user.updatedAt.toISOString(),
+        emailVerified: user.emailVerified?.toISOString() || null,
+        constructionGroupId: effectiveCG?.id || null,
+        constructionGroup: effectiveCG || null,
       };
     });
     
