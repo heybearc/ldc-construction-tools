@@ -136,6 +136,39 @@ export default function AuditLogsPage() {
         </button>
       </div>
 
+      {/* Audit Log Types */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white shadow rounded-lg p-6 border-l-4 border-blue-500">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">General Audit Logs</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Standard system activity logs for all user actions
+          </p>
+          <div className="text-sm text-gray-500">
+            Currently viewing this page
+          </div>
+        </div>
+        
+        <a 
+          href="/admin/audit/multi-tenant"
+          className="bg-gradient-to-br from-blue-50 to-indigo-50 shadow rounded-lg p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-shadow cursor-pointer group"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+              Multi-Tenant Audit Logs
+            </h3>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              Phase 2.3
+            </span>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Track Construction Group operations, CG filter changes, and cross-tenant activities
+          </p>
+          <div className="text-sm text-indigo-600 font-medium group-hover:text-indigo-700">
+            View Multi-Tenant Logs →
+          </div>
+        </a>
+      </div>
+
       {/* Filters */}
       <div className="bg-white shadow rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
