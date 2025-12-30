@@ -110,6 +110,43 @@ export default async function OrganizationHelpPage() {
             <li>Click <strong>Save</strong></li>
           </ol>
 
+          <h2>✏️ Editing and Deleting CGs (Super Admin Only)</h2>
+          <p>Super Admins can edit or remove Construction Groups when needed:</p>
+
+          <h3>Editing a Construction Group</h3>
+          <ol>
+            <li>Find the CG you want to edit in the tree</li>
+            <li>Click the <strong>Edit</strong> button (pencil icon) next to the CG</li>
+            <li>Update the CG code or name as needed</li>
+            <li>Click <strong>Save Changes</strong></li>
+          </ol>
+
+          <h3>Deleting a Construction Group</h3>
+          <ol>
+            <li>Find the CG you want to remove</li>
+            <li>Click the <strong>Delete</strong> button (trash icon) next to the CG</li>
+            <li>Confirm the deletion when prompted</li>
+          </ol>
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 my-6">
+            <h3 className="text-lg font-semibold text-yellow-900 mt-0 mb-3">⚠️ Important Notes About Deletion</h3>
+            <ul className="text-yellow-800 mb-0">
+              <li>Deleting a CG is a <strong>soft delete</strong> - the data is preserved</li>
+              <li>Users, volunteers, and other data remain in the system</li>
+              <li>The CG is marked as inactive and hidden from normal views</li>
+              <li>Super Admins can reactivate deleted CGs if needed</li>
+              <li>All changes are tracked in the audit logs</li>
+            </ul>
+          </div>
+
+          <h3>Reactivating a Deleted CG</h3>
+          <p>If a CG was deleted by mistake, Super Admins can reactivate it:</p>
+          <ol>
+            <li>The deleted CG will show with a <strong>Reactivate</strong> button</li>
+            <li>Click <strong>Reactivate</strong> to restore the CG</li>
+            <li>The CG and all its data will be available again</li>
+          </ol>
+
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 my-6">
             <h3 className="text-lg font-semibold text-yellow-900 mt-0 mb-3">💡 Naming Convention</h3>
             <p className="text-yellow-800 mb-2">

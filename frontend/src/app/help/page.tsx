@@ -73,6 +73,13 @@ const helpTopics: HelpTopic[] = [
     icon: '⚙️'
   },
   {
+    id: 'admin/audit-logs',
+    title: 'Multi-Tenant Audit Logs',
+    description: 'Track Construction Group operations and cross-tenant activities',
+    roles: ['SUPER_ADMIN'],
+    icon: '📋'
+  },
+  {
     id: 'crew-requests',
     title: 'Crew Requests',
     description: 'Submit and manage crew change requests for volunteers',
