@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Download, Filter, RefreshCw, Search, User, FileText, Database } from 'lucide-react';
@@ -334,131 +334,125 @@ export default function MultiTenantAuditPage() {
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="hover:bg-gray-50"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        {formatTimestamp(log.timestamp)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-gray-400" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {log.user?.name || 'Unknown'}
-                          </div>
-                          <div className="text-xs text-gray-500">{log.user?.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                        {formatAction(log.action)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-gray-400" />
-                        <div>
-                          <div className="text-sm text-gray-900">{log.resource}</div>
-                          {log.resourceId && (
-                            <div className="text-xs text-gray-500">{log.resourceId.substring(0, 8)}...</div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.fromConstructionGroup || log.toConstructionGroup ? (
+                  <React.Fragment key={log.id}>
+                    <tr className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex items-center gap-2">
-                          {log.fromConstructionGroup && (
-                            <span className="text-xs text-gray-600">
-                              {log.fromConstructionGroup.code}
-                            </span>
-                          )}
-                          {log.fromConstructionGroup && log.toConstructionGroup && (
-                            <span className="text-gray-400">→</span>
-                          )}
-                          {log.toConstructionGroup && (
-                            <span className="text-xs font-medium text-blue-600">
-                              {log.toConstructionGroup.code}
-                            </span>
-                          )}
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          {formatTimestamp(log.timestamp)}
                         </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button 
-                        onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        {expandedLog === log.id ? 'Hide' : 'Show'}
-                      </button>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {log.user?.name || 'Unknown'}
+                            </div>
+                            <div className="text-xs text-gray-500">{log.user?.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                          {formatAction(log.action)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <div className="text-sm text-gray-900">{log.resource}</div>
+                            {log.resourceId && (
+                              <div className="text-xs text-gray-500">{log.resourceId.substring(0, 8)}...</div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {log.fromConstructionGroup || log.toConstructionGroup ? (
+                          <div className="flex items-center gap-2">
+                            {log.fromConstructionGroup && (
+                              <span className="text-xs text-gray-600">
+                                {log.fromConstructionGroup.code}
+                              </span>
+                            )}
+                            {log.fromConstructionGroup && log.toConstructionGroup && (
+                              <span className="text-gray-400">→</span>
+                            )}
+                            {log.toConstructionGroup && (
+                              <span className="text-xs font-medium text-blue-600">
+                                {log.toConstructionGroup.code}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button 
+                          onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {expandedLog === log.id ? 'Hide' : 'Show'}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedLog === log.id && (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-6 bg-gray-50">
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-900">Audit Log Details</h3>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">IP Address</label>
+                                <p className="text-sm text-gray-900">{log.ipAddress || 'Not recorded'}</p>
+                              </div>
+                              
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">User Agent</label>
+                                <p className="text-sm text-gray-900 truncate">{log.userAgent || 'Not recorded'}</p>
+                              </div>
+                            </div>
+
+                            {log.metadata && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Metadata</label>
+                                <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
+                                  {JSON.stringify(log.metadata, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+
+                            {log.oldValues && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Old Values</label>
+                                <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
+                                  {JSON.stringify(log.oldValues, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+
+                            {log.newValues && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">New Values</label>
+                                <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
+                                  {JSON.stringify(log.newValues, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>
           </table>
         </div>
-
-        {/* Expanded Details */}
-        {expandedLog && logs.find(l => l.id === expandedLog) && (
-          <div className="border-t border-gray-200 bg-gray-50 p-6">
-            {(() => {
-              const log = logs.find(l => l.id === expandedLog)!;
-              return (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Audit Log Details</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">IP Address</label>
-                      <p className="text-sm text-gray-900">{log.ipAddress || 'Not recorded'}</p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">User Agent</label>
-                      <p className="text-sm text-gray-900 truncate">{log.userAgent || 'Not recorded'}</p>
-                    </div>
-                  </div>
-
-                  {log.metadata && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Metadata</label>
-                      <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
-                        {JSON.stringify(log.metadata, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-
-                  {log.oldValues && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Old Values</label>
-                      <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
-                        {JSON.stringify(log.oldValues, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-
-                  {log.newValues && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">New Values</label>
-                      <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
-                        {JSON.stringify(log.newValues, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
-        )}
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
