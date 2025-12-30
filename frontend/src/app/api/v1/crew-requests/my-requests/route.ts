@@ -14,10 +14,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get all requests created by this user
+    // Get all requests where user's email matches requestorEmail
     const requests = await prisma.crewChangeRequest.findMany({
       where: {
-        createdById: session.user.id
+        requestorEmail: session.user.email || ''
       },
       include: {
         assignedTo: {
@@ -33,11 +33,11 @@ export async function GET(request: NextRequest) {
             name: true
           }
         },
-        createdBy: {
+        constructionGroup: {
           select: {
             id: true,
-            name: true,
-            email: true
+            code: true,
+            name: true
           }
         }
       },
