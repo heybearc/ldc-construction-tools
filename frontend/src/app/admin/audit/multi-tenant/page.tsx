@@ -394,7 +394,10 @@ export default function MultiTenantAuditPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button className="text-blue-600 hover:text-blue-800">
+                      <button 
+                        onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
                         {expandedLog === log.id ? 'Hide' : 'Show'}
                       </button>
                     </td>
