@@ -308,18 +308,28 @@ model EmailTemplate {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  action     String
-  resource   String
-  resourceId String?
-  oldValues  Json?
-  newValues  Json?
-  ipAddress  String?
-  userAgent  String?
-  timestamp  DateTime @default(now())
-  user       User?    @relation(fields: [userId], references: [id])
+  id                        String              @id @default(cuid())
+  userId                    String?
+  action                    String
+  resource                  String
+  resourceId                String?
+  oldValues                 Json?
+  newValues                 Json?
+  ipAddress                 String?
+  userAgent                 String?
+  timestamp                 DateTime            @default(now())
+  // Multi-tenant fields
+  fromConstructionGroupId   String?
+  toConstructionGroupId     String?
+  metadata                  Json?
+  user                      User?               @relation(fields: [userId], references: [id])
+  fromConstructionGroup     ConstructionGroup?  @relation("AuditLogFromCG", fields: [fromConstructionGroupId], references: [id])
+  toConstructionGroup       ConstructionGroup?  @relation("AuditLogToCG", fields: [toConstructionGroupId], references: [id])
 
+  @@index([userId, timestamp])
+  @@index([action, timestamp])
+  @@index([resource, resourceId])
+  @@index([fromConstructionGroupId, toConstructionGroupId])
   @@map("audit_logs")
 }
 
@@ -415,6 +425,8 @@ model ConstructionGroup {
   congregations   Congregation[]
   announcements   Announcement[]
   crewChangeRequests CrewChangeRequest[]
+  auditLogsFrom   AuditLog[]  @relation("AuditLogFromCG")
+  auditLogsTo     AuditLog[]  @relation("AuditLogToCG")
 
   @@map("construction_groups")
 }

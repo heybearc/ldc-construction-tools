@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { cookies } from 'next/headers';
+import { logCGFilterChange } from '@/lib/audit-logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,9 +26,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { constructionGroupId } = body;
 
-    // Set cookie for CG filter (null means "All CGs")
+    // Get current filter for audit log
     const cookieStore = await cookies();
-    
+    const currentFilter = cookieStore.get('cg_filter')?.value || null;
+
+    // Set cookie for CG filter (null means "All CGs")
     if (constructionGroupId) {
       cookieStore.set('cg_filter', constructionGroupId, {
         httpOnly: true,
@@ -37,6 +40,16 @@ export async function POST(request: NextRequest) {
       });
     } else {
       cookieStore.delete('cg_filter');
+    }
+
+    // Log the CG filter change
+    if (session.user.id) {
+      await logCGFilterChange(
+        session.user.id,
+        currentFilter,
+        constructionGroupId || null,
+        request
+      );
     }
 
     return NextResponse.json({

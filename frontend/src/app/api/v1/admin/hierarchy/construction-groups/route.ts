@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { STANDARD_TRADE_TEAMS } from '@/lib/standard-trade-teams';
+import { logCGCreated, logCGReactivated } from '@/lib/audit-logger';
 
 // GET: List all construction groups
 export async function GET(request: NextRequest) {
@@ -229,6 +230,26 @@ export async function POST(request: NextRequest) {
 
       totalCrews = constructionGroup.tradeTeams.reduce((sum, t) => sum + t.crews.length, 0);
       console.log(`✅ Created CG "${code}" with ${constructionGroup.tradeTeams.length} trade teams and ${totalCrews} crews`);
+    }
+
+    // Log audit event
+    if (isReactivation) {
+      await logCGReactivated(
+        session.user.id!,
+        constructionGroup!.id,
+        code,
+        name || code,
+        request
+      );
+    } else {
+      await logCGCreated(
+        session.user.id!,
+        constructionGroup!.id,
+        code,
+        name || code,
+        regionId,
+        request
+      );
     }
 
     return NextResponse.json({ 

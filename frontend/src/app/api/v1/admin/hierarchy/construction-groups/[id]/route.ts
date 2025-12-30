@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { getCGScope } from '@/lib/cg-scope';
+import { logCGUpdated, logCGDeleted } from '@/lib/audit-logger';
 
 // PATCH - Update Construction Group
 export async function PATCH(
@@ -120,6 +121,20 @@ export async function PATCH(
       }
     });
 
+    // Log audit event
+    await logCGUpdated(
+      session.user.id!,
+      params.id,
+      {
+        code: existingCG.code,
+        name: existingCG.name,
+        description: existingCG.description,
+        regionId: existingCG.regionId
+      },
+      { code, name, description, regionId },
+      request
+    );
+
     return NextResponse.json({
       message: 'Construction Group updated successfully',
       constructionGroup: updatedCG
@@ -213,6 +228,15 @@ export async function DELETE(
         isActive: false,
       }
     });
+
+    // Log audit event
+    await logCGDeleted(
+      session.user.id!,
+      params.id,
+      existingCG.code,
+      existingCG.name,
+      request
+    );
 
     return NextResponse.json({
       message: 'Construction Group deactivated successfully',
