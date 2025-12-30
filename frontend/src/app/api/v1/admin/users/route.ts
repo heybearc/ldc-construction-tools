@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, password, role, zoneId, regionId } = body;
+    const { name, email, password, role, volunteerId } = body;
 
     // Validate required fields
     if (!name || !email || !password || !role) {
@@ -180,8 +180,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get CG scope for the new user
-    const cgScope = await getCGScope();
+    // If volunteerId provided, verify it exists and get CG from volunteer
+    let constructionGroupId = null;
+    if (volunteerId) {
+      const volunteer = await prisma.volunteer.findUnique({
+        where: { id: volunteerId },
+        select: { constructionGroupId: true }
+      });
+      
+      if (!volunteer) {
+        return NextResponse.json(
+          { error: 'Volunteer not found' },
+          { status: 404 }
+        );
+      }
+      
+      constructionGroupId = volunteer.constructionGroupId;
+    } else {
+      // For break-glass SUPER_ADMIN accounts without a volunteer,
+      // use the creating admin's CG scope
+      const cgScope = await getCGScope();
+      constructionGroupId = cgScope?.constructionGroupId || null;
+    }
 
     // Hash the password
     const bcrypt = require('bcryptjs');
@@ -195,9 +215,8 @@ export async function POST(request: NextRequest) {
         passwordHash: hashedPassword,
         role,
         status: 'ACTIVE',
-        zoneId: zoneId || null,
-        regionId: regionId || null,
-        constructionGroupId: cgScope?.constructionGroupId || null,
+        volunteerId: volunteerId || null,
+        constructionGroupId,
       },
       select: {
         id: true,
@@ -205,8 +224,8 @@ export async function POST(request: NextRequest) {
         email: true,
         role: true,
         status: true,
-        zoneId: true,
-        regionId: true,
+        volunteerId: true,
+        constructionGroupId: true,
         createdAt: true,
       }
     });
@@ -219,8 +238,8 @@ export async function POST(request: NextRequest) {
         email: newUser.email,
         role: newUser.role,
         status: newUser.status,
-        zoneId: newUser.zoneId,
-        regionId: newUser.regionId,
+        volunteerId: newUser.volunteerId,
+        constructionGroupId: newUser.constructionGroupId,
         createdAt: newUser.createdAt.toISOString(),
       }
     }, { status: 201 });

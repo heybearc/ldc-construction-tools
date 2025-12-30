@@ -54,6 +54,21 @@ export async function getCGScope(): Promise<CGScope | null> {
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
+      volunteer: {
+        include: {
+          constructionGroup: {
+            include: {
+              region: {
+                include: {
+                  zone: {
+                    include: { branch: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       constructionGroup: {
         include: {
           region: {
@@ -71,7 +86,10 @@ export async function getCGScope(): Promise<CGScope | null> {
   if (!user) return null;
 
   const role = user.role;
-  let cg = user.constructionGroup;
+  
+  // Derive CG from linked volunteer (source of truth)
+  // Fall back to user.constructionGroup for break-glass SUPER_ADMIN accounts
+  let cg = user.volunteer?.constructionGroup || user.constructionGroup;
 
   // For SUPER_ADMIN, check if they have a CG filter set
   if (role === 'SUPER_ADMIN') {

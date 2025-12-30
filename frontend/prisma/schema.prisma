@@ -49,11 +49,10 @@ model User {
   volunteerId         String?             @unique
   volunteer           Volunteer?          @relation(fields: [volunteerId], references: [id])
   // Multi-tenant: Primary CG assignment
+  // For users with a linked volunteer, CG is derived from volunteer.constructionGroupId
+  // For the break-glass SUPER_ADMIN account (no volunteer), CG can be set directly
   constructionGroupId String?
   constructionGroup   ConstructionGroup?  @relation(fields: [constructionGroupId], references: [id])
-  // Legacy fields (will be derived from CG relationship)
-  regionId            String              @default("01.12")
-  zoneId              String              @default("01")
   passwordHash        String?
   lastLogin           DateTime?
   loginCount          Int                 @default(0)
@@ -94,8 +93,6 @@ model UserInvitation {
   firstName       String
   lastName        String
   role            UserRole
-  regionId        String
-  zoneId          String
   invitedBy       String
   invitationToken String           @unique
   expiresAt       DateTime

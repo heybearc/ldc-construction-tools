@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       });
 
       try {
-        const { name, email, role, regionId, zoneId, status } = row;
+        const { name, email, role, volunteerId, status } = row;
         
         if (!email || !role) {
           errors.push(`Row ${i + 1}: Missing required fields (email, role)`);
@@ -85,6 +85,25 @@ export async function POST(request: NextRequest) {
         if (existingUser) {
           errors.push(`Row ${i + 1}: User ${email} already exists`);
           continue;
+        }
+
+        // If volunteerId provided, verify it exists and get CG from volunteer
+        let constructionGroupId = null;
+        if (volunteerId) {
+          const volunteer = await prisma.volunteer.findUnique({
+            where: { id: volunteerId },
+            select: { constructionGroupId: true }
+          });
+          
+          if (!volunteer) {
+            errors.push(`Row ${i + 1}: Volunteer ${volunteerId} not found`);
+            continue;
+          }
+          
+          constructionGroupId = volunteer.constructionGroupId;
+        } else {
+          // For users without a volunteer link, use the importing admin's CG
+          constructionGroupId = cgScope?.constructionGroupId || null;
         }
 
         const userStatus = status?.toUpperCase() || 'INVITED';
@@ -106,13 +125,8 @@ export async function POST(request: NextRequest) {
             email,
             role,
             status: userStatus as 'ACTIVE' | 'INVITED' | 'INACTIVE',
-            zoneId: zoneId || cgScope?.zoneId || '01',
-            regionId: regionId || cgScope?.regionId || '01.12',
-            ...(cgScope?.constructionGroupId && {
-              constructionGroup: {
-                connect: { id: cgScope.constructionGroupId }
-              }
-            }),
+            volunteerId: volunteerId || null,
+            constructionGroupId,
             emailVerified: userStatus === 'ACTIVE' ? new Date() : null,
             invitedBy: cgScope?.userId,
             invitedAt: shouldSendInvite ? new Date() : null,
@@ -131,9 +145,6 @@ export async function POST(request: NextRequest) {
               expiresAt: inviteExpires,
               status: 'PENDING',
               invitedBy: cgScope?.userId || null,
-              constructionGroupId: cgScope?.constructionGroupId || null,
-              regionId: regionId || cgScope?.regionId || '01.12',
-              zoneId: zoneId || cgScope?.zoneId || '01'
             }
           });
 
