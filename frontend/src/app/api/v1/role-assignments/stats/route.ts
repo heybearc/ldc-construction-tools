@@ -30,9 +30,7 @@ export async function GET(request: NextRequest) {
         constructionGroupId: cgScope.constructionGroupId
       }
     };
-    if (regionId) {
-      where.user.regionId = regionId;
-    }
+    // Note: regionId filter removed - use constructionGroupId instead
     if (scope) {
       where.scope = scope;
     }
