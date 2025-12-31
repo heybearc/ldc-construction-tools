@@ -43,9 +43,10 @@ export default function AdminHelpPage() {
       description: 'System settings, health monitoring, and maintenance',
       icon: '⚙️',
       topics: [
-        { title: 'System Health', href: '/admin/system' },
+        { title: 'System Operations Guide', href: '/help/admin/system-operations' },
+        { title: 'System Health Dashboard', href: '/admin/system' },
         { title: 'Audit Logs', href: '/help/admin/audit-logs' },
-        { title: 'Backup & Recovery', href: '/help/admin/backup' }
+        { title: 'Cache Management', href: '/admin/cache' }
       ]
     }
   ];
