@@ -9,6 +9,7 @@ import Link from 'next/link';
 import SignOutButton from './SignOutButton';
 import ReleaseBanner from './ReleaseBanner';
 import CGSelector from './CGSelector';
+import ServerIndicator from './ServerIndicator';
 import { APP_VERSION } from '@/lib/version';
 import { canAccessAdmin } from '@/lib/permissions';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -422,8 +423,11 @@ export default function ConditionalLayout({ children, releaseHighlight }: Condit
       <footer className="bg-white border-t border-gray-200 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-gray-500">
-              <p>LDC Tools v{APP_VERSION}</p>
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-500">
+                <p>LDC Tools v{APP_VERSION}</p>
+              </div>
+              <ServerIndicator />
             </div>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm">
               <Link href="/help/feedback" className="text-gray-600 hover:text-blue-600 whitespace-nowrap">
