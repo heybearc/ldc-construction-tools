@@ -70,28 +70,17 @@ export default function AuditLogsPage() {
   const loadAuditLogs = async () => {
     try {
       setLoading(true);
-      // Fetch both general and multi-tenant logs
-      const [generalResponse, multiTenantResponse] = await Promise.all([
-        fetch('/api/v1/admin/audit/logs', {
-          credentials: 'include',
-          cache: 'no-store',
-        }),
-        fetch('/api/v1/admin/audit/multi-tenant', {
-          credentials: 'include',
-          cache: 'no-store',
-        })
-      ]);
+      // Fetch audit logs from single endpoint
+      const response = await fetch('/api/v1/admin/audit/logs', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
       
       let allLogs: AuditLog[] = [];
       
-      if (generalResponse.ok) {
-        const generalData = await generalResponse.json();
-        allLogs = [...allLogs, ...(generalData.logs || [])];
-      }
-      
-      if (multiTenantResponse.ok) {
-        const multiTenantData = await multiTenantResponse.json();
-        allLogs = [...allLogs, ...(multiTenantData.logs || [])];
+      if (response.ok) {
+        const data = await response.json();
+        allLogs = data.logs || [];
       }
       
       // Sort by timestamp descending
