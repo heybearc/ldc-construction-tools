@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings, Server, Database, RefreshCw, Download, Upload, Trash2, AlertTriangle, CheckCircle, HardDrive } from 'lucide-react';
+import { Settings, Server, Database, RefreshCw, Download, Upload, Trash2, AlertTriangle, CheckCircle, HardDrive, Power, Calendar } from 'lucide-react';
+
+interface MaintenanceConfig {
+  enabled: boolean;
+  message: string;
+  scheduledStart?: string;
+  scheduledEnd?: string;
+  allowedIPs?: string[];
+}
 
 interface SystemOperation {
   id: string;
@@ -46,6 +54,13 @@ export default function SystemOperationsPage() {
   const [backupMessage, setBackupMessage] = useState('');
   const [showBackupList, setShowBackupList] = useState(false);
   const [deploymentState, setDeploymentState] = useState<DeploymentState | null>(null);
+  const [maintenanceConfig, setMaintenanceConfig] = useState<MaintenanceConfig>({
+    enabled: false,
+    message: 'LDC Tools is currently undergoing scheduled maintenance. We\'ll be back shortly!',
+    allowedIPs: []
+  });
+  const [savingMaintenance, setSavingMaintenance] = useState(false);
+  const [maintenanceStatus, setMaintenanceStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const fetchBackupInfo = async () => {
     try {
@@ -108,9 +123,76 @@ export default function SystemOperationsPage() {
     loadSystemData();
     fetchBackupInfo();
     fetchDeploymentState();
+    loadMaintenanceConfig();
     const interval = setInterval(fetchBackupInfo, 60000); // Refresh every minute
     return () => clearInterval(interval);
   }, []);
+
+  const loadMaintenanceConfig = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/maintenance/config');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.config) {
+          setMaintenanceConfig(data.config);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load maintenance config:', error);
+    }
+  };
+
+  const toggleMaintenanceMode = async () => {
+    const newEnabled = !maintenanceConfig.enabled;
+    setMaintenanceConfig({ ...maintenanceConfig, enabled: newEnabled });
+    
+    try {
+      const response = await fetch('/api/v1/admin/maintenance/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: newEnabled })
+      });
+      
+      if (response.ok) {
+        setMaintenanceStatus({ 
+          type: 'success', 
+          message: newEnabled ? 'Maintenance mode enabled' : 'Maintenance mode disabled' 
+        });
+        setTimeout(() => setMaintenanceStatus(null), 3000);
+      } else {
+        setMaintenanceConfig({ ...maintenanceConfig, enabled: !newEnabled });
+        setMaintenanceStatus({ type: 'error', message: 'Failed to toggle maintenance mode' });
+      }
+    } catch (error) {
+      setMaintenanceConfig({ ...maintenanceConfig, enabled: !newEnabled });
+      setMaintenanceStatus({ type: 'error', message: 'Failed to toggle maintenance mode' });
+    }
+  };
+
+  const saveMaintenanceConfig = async () => {
+    setSavingMaintenance(true);
+    setMaintenanceStatus(null);
+    
+    try {
+      const response = await fetch('/api/v1/admin/maintenance/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(maintenanceConfig)
+      });
+      
+      if (response.ok) {
+        setMaintenanceStatus({ type: 'success', message: 'Maintenance configuration saved successfully!' });
+        setTimeout(() => setMaintenanceStatus(null), 3000);
+      } else {
+        const data = await response.json();
+        setMaintenanceStatus({ type: 'error', message: data.error || 'Failed to save configuration' });
+      }
+    } catch (error) {
+      setMaintenanceStatus({ type: 'error', message: 'Failed to save configuration' });
+    } finally {
+      setSavingMaintenance(false);
+    }
+  };
 
   const loadSystemData = async () => {
     try {
@@ -122,37 +204,8 @@ export default function SystemOperationsPage() {
         const data = await response.json();
         setSystemInfo(data.systemInfo);
         
-        // Set predefined operations (these are UI-only for now)
-        // In production, these would trigger actual system operations
-        // Note: Database backup is handled by the Data Protection section
+        // Set predefined operations
         setOperations([
-          {
-            id: 'cache-clear',
-            name: 'Clear Application Cache',
-            description: 'Clear all cached data and temporary files',
-            category: 'maintenance',
-            status: 'idle',
-            lastRun: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            duration: 15
-          },
-          {
-            id: 'restart-services',
-            name: 'Restart Background Services',
-            description: 'Restart all background workers and services',
-            category: 'maintenance',
-            status: 'idle',
-            lastRun: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-            duration: 30
-          },
-          {
-            id: 'log-cleanup',
-            name: 'Clean Old Logs',
-            description: 'Remove log files older than 30 days',
-            category: 'maintenance',
-            status: 'idle',
-            lastRun: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-            duration: 10
-          },
           {
             id: 'health-check',
             name: 'System Health Check',
@@ -297,6 +350,144 @@ export default function SystemOperationsPage() {
         </button>
       </div>
 
+      {/* Maintenance Mode Control */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <Power className="mr-2 h-5 w-5 text-yellow-600" />
+            Maintenance Mode
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">Control system-wide maintenance mode and scheduled downtime</p>
+        </div>
+        <div className="p-6">
+          {maintenanceStatus && (
+            <div className={`mb-4 p-4 rounded-lg ${
+              maintenanceStatus.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
+              maintenanceStatus.type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' :
+              'bg-blue-50 text-blue-800 border border-blue-200'
+            }`}>
+              <div className="flex items-center">
+                {maintenanceStatus.type === 'success' ? <CheckCircle className="h-5 w-5 mr-2" /> : 
+                 <AlertTriangle className="h-5 w-5 mr-2" />}
+                {maintenanceStatus.message}
+              </div>
+            </div>
+          )}
+
+          {/* Status and Toggle */}
+          <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  maintenanceConfig.enabled ? 'bg-yellow-100' : 'bg-green-100'
+                }`}>
+                  <Power className={`h-6 w-6 ${
+                    maintenanceConfig.enabled ? 'text-yellow-600' : 'text-green-600'
+                  }`} />
+                </div>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-900">
+                    {maintenanceConfig.enabled ? 'Maintenance Mode Active' : 'System Operational'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {maintenanceConfig.enabled ? 'Users will see the maintenance message' : 'All users can access the system normally'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleMaintenanceMode}
+                className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                  maintenanceConfig.enabled 
+                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                }`}
+              >
+                {maintenanceConfig.enabled ? 'Disable Maintenance' : 'Enable Maintenance'}
+              </button>
+            </div>
+          </div>
+
+          {/* Configuration */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Maintenance Message
+              </label>
+              <textarea
+                value={maintenanceConfig.message}
+                onChange={(e) => setMaintenanceConfig({ ...maintenanceConfig, message: e.target.value })}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter the message users will see during maintenance..."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="inline h-4 w-4 mr-1" />
+                  Scheduled Start (Optional)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={maintenanceConfig.scheduledStart || ''}
+                  onChange={(e) => setMaintenanceConfig({ ...maintenanceConfig, scheduledStart: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="inline h-4 w-4 mr-1" />
+                  Scheduled End (Optional)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={maintenanceConfig.scheduledEnd || ''}
+                  onChange={(e) => setMaintenanceConfig({ ...maintenanceConfig, scheduledEnd: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Allowed IP Addresses (Optional)
+              </label>
+              <input
+                type="text"
+                value={maintenanceConfig.allowedIPs?.join(', ') || ''}
+                onChange={(e) => setMaintenanceConfig({ 
+                  ...maintenanceConfig, 
+                  allowedIPs: e.target.value.split(',').map(ip => ip.trim()).filter(ip => ip) 
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="10.92.3.1, 192.168.1.100 (comma-separated)"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                These IPs will bypass maintenance mode (useful for admin access)
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                onClick={loadMaintenanceConfig}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Reset
+              </button>
+              <button
+                onClick={saveMaintenanceConfig}
+                disabled={savingMaintenance}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                {savingMaintenance ? 'Saving...' : 'Save Configuration'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* System Information */}
       {systemInfo && (
         <div className="bg-white shadow rounded-lg">
@@ -338,12 +529,11 @@ export default function SystemOperationsPage() {
       )}
 
       {/* Operations by Category */}
-      {['maintenance', 'deployment', 'monitoring'].map(category => {
+      {['deployment', 'monitoring'].map(category => {
         const categoryOps = operations.filter(op => op.category === category);
         if (categoryOps.length === 0) return null;
 
         const categoryTitles: Record<string, string> = {
-          maintenance: 'Maintenance',
           deployment: 'Deployment',
           monitoring: 'Monitoring'
         };
@@ -481,36 +671,46 @@ export default function SystemOperationsPage() {
         </div>
       </div>
 
-      {/* Emergency Operations */}
-      <div className="bg-red-50 border border-red-200 rounded-lg">
-        <div className="px-6 py-4 border-b border-red-200">
-          <h3 className="text-lg font-medium text-red-900 flex items-center">
-            <AlertTriangle className="mr-2 h-5 w-5" />
-            Emergency Operations
+      {/* Quick Links */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="px-6 py-4 border-b border-blue-200">
+          <h3 className="text-lg font-medium text-blue-900 flex items-center">
+            <Settings className="mr-2 h-5 w-5" />
+            Additional System Tools
           </h3>
-          <p className="text-sm text-red-700 mt-1">Use these operations only in emergency situations</p>
+          <p className="text-sm text-blue-700 mt-1">Access other system management features</p>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="p-4 border border-red-300 rounded-lg text-left hover:bg-red-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="/admin/cache" className="p-4 border border-blue-300 rounded-lg text-left hover:bg-blue-100 transition-colors">
               <div className="flex items-center">
-                <Trash2 className="h-5 w-5 text-red-600 mr-3" />
+                <Database className="h-5 w-5 text-blue-600 mr-3" />
                 <div>
-                  <div className="font-medium text-red-900">Emergency Cache Clear</div>
-                  <div className="text-sm text-red-700 mt-1">Clear all caches and restart services</div>
+                  <div className="font-medium text-blue-900">Cache Management</div>
+                  <div className="text-sm text-blue-700 mt-1">View and manage application cache</div>
                 </div>
               </div>
-            </button>
+            </a>
             
-            <button className="p-4 border border-red-300 rounded-lg text-left hover:bg-red-100">
+            <a href="/admin/health" className="p-4 border border-blue-300 rounded-lg text-left hover:bg-blue-100 transition-colors">
               <div className="flex items-center">
-                <RefreshCw className="h-5 w-5 text-red-600 mr-3" />
+                <Server className="h-5 w-5 text-blue-600 mr-3" />
                 <div>
-                  <div className="font-medium text-red-900">Force Application Restart</div>
-                  <div className="text-sm text-red-700 mt-1">Force restart the entire application</div>
+                  <div className="font-medium text-blue-900">Health Monitoring</div>
+                  <div className="text-sm text-blue-700 mt-1">Real-time system health metrics</div>
                 </div>
               </div>
-            </button>
+            </a>
+
+            <a href="/admin/audit" className="p-4 border border-blue-300 rounded-lg text-left hover:bg-blue-100 transition-colors">
+              <div className="flex items-center">
+                <AlertTriangle className="h-5 w-5 text-blue-600 mr-3" />
+                <div>
+                  <div className="font-medium text-blue-900">Audit Logs</div>
+                  <div className="text-sm text-blue-700 mt-1">View system activity and changes</div>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </div>
