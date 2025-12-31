@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Filter, Search, Download, Eye, Calendar, User, Activity } from 'lucide-react';
+import { FileText, Filter, Search, Download, Eye, Calendar, User, Activity, Building2 } from 'lucide-react';
 
 interface AuditLog {
   id: string;
@@ -12,9 +12,29 @@ interface AuditLog {
   resourceId?: string;
   oldValues?: any;
   newValues?: any;
+  metadata?: any;
   ipAddress?: string;
   userAgent?: string;
   timestamp: string;
+  // Multi-tenant specific fields
+  fromConstructionGroupId?: string | null;
+  toConstructionGroupId?: string | null;
+  user?: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+  } | null;
+  fromConstructionGroup?: {
+    id: string;
+    code: string;
+    name: string;
+  } | null;
+  toConstructionGroup?: {
+    id: string;
+    code: string;
+    name: string;
+  } | null;
 }
 
 interface AuditFilters {
@@ -26,10 +46,14 @@ interface AuditFilters {
   search: string;
 }
 
+type TabType = 'all' | 'system' | 'cg-operations' | 'user-operations' | 'volunteer-operations';
+
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+  const [expandedLog, setExpandedLog] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('all');
   const [filters, setFilters] = useState<AuditFilters>({
     action: '',
     resource: '',
@@ -41,22 +65,41 @@ export default function AuditLogsPage() {
 
   useEffect(() => {
     loadAuditLogs();
-  }, [filters]);
+  }, [filters, activeTab]);
 
   const loadAuditLogs = async () => {
     try {
-      const response = await fetch('/api/v1/admin/audit/logs', {
-        credentials: 'include',
-        cache: 'no-store',
-      });
+      setLoading(true);
+      // Fetch both general and multi-tenant logs
+      const [generalResponse, multiTenantResponse] = await Promise.all([
+        fetch('/api/v1/admin/audit/logs', {
+          credentials: 'include',
+          cache: 'no-store',
+        }),
+        fetch('/api/v1/admin/audit/multi-tenant', {
+          credentials: 'include',
+          cache: 'no-store',
+        })
+      ]);
       
-      if (response.ok) {
-        const data = await response.json();
-        setLogs(data.logs || []);
-      } else {
-        console.error('Failed to load audit logs:', response.statusText);
-        setLogs([]);
+      let allLogs: AuditLog[] = [];
+      
+      if (generalResponse.ok) {
+        const generalData = await generalResponse.json();
+        allLogs = [...allLogs, ...(generalData.logs || [])];
       }
+      
+      if (multiTenantResponse.ok) {
+        const multiTenantData = await multiTenantResponse.json();
+        allLogs = [...allLogs, ...(multiTenantData.logs || [])];
+      }
+      
+      // Sort by timestamp descending
+      allLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      // Apply tab filtering
+      const filteredLogs = filterLogsByTab(allLogs);
+      setLogs(filteredLogs);
     } catch (error) {
       console.error('Failed to load audit logs:', error);
     } finally {
@@ -64,32 +107,63 @@ export default function AuditLogsPage() {
     }
   };
 
-  const getActionColor = (action: string) => {
-    switch (action) {
-      case 'CREATE':
-        return 'bg-green-100 text-green-800';
-      case 'UPDATE':
-        return 'bg-blue-100 text-blue-800';
-      case 'DELETE':
-        return 'bg-red-100 text-red-800';
-      case 'LOGIN':
-        return 'bg-purple-100 text-purple-800';
-      case 'LOGOUT':
-        return 'bg-gray-100 text-gray-800';
+  const filterLogsByTab = (logs: AuditLog[]): AuditLog[] => {
+    switch (activeTab) {
+      case 'system':
+        return logs.filter(log => 
+          ['EMAIL_CONFIG', 'SESSION', 'ANNOUNCEMENT', 'SYSTEM'].includes(log.resource)
+        );
+      case 'cg-operations':
+        return logs.filter(log => 
+          log.resource === 'CONSTRUCTION_GROUP' || 
+          log.resource === 'CG_FILTER' ||
+          log.action.includes('CG_')
+        );
+      case 'user-operations':
+        return logs.filter(log => 
+          log.resource === 'USER' && !log.action.includes('CG_')
+        );
+      case 'volunteer-operations':
+        return logs.filter(log => 
+          log.resource === 'VOLUNTEER'
+        );
+      case 'all':
       default:
-        return 'bg-gray-100 text-gray-800';
+        return logs;
     }
+  };
+
+  const getActionColor = (action: string) => {
+    if (action.includes('CREATE') || action.includes('CREATED')) {
+      return 'bg-green-100 text-green-800';
+    } else if (action.includes('UPDATE') || action.includes('UPDATED')) {
+      return 'bg-blue-100 text-blue-800';
+    } else if (action.includes('DELETE') || action.includes('DELETED')) {
+      return 'bg-red-100 text-red-800';
+    } else if (action.includes('LOGIN')) {
+      return 'bg-purple-100 text-purple-800';
+    } else if (action.includes('REACTIVATED')) {
+      return 'bg-yellow-100 text-yellow-800';
+    } else {
+      return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatAction = (action: string) => {
+    return action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   };
 
   const exportLogs = () => {
     const csv = [
-      ['Timestamp', 'User', 'Action', 'Resource', 'Resource ID', 'IP Address'].join(','),
+      ['Timestamp', 'User', 'Action', 'Resource', 'Resource ID', 'From CG', 'To CG', 'IP Address'].join(','),
       ...logs.map(log => [
         log.timestamp,
-        log.userName || 'Unknown',
+        log.userName || log.user?.name || 'Unknown',
         log.action,
         log.resource,
         log.resourceId || '',
+        log.fromConstructionGroup?.code || '',
+        log.toConstructionGroup?.code || '',
         log.ipAddress || ''
       ].join(','))
     ].join('\n');
@@ -98,10 +172,18 @@ export default function AuditLogsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `audit-logs-${activeTab}-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
+
+  const tabs = [
+    { id: 'all' as TabType, label: 'All Logs', icon: FileText },
+    { id: 'system' as TabType, label: 'System Operations', icon: Activity },
+    { id: 'cg-operations' as TabType, label: 'CG Operations', icon: Building2 },
+    { id: 'user-operations' as TabType, label: 'User Operations', icon: User },
+    { id: 'volunteer-operations' as TabType, label: 'Volunteer Operations', icon: User },
+  ];
 
   if (loading) {
     return (
@@ -124,7 +206,7 @@ export default function AuditLogsPage() {
             Audit Logs
           </h2>
           <p className="text-gray-600 mt-1">
-            Track all system activities and user actions
+            Track all system activities, CG operations, and user actions
           </p>
         </div>
         <button
@@ -136,37 +218,29 @@ export default function AuditLogsPage() {
         </button>
       </div>
 
-      {/* Audit Log Types */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white shadow rounded-lg p-6 border-l-4 border-blue-500">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">General Audit Logs</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Standard system activity logs for all user actions
-          </p>
-          <div className="text-sm text-gray-500">
-            Currently viewing this page
-          </div>
-        </div>
-        
-        <a 
-          href="/admin/audit/multi-tenant"
-          className="bg-gradient-to-br from-blue-50 to-indigo-50 shadow rounded-lg p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-shadow cursor-pointer group"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-              Multi-Tenant Audit Logs
-            </h3>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-              Phase 2.3
-            </span>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">
-            Track Construction Group operations, CG filter changes, and cross-tenant activities
-          </p>
-          <div className="text-sm text-indigo-600 font-medium group-hover:text-indigo-700">
-            View Multi-Tenant Logs →
-          </div>
-        </a>
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex items-center py-4 px-1 border-b-2 font-medium text-sm
+                  ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }
+                `}
+              >
+                <Icon className="h-5 w-5 mr-2" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Filters */}
@@ -202,7 +276,11 @@ export default function AuditLogsPage() {
               <option value="UPDATE">Update</option>
               <option value="DELETE">Delete</option>
               <option value="LOGIN">Login</option>
-              <option value="LOGOUT">Logout</option>
+              <option value="CG_CREATED">CG Created</option>
+              <option value="CG_UPDATED">CG Updated</option>
+              <option value="CG_DELETED">CG Deleted</option>
+              <option value="CG_REACTIVATED">CG Reactivated</option>
+              <option value="CG_FILTER_CHANGE">CG Filter Change</option>
             </select>
           </div>
 
@@ -217,10 +295,12 @@ export default function AuditLogsPage() {
             >
               <option value="">All Resources</option>
               <option value="USER">User</option>
+              <option value="VOLUNTEER">Volunteer</option>
+              <option value="CONSTRUCTION_GROUP">Construction Group</option>
+              <option value="CG_FILTER">CG Filter</option>
               <option value="PROJECT">Project</option>
               <option value="EMAIL_CONFIG">Email Config</option>
               <option value="SESSION">Session</option>
-              <option value="ROLE">Role</option>
             </select>
           </div>
 
@@ -270,7 +350,7 @@ export default function AuditLogsPage() {
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">
-            Audit Logs ({logs.length})
+            {tabs.find(t => t.id === activeTab)?.label} ({logs.length})
           </h3>
         </div>
 
@@ -291,141 +371,150 @@ export default function AuditLogsPage() {
                   Resource
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  CG Context
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   IP Address
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  Details
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                     No audit logs found matching your criteria.
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{log.userName || 'Unknown'}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActionColor(log.action)}`}>
-                        {log.action}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.resource}
-                      {log.resourceId && (
-                        <div className="text-xs text-gray-500">ID: {log.resourceId}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.ipAddress || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => setSelectedLog(log)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
+                  <React.Fragment key={log.id}>
+                    <tr className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          {new Date(log.timestamp).toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 text-gray-400 mr-2" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {log.userName || log.user?.name || 'Unknown'}
+                            </div>
+                            {log.user?.email && (
+                              <div className="text-xs text-gray-500">{log.user.email}</div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActionColor(log.action)}`}>
+                          {formatAction(log.action)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <div>{log.resource}</div>
+                            {log.resourceId && (
+                              <div className="text-xs text-gray-500">{log.resourceId.substring(0, 8)}...</div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {log.fromConstructionGroup || log.toConstructionGroup ? (
+                          <div className="flex items-center gap-2">
+                            {log.fromConstructionGroup && (
+                              <span className="text-xs text-gray-600">
+                                {log.fromConstructionGroup.code}
+                              </span>
+                            )}
+                            {log.fromConstructionGroup && log.toConstructionGroup && (
+                              <span className="text-gray-400">→</span>
+                            )}
+                            {log.toConstructionGroup && (
+                              <span className="text-xs font-medium text-blue-600">
+                                {log.toConstructionGroup.code}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {log.ipAddress || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button 
+                          onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {expandedLog === log.id ? 'Hide' : 'Show'}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedLog === log.id && (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-6 bg-gray-50">
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-900">Audit Log Details</h3>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">IP Address</label>
+                                <p className="text-sm text-gray-900">{log.ipAddress || 'Not recorded'}</p>
+                              </div>
+                              
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">User Agent</label>
+                                <p className="text-sm text-gray-900 truncate">{log.userAgent || 'Not recorded'}</p>
+                              </div>
+                            </div>
+
+                            {log.metadata && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Metadata</label>
+                                <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
+                                  {JSON.stringify(log.metadata, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+
+                            {log.oldValues && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Old Values</label>
+                                <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
+                                  {JSON.stringify(log.oldValues, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+
+                            {log.newValues && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">New Values</label>
+                                <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto">
+                                  {JSON.stringify(log.newValues, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Log Detail Modal */}
-      {selectedLog && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-96 overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Audit Log Details</h3>
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Timestamp</label>
-                  <p className="text-sm text-gray-900">{new Date(selectedLog.timestamp).toLocaleString()}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">User</label>
-                  <p className="text-sm text-gray-900">{selectedLog.userName || 'Unknown'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Action</label>
-                  <p className="text-sm text-gray-900">{selectedLog.action}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Resource</label>
-                  <p className="text-sm text-gray-900">{selectedLog.resource}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">IP Address</label>
-                  <p className="text-sm text-gray-900">{selectedLog.ipAddress || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Resource ID</label>
-                  <p className="text-sm text-gray-900">{selectedLog.resourceId || 'N/A'}</p>
-                </div>
-              </div>
-
-              {selectedLog.oldValues && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Old Values</label>
-                  <pre className="text-xs bg-gray-100 p-3 rounded-md overflow-x-auto">
-                    {JSON.stringify(selectedLog.oldValues, null, 2)}
-                  </pre>
-                </div>
-              )}
-
-              {selectedLog.newValues && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New Values</label>
-                  <pre className="text-xs bg-gray-100 p-3 rounded-md overflow-x-auto">
-                    {JSON.stringify(selectedLog.newValues, null, 2)}
-                  </pre>
-                </div>
-              )}
-
-              {selectedLog.userAgent && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">User Agent</label>
-                  <p className="text-xs text-gray-600 break-all">{selectedLog.userAgent}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

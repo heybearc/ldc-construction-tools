@@ -22,14 +22,14 @@ export default async function AuditLogsHelpPage() {
   const htmlContent = marked(fileContents)
 
   return (
-    <HelpLayout title="Multi-Tenant Audit Logs">
+    <HelpLayout title="Audit Logs">
       <div className="max-w-4xl mx-auto">
         <nav className="mb-6 text-sm">
           <Link href="/help" className="text-blue-600 hover:text-blue-800">Help Center</Link>
           <span className="mx-2 text-gray-400">/</span>
           <Link href="/help/admin" className="text-blue-600 hover:text-blue-800">Admin Help</Link>
           <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-600">Multi-Tenant Audit Logs</span>
+          <span className="text-gray-600">Audit Logs</span>
         </nav>
 
         <div 

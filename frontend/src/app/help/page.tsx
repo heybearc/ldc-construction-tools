@@ -74,8 +74,8 @@ const helpTopics: HelpTopic[] = [
   },
   {
     id: 'admin/audit-logs',
-    title: 'Multi-Tenant Audit Logs',
-    description: 'Track Construction Group operations and cross-tenant activities',
+    title: 'Audit Logs',
+    description: 'Track all system activities, CG operations, and user actions',
     roles: ['SUPER_ADMIN'],
     icon: '📋'
   },

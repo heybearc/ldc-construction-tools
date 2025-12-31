@@ -1,8 +1,8 @@
-# 📋 Multi-Tenant Audit Logs
+# 📋 Audit Logs
 
 ## Overview
 
-The Multi-Tenant Audit Logs feature helps Super Admins track all Construction Group operations and cross-tenant activities. This powerful tool provides complete visibility into who made what changes, when, and from where.
+The Audit Logs feature helps Super Admins track all system activities, Construction Group operations, and user actions. This powerful tool provides complete visibility into who made what changes, when, from which CG, and from where.
 
 ## What Gets Logged
 
@@ -17,10 +17,13 @@ The system automatically tracks:
 ## How to Access Audit Logs
 
 1. Go to **Admin** → **Audit Logs** (in the sidebar)
-2. You'll see two options:
-   - **General Audit Logs** - Standard system activity
-   - **Multi-Tenant Audit Logs** - CG operations and cross-tenant tracking
-3. Click on **Multi-Tenant Audit Logs** to view CG-specific activities
+2. You'll see a unified audit log page with filter tabs:
+   - **All Logs** - Everything in one place
+   - **System Operations** - Email config, announcements, etc.
+   - **CG Operations** - Construction Group management
+   - **User Operations** - User account changes
+   - **Volunteer Operations** - Volunteer data changes
+3. Click any tab to filter logs by category
 
 ## Understanding the Audit Log Table
 
@@ -133,12 +136,14 @@ No. Audit logs are immutable and cannot be edited or deleted. This ensures data 
 
 ### Why don't I see some actions?
 
-You might be viewing **General Audit Logs** instead of **Multi-Tenant Audit Logs**. Make sure you're on the Multi-Tenant page for CG-specific operations.
+Make sure you're on the correct tab. Use the filter tabs at the top to switch between All Logs, System Operations, CG Operations, User Operations, and Volunteer Operations.
 
-### What's the difference between General and Multi-Tenant logs?
+### How do I see which CG a user was in when they made changes?
 
-- **General Audit Logs** - Standard system operations (email config, announcements, etc.)
-- **Multi-Tenant Audit Logs** - Construction Group operations and cross-tenant activities
+Look at the **CG Context** column in the audit table. This shows:
+- The CG the user was viewing/working in
+- CG transitions (e.g., CG 01.12 → CG 01.15) for filter changes
+- Empty if the action wasn't CG-specific
 
 ### Can I see who viewed data?
 
@@ -162,7 +167,7 @@ Multi-tenant audit logging was added in version 1.24.0. Only actions after this 
 
 ## Quick Access
 
-**Admin** → **Audit Logs** → **Multi-Tenant Audit Logs**
+**Admin** → **Audit Logs** (use tabs to filter by category)
 
 ---
 
