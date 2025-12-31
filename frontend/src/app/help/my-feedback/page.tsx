@@ -65,11 +65,21 @@ export default function MyFeedbackPage() {
       });
 
       if (response.ok) {
-        await fetchMyFeedback();
-        const updatedFeedback = feedback.find(f => f.id === selectedFeedback.id);
-        if (updatedFeedback) {
-          setSelectedFeedback(updatedFeedback);
+        // Fetch updated feedback data
+        const feedbackResponse = await fetch('/api/v1/feedback/my-feedback');
+        const feedbackData = await feedbackResponse.json();
+        
+        if (feedbackData.success) {
+          const updatedFeedbackList = feedbackData.data.feedback;
+          setFeedback(updatedFeedbackList);
+          
+          // Update the selected feedback with the latest data
+          const updatedItem = updatedFeedbackList.find((f: FeedbackItem) => f.id === selectedFeedback.id);
+          if (updatedItem) {
+            setSelectedFeedback(updatedItem);
+          }
         }
+        
         setNewComment('');
       } else {
         alert('Failed to add comment');

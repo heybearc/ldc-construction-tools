@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
           include: {
             author: {
               select: {
+                name: true,
                 firstName: true,
                 lastName: true,
                 role: true
@@ -72,7 +73,11 @@ export async function GET(request: NextRequest) {
       comments: (item.comments || []).map((comment: any) => ({
         id: comment.id,
         content: comment.content,
-        author: comment.author ? `${comment.author.firstName} ${comment.author.lastName}` : 'Unknown',
+        author: comment.author 
+          ? (comment.author.firstName && comment.author.lastName 
+              ? `${comment.author.firstName} ${comment.author.lastName}` 
+              : comment.author.name || comment.author.firstName || comment.author.lastName || 'User')
+          : 'Unknown',
         createdAt: comment.createdAt.toISOString()
       })),
       attachments: (item.attachments || []).map((attachment: any) => ({
