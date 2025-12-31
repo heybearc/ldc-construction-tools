@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import os from 'os';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
 
 export async function GET() {
   try {
@@ -25,30 +29,27 @@ export async function GET() {
       ip = '10.92.3.23';
     }
     
-    // Try to determine if this is LIVE or STANDBY by checking HAProxy
-    // This is a simple heuristic - in production you'd query HAProxy stats
+    // Determine if this is LIVE or STANDBY by reading deployment state file
     let status: 'LIVE' | 'STANDBY' = 'STANDBY';
     
-    // Check if we're receiving production traffic (simple heuristic)
-    // In a real setup, you'd query HAProxy or check a shared state
     try {
-      const response = await fetch('http://10.92.3.26:8404/stats;csv', {
-        signal: AbortSignal.timeout(1000)
-      });
+      // Try to read the deployment state file
+      const stateData = await fs.readFile(STATE_FILE, 'utf-8');
+      const state = JSON.parse(stateData);
       
-      if (response.ok) {
-        const stats = await response.text();
-        // Parse HAProxy stats to determine which backend is active
-        if (stats.includes('ldc-tools-green') && stats.includes('UP')) {
-          status = server === 'GREEN' ? 'LIVE' : 'STANDBY';
-        } else if (stats.includes('ldc-tools-blue') && stats.includes('UP')) {
-          status = server === 'BLUE' ? 'LIVE' : 'STANDBY';
-        }
+      // Check which server is currently LIVE
+      if (state.liveServer === server) {
+        status = 'LIVE';
+      } else {
+        status = 'STANDBY';
       }
     } catch (error) {
-      // If we can't reach HAProxy, use environment variable as fallback
+      // If state file doesn't exist or can't be read, use environment variable
       if (process.env.SERVER_STATUS) {
         status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
+      } else {
+        // Default fallback: BLUE is typically LIVE initially
+        status = server === 'BLUE' ? 'LIVE' : 'STANDBY';
       }
     }
     
