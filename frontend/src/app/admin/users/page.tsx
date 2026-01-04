@@ -44,8 +44,8 @@ export default function UserManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '' });
-  const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '' });
+  const [createForm, setCreateForm] = useState({ name: '', email: '', role: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [passwordManagement, setPasswordManagement] = useState({ changePassword: false, newPassword: '', sendResetEmail: false });
@@ -145,12 +145,13 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User invitation sent successfully!');
-        setInviteForm({ name: '', email: '', role: '', regionId: '', zoneId: '' });
+        setInviteForm({ name: '', email: '', role: '' });
         setIsInviteModalOpen(false);
         loadUsers();
         loadUserStats();
       } else {
-        alert('Failed to send invitation. Please try again.');
+        const errorData = await response.json();
+        alert(`Failed to send invitation: ${errorData.error || errorData.message || 'Please try again.'}`);
       }
     } catch (error) {
       console.error('Failed to invite user:', error);
@@ -173,7 +174,7 @@ export default function UserManagementPage() {
       
       if (response.ok) {
         alert('User created successfully!');
-        setCreateForm({ name: '', email: '', role: '', regionId: '', zoneId: '', password: '' });
+        setCreateForm({ name: '', email: '', role: '', password: '' });
         setIsCreateModalOpen(false);
         loadUsers();
         loadUserStats();
@@ -693,8 +694,6 @@ export default function UserManagementPage() {
             <form onSubmit={handleInviteUser} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Name *
                 </label>
                 <input
@@ -707,6 +706,8 @@ export default function UserManagementPage() {
                 />
               </div>
               
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address *
                 </label>
                 <input
@@ -738,51 +739,6 @@ export default function UserManagementPage() {
                 <p className="mt-1 text-xs text-gray-500">
                   System role controls platform access. Organizational roles are assigned through the volunteer record.
                 </p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Zone
-                  </label>
-                  <select
-                    value={inviteForm.zoneId}
-                    onChange={(e) => setInviteForm({...inviteForm, zoneId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Zone</option>
-                    <option value="zone-1">Zone 1</option>
-                    <option value="zone-2">Zone 2</option>
-                    <option value="zone-3">Zone 3</option>
-                    <option value="zone-4">Zone 4</option>
-                    <option value="zone-5">Zone 5</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Region
-                  </label>
-                  <select
-                    value={inviteForm.regionId}
-                    onChange={(e) => setInviteForm({...inviteForm, regionId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Region</option>
-                    <option value="region-1">Region 1</option>
-                    <option value="region-2">Region 2</option>
-                    <option value="region-3">Region 3</option>
-                    <option value="region-4">Region 4</option>
-                    <option value="region-5">Region 5</option>
-                    <option value="region-6">Region 6</option>
-                    <option value="region-7">Region 7</option>
-                    <option value="region-8">Region 8</option>
-                    <option value="region-9">Region 9</option>
-                    <option value="region-10">Region 10</option>
-                    <option value="region-11">Region 11</option>
-                    <option value="region-12">Region 12</option>
-                  </select>
-                </div>
               </div>
               
               <div className="flex justify-end space-x-3 pt-4">
@@ -919,51 +875,6 @@ export default function UserManagementPage() {
                   <option value="SAFETY_COORDINATOR_SUPPORT">Safety Coordinator Support</option>
                   <option value="READ_ONLY">Read Only</option>
                 </select>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Zone
-                  </label>
-                  <select
-                    value={createForm.zoneId}
-                    onChange={(e) => setCreateForm({...createForm, zoneId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="">Select Zone</option>
-                    <option value="zone-1">Zone 1</option>
-                    <option value="zone-2">Zone 2</option>
-                    <option value="zone-3">Zone 3</option>
-                    <option value="zone-4">Zone 4</option>
-                    <option value="zone-5">Zone 5</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Region
-                  </label>
-                  <select
-                    value={createForm.regionId}
-                    onChange={(e) => setCreateForm({...createForm, regionId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="">Select Region</option>
-                    <option value="region-1">Region 1</option>
-                    <option value="region-2">Region 2</option>
-                    <option value="region-3">Region 3</option>
-                    <option value="region-4">Region 4</option>
-                    <option value="region-5">Region 5</option>
-                    <option value="region-6">Region 6</option>
-                    <option value="region-7">Region 7</option>
-                    <option value="region-8">Region 8</option>
-                    <option value="region-9">Region 9</option>
-                    <option value="region-10">Region 10</option>
-                    <option value="region-11">Region 11</option>
-                    <option value="region-12">Region 12</option>
-                  </select>
-                </div>
               </div>
               
               <div className="flex justify-end space-x-3 pt-4">

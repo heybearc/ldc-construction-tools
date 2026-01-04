@@ -71,6 +71,9 @@ export default function CGSelector() {
         return;
       }
 
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('cg-filter-changed'));
+      
       // Add a small delay to ensure cookie is set, then reload
       setTimeout(() => {
         // Use location.replace to navigate to current page without adding to history

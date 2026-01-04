@@ -25,9 +25,21 @@ export default function DashboardPage() {
     upcomingEvents: 0
   });
   const [loading, setLoading] = useState(true);
+  const [cgInfo, setCgInfo] = useState<{ name: string; regionName: string } | null>(null);
 
   useEffect(() => {
     fetchDashboardStats();
+    
+    // Listen for CG filter changes
+    const handleCGChange = () => {
+      fetchDashboardStats();
+    };
+    
+    window.addEventListener('cg-filter-changed', handleCGChange);
+    
+    return () => {
+      window.removeEventListener('cg-filter-changed', handleCGChange);
+    };
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -35,6 +47,22 @@ export default function DashboardPage() {
       let volunteerCount = 0;
       let teamCount = 0;
       let projectCount = 0;
+
+      // Fetch CG info
+      try {
+        const cgRes = await fetch('/api/v1/user/cg-info', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
+        if (cgRes.ok) {
+          const cgData = await cgRes.json();
+          setCgInfo(cgData);
+        }
+      } catch (error) {
+        console.error('Error fetching CG info:', error);
+      }
 
       // Fetch volunteers data
       try {
@@ -155,7 +183,11 @@ export default function DashboardPage() {
               Welcome to LDC Tools
             </h1>
             <p className="mt-2 text-sm sm:text-lg text-gray-600">
-              Construction Group coordination and trade team management for Region 01.12
+              {cgInfo ? (
+                `Construction Group coordination and trade team management for ${cgInfo.regionName}`
+              ) : (
+                'Construction Group coordination and trade team management'
+              )}
             </p>
           </div>
         </div>

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, role, zoneId, regionId } = body;
+    const { name, email, role } = body;
     
     if (!email || !role) {
       return NextResponse.json(
@@ -62,8 +62,6 @@ export async function POST(request: NextRequest) {
         email,
         role,
         status: 'INVITED',
-        zoneId: zoneId || cgScope.zoneId || '01',
-        regionId: regionId || cgScope.regionId || '01.12',
         ...(cgScope?.constructionGroupId && {
           constructionGroup: {
             connect: { id: cgScope.constructionGroupId }
@@ -88,8 +86,6 @@ export async function POST(request: NextRequest) {
         firstName: name?.split(' ')[0] || '',
         lastName: name?.split(' ').slice(1).join(' ') || '',
         role,
-        regionId: regionId || cgScope.regionId || '',
-        zoneId: zoneId || cgScope.zoneId || '',
         invitedBy: cgScope.userId,
         invitationToken: inviteToken,
         expiresAt: inviteExpires,

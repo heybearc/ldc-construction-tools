@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { getCGScope } from '@/lib/cg-scope';
+import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 
 // GET /api/v1/volunteers/stats - Get volunteer statistics
 export async function GET(request: NextRequest) {
@@ -13,10 +13,13 @@ export async function GET(request: NextRequest) {
     }
 
     const cgScope = await getCGScope();
+    if (!cgScope) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const volunteers = await prisma.volunteer.findMany({
       where: {
-        constructionGroupId: cgScope.constructionGroupId,
+        ...withCGFilter(cgScope),
         isActive: true,
       },
       select: {

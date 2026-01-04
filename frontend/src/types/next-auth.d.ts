@@ -5,8 +5,8 @@ declare module "next-auth" {
     user: {
       id: string
       role: string
-      regionId: string
-      zoneId: string
+      adminLevel?: string
+      volunteerId?: string
     } & DefaultSession["user"]
   }
 
@@ -15,8 +15,8 @@ declare module "next-auth" {
     email: string
     name: string | null
     role: string
-    regionId: string
-    zoneId: string
+    adminLevel?: string
+    volunteerId?: string
   }
 }
 
@@ -24,7 +24,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string
     role: string
-    regionId: string
-    zoneId: string
+    adminLevel?: string
+    volunteerId?: string
   }
 }

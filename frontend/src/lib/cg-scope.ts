@@ -114,8 +114,10 @@ export async function getCGScope(): Promise<CGScope | null> {
       if (selectedCG) {
         cg = selectedCG;
       }
+    } else {
+      // No filter cookie means SUPER_ADMIN wants to see ALL CGs
+      cg = null;
     }
-    // If no filter cookie, SUPER_ADMIN sees all CGs (cg remains null or their assigned CG)
   }
 
   return {
@@ -147,16 +149,16 @@ export function withCGFilter(
 ): Record<string, unknown> {
   const { allowCrossZone = false, cgField = 'constructionGroupId' } = options;
 
+  // Super admin with no CG filter sees everything
+  if (scope.canViewAllBranches && !scope.constructionGroupId) {
+    return {};
+  }
+
   // If a specific CG is set (e.g., SUPER_ADMIN filtered to a specific CG), use it
   if (scope.constructionGroupId) {
     return {
       [cgField]: scope.constructionGroupId,
     };
-  }
-
-  // Super admin with no CG filter sees everything
-  if (scope.canViewAllBranches) {
-    return {};
   }
 
   // Zone-level users see all CGs in their zone

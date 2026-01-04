@@ -69,10 +69,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-          adminLevel: user.adminLevel,
-          regionId: user.regionId,
-          zoneId: user.zoneId,
-          volunteerId: user.volunteerId,
+          adminLevel: user.adminLevel || undefined,
+          volunteerId: user.volunteerId || undefined,
         }
       }
     })
@@ -96,8 +94,6 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = user.role
         token.adminLevel = user.adminLevel
-        token.regionId = user.regionId
-        token.zoneId = user.zoneId
         token.volunteerId = user.volunteerId
       }
       return token
@@ -109,8 +105,6 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.user.adminLevel = token.adminLevel as string
-        session.user.regionId = token.regionId as string
-        session.user.zoneId = token.zoneId as string
         session.user.volunteerId = token.volunteerId as string
       }
       return session
