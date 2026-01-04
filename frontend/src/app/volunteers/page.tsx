@@ -66,6 +66,13 @@ export default function VolunteersPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [userOrgRoles, setUserOrgRoles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Quick filter states
+  const [statusFilter, setStatusFilter] = useState<string>('active');
+  const [servingAsFilter, setServingAsFilter] = useState<string>('');
+  const [hasEmailFilter, setHasEmailFilter] = useState<string>('');
+  const [hasPhoneFilter, setHasPhoneFilter] = useState<string>('');
+  const [isAssignedFilter, setIsAssignedFilter] = useState<string>('');
 
   // Fetch user's organizational roles
   useEffect(() => {
@@ -94,6 +101,11 @@ export default function VolunteersPage() {
     fetchStats();
   }, []);
 
+  // Re-fetch when filters change
+  useEffect(() => {
+    fetchVolunteers();
+  }, [searchTerm, roleFilter, congregationFilter, statusFilter, servingAsFilter, hasEmailFilter, hasPhoneFilter, isAssignedFilter]);
+
   const fetchVolunteers = async () => {
     try {
       setLoading(true);
@@ -101,6 +113,11 @@ export default function VolunteersPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (roleFilter) params.append('role', roleFilter);
       if (congregationFilter) params.append('congregation', congregationFilter);
+      if (statusFilter) params.append('status', statusFilter);
+      if (servingAsFilter) params.append('servingAs', servingAsFilter);
+      if (hasEmailFilter) params.append('hasEmail', hasEmailFilter);
+      if (hasPhoneFilter) params.append('hasPhone', hasPhoneFilter);
+      if (isAssignedFilter) params.append('isAssigned', isAssignedFilter);
       
       const response = await fetch(`/api/v1/volunteers?${params}`);
       if (response.ok) {
@@ -462,6 +479,143 @@ export default function VolunteersPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="border-t pt-3 mt-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Quick Filters:</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {/* Status Filter */}
+              <button
+                onClick={() => setStatusFilter(statusFilter === 'active' ? '' : 'active')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  statusFilter === 'active'
+                    ? 'bg-green-100 text-green-800 border-2 border-green-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <UserCheck className="h-3.5 w-3.5 inline mr-1" />
+                Active Only
+              </button>
+              <button
+                onClick={() => setStatusFilter(statusFilter === 'inactive' ? '' : 'inactive')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  statusFilter === 'inactive'
+                    ? 'bg-red-100 text-red-800 border-2 border-red-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <UserX className="h-3.5 w-3.5 inline mr-1" />
+                Inactive Only
+              </button>
+
+              {/* Email Filter */}
+              <button
+                onClick={() => setHasEmailFilter(hasEmailFilter === 'true' ? '' : 'true')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  hasEmailFilter === 'true'
+                    ? 'bg-blue-100 text-blue-800 border-2 border-blue-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Mail className="h-3.5 w-3.5 inline mr-1" />
+                Has Email
+              </button>
+              <button
+                onClick={() => setHasEmailFilter(hasEmailFilter === 'false' ? '' : 'false')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  hasEmailFilter === 'false'
+                    ? 'bg-orange-100 text-orange-800 border-2 border-orange-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Mail className="h-3.5 w-3.5 inline mr-1" />
+                Missing Email
+              </button>
+
+              {/* Phone Filter */}
+              <button
+                onClick={() => setHasPhoneFilter(hasPhoneFilter === 'true' ? '' : 'true')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  hasPhoneFilter === 'true'
+                    ? 'bg-purple-100 text-purple-800 border-2 border-purple-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Phone className="h-3.5 w-3.5 inline mr-1" />
+                Has Phone
+              </button>
+              <button
+                onClick={() => setHasPhoneFilter(hasPhoneFilter === 'false' ? '' : 'false')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  hasPhoneFilter === 'false'
+                    ? 'bg-orange-100 text-orange-800 border-2 border-orange-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Phone className="h-3.5 w-3.5 inline mr-1" />
+                Missing Phone
+              </button>
+
+              {/* Assignment Filter */}
+              <button
+                onClick={() => setIsAssignedFilter(isAssignedFilter === 'true' ? '' : 'true')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  isAssignedFilter === 'true'
+                    ? 'bg-teal-100 text-teal-800 border-2 border-teal-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Building2 className="h-3.5 w-3.5 inline mr-1" />
+                Assigned to Crew
+              </button>
+              <button
+                onClick={() => setIsAssignedFilter(isAssignedFilter === 'false' ? '' : 'false')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  isAssignedFilter === 'false'
+                    ? 'bg-orange-100 text-orange-800 border-2 border-orange-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Building2 className="h-3.5 w-3.5 inline mr-1" />
+                Unassigned
+              </button>
+
+              {/* Serving As Filter */}
+              <select
+                value={servingAsFilter}
+                onChange={(e) => setServingAsFilter(e.target.value)}
+                className="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border-0"
+              >
+                <option value="">All Serving As</option>
+                <option value="Elder">Elders</option>
+                <option value="Ministerial Servant">Ministerial Servants</option>
+                <option value="Regular Pioneer">Regular Pioneers</option>
+                <option value="Publisher">Publishers</option>
+              </select>
+
+              {/* Clear All Filters */}
+              {(statusFilter || servingAsFilter || hasEmailFilter || hasPhoneFilter || isAssignedFilter || searchTerm || roleFilter || congregationFilter) && (
+                <button
+                  onClick={() => {
+                    setStatusFilter('active');
+                    setServingAsFilter('');
+                    setHasEmailFilter('');
+                    setHasPhoneFilter('');
+                    setIsAssignedFilter('');
+                    setSearchTerm('');
+                    setRoleFilter('');
+                    setCongregationFilter('');
+                  }}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -24,31 +24,94 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role') || '';
     const congregation = searchParams.get('congregation') || '';
     const crewId = searchParams.get('crewId') || '';
+    const tradeTeamId = searchParams.get('tradeTeamId') || '';
+    const servingAs = searchParams.get('servingAs') || '';
+    const hasEmail = searchParams.get('hasEmail') || '';
+    const hasPhone = searchParams.get('hasPhone') || '';
+    const isAssigned = searchParams.get('isAssigned') || '';
+    const status = searchParams.get('status') || '';
 
     const where: any = {
       ...withCGFilter(cgScope),
-      isActive: true,
     };
 
+    // Status filter (active/inactive/all)
+    if (status === 'active') {
+      where.isActive = true;
+    } else if (status === 'inactive') {
+      where.isActive = false;
+    }
+    // If status is 'all' or empty, don't filter by isActive
+
+    // Multi-field search
     if (search) {
       where.OR = [
         { firstName: { contains: search, mode: 'insensitive' } },
         { lastName: { contains: search, mode: 'insensitive' } },
         { baId: { contains: search, mode: 'insensitive' } },
         { congregation: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { emailPersonal: { contains: search, mode: 'insensitive' } },
+        { emailJw: { contains: search, mode: 'insensitive' } },
       ];
     }
 
+    // Role filter
     if (role) {
       where.role = role;
     }
 
+    // Congregation filter
     if (congregation) {
       where.congregation = congregation;
     }
 
+    // Crew filter
     if (crewId) {
       where.crewId = crewId;
+    }
+
+    // Trade team filter
+    if (tradeTeamId) {
+      where.tradeTeamId = tradeTeamId;
+    }
+
+    // Serving as filter (Elder, MS, Pioneer, Publisher)
+    if (servingAs) {
+      where.servingAs = {
+        has: servingAs,
+      };
+    }
+
+    // Has email filter
+    if (hasEmail === 'true') {
+      where.OR = where.OR || [];
+      where.OR.push(
+        { emailPersonal: { not: null } },
+        { emailJw: { not: null } }
+      );
+    } else if (hasEmail === 'false') {
+      where.emailPersonal = null;
+      where.emailJw = null;
+    }
+
+    // Has phone filter
+    if (hasPhone === 'true') {
+      where.phone = { not: null };
+    } else if (hasPhone === 'false') {
+      where.phone = null;
+    }
+
+    // Assignment filter
+    if (isAssigned === 'true') {
+      where.OR = where.OR || [];
+      where.OR.push(
+        { crewId: { not: null } },
+        { tradeTeamId: { not: null } }
+      );
+    } else if (isAssigned === 'false') {
+      where.crewId = null;
+      where.tradeTeamId = null;
     }
 
     const volunteers = await prisma.volunteer.findMany({
