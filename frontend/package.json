@@ -29,6 +29,7 @@
     "gray-matter": "^4.0.3",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
+    "libphonenumber-js": "^1.12.33",
     "lucide-react": "^0.460.0",
     "marked": "^9.1.6",
     "next": "14.2.33",

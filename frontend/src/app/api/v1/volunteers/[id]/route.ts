@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-config';
 import { getCGScope } from '@/lib/cg-scope';
 import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
 import { canManageVolunteers } from '@/lib/permissions';
+import { formatPhoneForStorage, validateAndFormatPhone } from '@/lib/phone-utils';
 
 // GET /api/v1/volunteers/[id] - Get a single volunteer
 export async function GET(
@@ -121,7 +122,23 @@ export async function PATCH(
     if (body.first_name !== undefined) updateData.firstName = body.first_name;
     if (body.last_name !== undefined) updateData.lastName = body.last_name;
     if (body.ba_id !== undefined) updateData.baId = body.ba_id || null;
-    if (body.phone !== undefined) updateData.phone = body.phone || null;
+    
+    // Validate and format phone number if provided
+    if (body.phone !== undefined) {
+      if (body.phone) {
+        const phoneValidation = validateAndFormatPhone(body.phone);
+        if (!phoneValidation.isValid) {
+          return NextResponse.json(
+            { error: `Invalid phone number: ${phoneValidation.error}` },
+            { status: 400 }
+          );
+        }
+        updateData.phone = formatPhoneForStorage(body.phone);
+      } else {
+        updateData.phone = null;
+      }
+    }
+    
     if (body.email_personal !== undefined) updateData.emailPersonal = body.email_personal || null;
     if (body.email_jw !== undefined) updateData.emailJw = body.email_jw || null;
     if (body.congregation !== undefined) updateData.congregation = body.congregation || null;

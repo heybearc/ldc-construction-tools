@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-config';
 import { getCGScope, withCGFilter } from '@/lib/cg-scope';
 import { getUserOrgRoles, checkPermission } from '@/lib/api-permissions';
 import { canManageVolunteers } from '@/lib/permissions';
+import { formatPhoneForStorage, validateAndFormatPhone } from '@/lib/phone-utils';
 
 // GET /api/v1/volunteers - List volunteers with optional filters
 export async function GET(request: NextRequest) {
@@ -194,12 +195,25 @@ export async function POST(request: NextRequest) {
     const cgScope = await getCGScope();
     const body = await request.json();
 
+    // Validate and format phone number if provided
+    let formattedPhone = body.phone || null;
+    if (body.phone) {
+      const phoneValidation = validateAndFormatPhone(body.phone);
+      if (!phoneValidation.isValid) {
+        return NextResponse.json(
+          { error: `Invalid phone number: ${phoneValidation.error}` },
+          { status: 400 }
+        );
+      }
+      formattedPhone = formatPhoneForStorage(body.phone);
+    }
+
     const volunteer = await prisma.volunteer.create({
       data: {
         firstName: body.first_name,
         lastName: body.last_name,
         baId: body.ba_id || null,
-        phone: body.phone || null,
+        phone: formattedPhone,
         emailPersonal: body.email_personal || null,
         emailJw: body.email_jw || null,
         congregation: body.congregation || null,
