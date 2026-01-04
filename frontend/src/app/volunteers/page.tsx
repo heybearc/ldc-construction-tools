@@ -31,6 +31,14 @@ interface Volunteer {
   phone?: string;
   email_personal?: string;
   email_jw?: string;
+  email_personal_verified?: boolean;
+  email_jw_verified?: boolean;
+  email_personal_bounced?: boolean;
+  email_jw_bounced?: boolean;
+  last_email_verified?: string | null;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
   congregation?: string;
   serving_as?: string[];
   is_overseer: boolean;
@@ -689,13 +697,25 @@ export default function VolunteersPage() {
               {volunteer.email_jw && (
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="h-4 w-4 mr-2" />
-                  {volunteer.email_jw}
+                  <span className="flex-1">{volunteer.email_jw}</span>
+                  {volunteer.email_jw_verified && (
+                    <span className="ml-2 text-green-600" title="Email verified">✓</span>
+                  )}
+                  {volunteer.email_jw_bounced && (
+                    <span className="ml-2 text-red-600" title="Email bounced">⚠</span>
+                  )}
                 </div>
               )}
               {volunteer.email_personal && (
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="h-4 w-4 mr-2" />
-                  {volunteer.email_personal}
+                  <span className="flex-1">{volunteer.email_personal}</span>
+                  {volunteer.email_personal_verified && (
+                    <span className="ml-2 text-green-600" title="Email verified">✓</span>
+                  )}
+                  {volunteer.email_personal_bounced && (
+                    <span className="ml-2 text-red-600" title="Email bounced">⚠</span>
+                  )}
                 </div>
               )}
             </div>
