@@ -27,6 +27,9 @@ interface Volunteer {
   phone?: string | null;
   email_personal?: string | null;
   email_jw?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  emergency_contact_relationship?: string | null;
   congregation?: string | null;
   serving_as?: string[];
   is_overseer: boolean;
@@ -287,6 +290,55 @@ export default function EditVolunteerModal({ volunteer, isOpen, onClose, onSave 
             </div>
           </div>
 
+          {/* Emergency Contact Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Emergency Contact</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Emergency Contact Name
+                </label>
+                <input
+                  type="text"
+                  name="emergency_contact_name"
+                  value={formData.emergency_contact_name || ''}
+                  onChange={handleInputChange}
+                  placeholder="Full Name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Emergency Contact Phone
+                </label>
+                <input
+                  type="tel"
+                  name="emergency_contact_phone"
+                  value={formatPhoneNumber(formData.emergency_contact_phone || '')}
+                  onChange={(e) => {
+                    const formatted = formatPhoneNumber(e.target.value);
+                    handleInputChange({ target: { name: 'emergency_contact_phone', value: unformatPhoneNumber(formatted) } } as any);
+                  }}
+                  placeholder="(555) 555-5555"
+                  maxLength={14}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Relationship
+              </label>
+              <input
+                type="text"
+                name="emergency_contact_relationship"
+                value={formData.emergency_contact_relationship || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., Spouse, Parent, Sibling"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
 
           {/* Link User Account */}
           <div className="space-y-4">
