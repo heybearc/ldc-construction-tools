@@ -727,6 +727,18 @@ model Volunteer {
   congregation        String?
   servingAs           String[]            // Elder, Ministerial Servant, Regular Pioneer, Publisher
   
+  // Email verification tracking
+  emailPersonalVerified Boolean           @default(false)
+  emailJwVerified       Boolean           @default(false)
+  emailPersonalBounced  Boolean           @default(false)
+  emailJwBounced        Boolean           @default(false)
+  lastEmailVerified     DateTime?
+  
+  // Emergency contact information
+  emergencyContactName         String?
+  emergencyContactPhone        String?
+  emergencyContactRelationship String?
+  
   // Optional link to platform User account (for login access)
   user                User?
   
