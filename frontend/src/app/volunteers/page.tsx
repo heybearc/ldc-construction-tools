@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 import BulkEditModal from '../../components/BulkEditModal';
+import BulkReassignmentWizard from '../../components/BulkReassignmentWizard';
 import { canManageVolunteers, canImportVolunteers, canExportVolunteers } from '@/lib/permissions';
 
 interface VolunteerRole {
@@ -86,6 +87,7 @@ export default function VolunteersPage() {
   // Bulk selection states
   const [selectedVolunteerIds, setSelectedVolunteerIds] = useState<Set<string>>(new Set());
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+  const [isReassignmentWizardOpen, setIsReassignmentWizardOpen] = useState(false);
 
   // Fetch user's organizational roles
   useEffect(() => {
@@ -336,6 +338,13 @@ export default function VolunteersPage() {
     fetchStats();
   };
 
+  const handleReassignmentComplete = () => {
+    setSelectedVolunteerIds(new Set());
+    setIsReassignmentWizardOpen(false);
+    fetchVolunteers();
+    fetchStats();
+  };
+
   const getRoleIcon = (volunteer: Volunteer) => {
     if (volunteer.is_overseer) {
       return <UserCheck className="h-8 w-8 text-green-600" />;
@@ -471,14 +480,24 @@ export default function VolunteersPage() {
           {canManage && (
             <>
               {selectedVolunteerIds.size > 0 && (
-                <button
-                  onClick={() => setIsBulkEditModalOpen(true)}
-                  className="inline-flex items-center px-4 py-2 min-h-[44px] bg-green-600 text-white rounded-md hover:bg-green-700"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Bulk Edit ({selectedVolunteerIds.size})</span>
-                  <span className="sm:hidden">Edit ({selectedVolunteerIds.size})</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => setIsReassignmentWizardOpen(true)}
+                    className="inline-flex items-center px-4 py-2 min-h-[44px] bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Reassign ({selectedVolunteerIds.size})</span>
+                    <span className="sm:hidden">Reassign</span>
+                  </button>
+                  <button
+                    onClick={() => setIsBulkEditModalOpen(true)}
+                    className="inline-flex items-center px-4 py-2 min-h-[44px] bg-green-600 text-white rounded-md hover:bg-green-700"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Bulk Edit ({selectedVolunteerIds.size})</span>
+                    <span className="sm:hidden">Edit ({selectedVolunteerIds.size})</span>
+                  </button>
+                </>
               )}
               <button
                 onClick={() => setIsAddModalOpen(true)}
@@ -996,6 +1015,14 @@ export default function VolunteersPage() {
         isOpen={isBulkEditModalOpen}
         onClose={() => setIsBulkEditModalOpen(false)}
         onSave={handleBulkEditComplete}
+      />
+
+      <BulkReassignmentWizard
+        selectedVolunteerIds={Array.from(selectedVolunteerIds)}
+        volunteers={volunteers}
+        isOpen={isReassignmentWizardOpen}
+        onClose={() => setIsReassignmentWizardOpen(false)}
+        onComplete={handleReassignmentComplete}
       />
     </div>
   );
