@@ -10,6 +10,7 @@ import AddVolunteerModal from '../../components/AddVolunteerModal';
 import BulkEditModal from '../../components/BulkEditModal';
 import BulkReassignmentWizard from '../../components/BulkReassignmentWizard';
 import BulkStatusUpdateModal from '../../components/BulkStatusUpdateModal';
+import SavedSearchFilters from '../../components/SavedSearchFilters';
 import { canManageVolunteers, canImportVolunteers, canExportVolunteers } from '@/lib/permissions';
 
 interface VolunteerRole {
@@ -354,6 +355,17 @@ export default function VolunteersPage() {
     fetchStats();
   };
 
+  const handleApplySavedFilter = (filters: any) => {
+    setSearchTerm(filters.searchTerm || '');
+    setRoleFilter(filters.roleFilter || '');
+    setCongregationFilter(filters.congregationFilter || '');
+    setStatusFilter(filters.statusFilter || 'active');
+    setServingAsFilter(filters.servingAsFilter || '');
+    setHasEmailFilter(filters.hasEmailFilter || '');
+    setHasPhoneFilter(filters.hasPhoneFilter || '');
+    setIsAssignedFilter(filters.isAssignedFilter || '');
+  };
+
   const getRoleIcon = (volunteer: Volunteer) => {
     if (volunteer.is_overseer) {
       return <UserCheck className="h-8 w-8 text-green-600" />;
@@ -594,9 +606,24 @@ export default function VolunteersPage() {
 
           {/* Quick Filters */}
           <div className="border-t pt-3 mt-2">
-            <div className="flex items-center gap-2 mb-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Quick Filters:</span>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Quick Filters:</span>
+              </div>
+              <SavedSearchFilters
+                currentFilters={{
+                  searchTerm,
+                  roleFilter,
+                  congregationFilter,
+                  statusFilter,
+                  servingAsFilter,
+                  hasEmailFilter,
+                  hasPhoneFilter,
+                  isAssignedFilter,
+                }}
+                onApplyFilter={handleApplySavedFilter}
+              />
             </div>
             <div className="flex flex-wrap gap-2">
               {/* Status Filter */}
