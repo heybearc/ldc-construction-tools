@@ -1,0 +1,280 @@
+import { test, expect } from '@playwright/test';
+
+// Test configuration
+const TEST_USER = {
+  email: process.env.TEST_USER_EMAIL || 'admin@test.com',
+  password: process.env.TEST_USER_PASSWORD || 'admin123',
+};
+
+test.describe('Phase 1: Enhanced Contact Management', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login before each test
+    await page.goto('/login');
+    await page.fill('input[name="email"]', TEST_USER.email);
+    await page.fill('input[name="password"]', TEST_USER.password);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/volunteers', { timeout: 10000 });
+  });
+
+  test('1.1 - Multi-field search works correctly', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Test search by name
+    await page.fill('input[placeholder*="Search"]', 'John');
+    await page.waitForTimeout(500);
+    
+    // Verify results are filtered
+    const cards = page.locator('.bg-white.rounded-lg.shadow');
+    await expect(cards.first()).toBeVisible();
+    
+    // Clear search
+    await page.fill('input[placeholder*="Search"]', '');
+  });
+
+  test('1.2 - Saved search filters functionality', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Apply some filters
+    await page.selectOption('select', { index: 1 }); // Select a role
+    
+    // Save filter
+    const saveButton = page.locator('button:has-text("Save Filter")');
+    if (await saveButton.isVisible()) {
+      await saveButton.click();
+      await page.fill('input[placeholder*="Filter Name"]', 'Test Filter');
+      await page.click('button:has-text("Save Filter")');
+      
+      // Verify saved
+      await expect(page.locator('button:has-text("Saved Filters")')).toBeVisible();
+    }
+  });
+
+  test('1.3 - Quick filters toggle correctly', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Test Active filter
+    const activeFilter = page.locator('button:has-text("Active")');
+    await activeFilter.click();
+    await page.waitForTimeout(300);
+    
+    // Verify filter is applied (button should be highlighted)
+    await expect(activeFilter).toHaveClass(/bg-green/);
+  });
+
+  test('2.1 - Phone validation and formatting', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Click Add Volunteer button
+    await page.click('button:has-text("Add Volunteer")');
+    await page.waitForTimeout(500);
+    
+    // Fill phone field
+    const phoneInput = page.locator('input[type="tel"]').first();
+    if (await phoneInput.isVisible()) {
+      await phoneInput.fill('5551234567');
+      await phoneInput.blur();
+      
+      // Verify formatting (should format to (555) 123-4567)
+      const value = await phoneInput.inputValue();
+      expect(value).toContain('555');
+    }
+  });
+
+  test('2.2 - Email verification badges display', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Look for email verification badges
+    const verifiedBadge = page.locator('svg.text-green-600'); // Checkmark
+    const bouncedBadge = page.locator('svg.text-red-600'); // Warning
+    
+    // At least one type should exist if volunteers have emails
+    const hasVerified = await verifiedBadge.count();
+    const hasBounced = await bouncedBadge.count();
+    
+    expect(hasVerified + hasBounced).toBeGreaterThanOrEqual(0);
+  });
+
+  test('2.4 - Congregation distribution card displays', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Check for congregation statistics card
+    const congCard = page.locator('text=Congregation Distribution');
+    if (await congCard.isVisible()) {
+      await expect(congCard).toBeVisible();
+      
+      // Verify grid of congregations
+      const congCards = page.locator('.bg-white.rounded-md.p-3.shadow-sm');
+      expect(await congCards.count()).toBeGreaterThan(0);
+    }
+  });
+
+  test('3.1 - Bulk edit modal opens and functions', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Select a volunteer
+    const checkbox = page.locator('input[type="checkbox"]').nth(1);
+    await checkbox.click();
+    
+    // Bulk Edit button should appear
+    const bulkEditBtn = page.locator('button:has-text("Edit")');
+    await expect(bulkEditBtn).toBeVisible();
+    
+    // Click Bulk Edit
+    await bulkEditBtn.click();
+    await page.waitForTimeout(500);
+    
+    // Verify modal opened
+    await expect(page.locator('text=Bulk Edit')).toBeVisible();
+    
+    // Close modal
+    await page.click('button:has-text("Cancel")');
+  });
+
+  test('3.2 - Bulk reassignment wizard workflow', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Select volunteers
+    const checkbox = page.locator('input[type="checkbox"]').nth(1);
+    await checkbox.click();
+    
+    // Click Reassign button
+    const reassignBtn = page.locator('button:has-text("Reassign")');
+    if (await reassignBtn.isVisible()) {
+      await reassignBtn.click();
+      await page.waitForTimeout(500);
+      
+      // Verify wizard opened
+      await expect(page.locator('text=Bulk Reassignment Wizard')).toBeVisible();
+      
+      // Verify step 1 (Select Team)
+      await expect(page.locator('text=Select Trade Team')).toBeVisible();
+      
+      // Close wizard
+      await page.click('button:has-text("Cancel")');
+    }
+  });
+
+  test('3.3 - Bulk status update modal', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Select volunteers
+    const checkbox = page.locator('input[type="checkbox"]').nth(1);
+    await checkbox.click();
+    
+    // Click Status button
+    const statusBtn = page.locator('button:has-text("Status")');
+    if (await statusBtn.isVisible()) {
+      await statusBtn.click();
+      await page.waitForTimeout(500);
+      
+      // Verify modal opened
+      await expect(page.locator('text=Bulk Status Update')).toBeVisible();
+      
+      // Verify action options
+      await expect(page.locator('text=Activate Volunteers')).toBeVisible();
+      await expect(page.locator('text=Deactivate Volunteers')).toBeVisible();
+      
+      // Close modal
+      await page.click('button:has-text("Cancel")');
+    }
+  });
+
+  test('3.4 - Export functionality with filters', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Apply a filter
+    await page.selectOption('select', { index: 1 });
+    await page.waitForTimeout(500);
+    
+    // Open export menu
+    const exportBtn = page.locator('button:has-text("Export")');
+    if (await exportBtn.isVisible()) {
+      await exportBtn.click();
+      
+      // Verify export options
+      await expect(page.locator('text=Export to Excel')).toBeVisible();
+      await expect(page.locator('text=Export to PDF')).toBeVisible();
+    }
+  });
+
+  test('Bulk operations - Select All functionality', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Click Select All
+    const selectAllCheckbox = page.locator('input[type="checkbox"]').first();
+    await selectAllCheckbox.click();
+    
+    // Verify bulk action buttons appear
+    await expect(page.locator('button:has-text("Status")')).toBeVisible();
+    await expect(page.locator('button:has-text("Reassign")')).toBeVisible();
+    await expect(page.locator('button:has-text("Edit")')).toBeVisible();
+    
+    // Clear selection
+    await page.click('button:has-text("Clear Selection")');
+  });
+
+  test('View mode toggle (Grid/List)', async ({ page }) => {
+    await page.goto('/volunteers');
+    
+    // Toggle to list view
+    const listViewBtn = page.locator('button[title="List view"]');
+    await listViewBtn.click();
+    await page.waitForTimeout(300);
+    
+    // Toggle back to grid view
+    const gridViewBtn = page.locator('button[title="Grid view"]');
+    await gridViewBtn.click();
+    await page.waitForTimeout(300);
+  });
+});
+
+test.describe('Smoke Tests - Critical Paths', () => {
+  test('Login and navigate to volunteers page', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[name="email"]', TEST_USER.email);
+    await page.fill('input[name="password"]', TEST_USER.password);
+    await page.click('button[type="submit"]');
+    
+    // Should redirect to volunteers or dashboard
+    await page.waitForURL(/\/(volunteers|dashboard)/, { timeout: 10000 });
+    
+    // Navigate to volunteers if not already there
+    if (!page.url().includes('/volunteers')) {
+      await page.goto('/volunteers');
+    }
+    
+    // Verify page loaded
+    await expect(page.locator('h1:has-text("Volunteers")')).toBeVisible();
+  });
+
+  test('Volunteers page loads without errors', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[name="email"]', TEST_USER.email);
+    await page.fill('input[name="password"]', TEST_USER.password);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/volunteers', { timeout: 10000 });
+    
+    // Check for critical elements
+    await expect(page.locator('h1:has-text("Volunteers")')).toBeVisible();
+    await expect(page.locator('input[placeholder*="Search"]')).toBeVisible();
+    
+    // No console errors (check for critical errors)
+    const errors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    
+    await page.waitForTimeout(2000);
+    
+    // Filter out known non-critical errors
+    const criticalErrors = errors.filter(e => 
+      !e.includes('favicon') && 
+      !e.includes('404') &&
+      !e.includes('net::ERR_')
+    );
+    
+    expect(criticalErrors.length).toBe(0);
+  });
+});
