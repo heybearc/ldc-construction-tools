@@ -385,6 +385,30 @@ export default function VolunteersPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Congregation Statistics Card */}
+      {stats && stats.congregation_breakdown && stats.congregation_breakdown.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-4 border border-blue-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Building2 className="h-5 w-5 mr-2 text-blue-600" />
+              Congregation Distribution
+            </h3>
+            <span className="text-sm text-gray-600">{stats.congregation_breakdown.length} congregations</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {stats.congregation_breakdown.map((cong) => (
+              <div key={cong.name} className="bg-white rounded-md p-3 shadow-sm border border-gray-200">
+                <div className="text-xs text-gray-500 truncate" title={cong.name}>{cong.name}</div>
+                <div className="text-2xl font-bold text-blue-600">{cong.count}</div>
+                <div className="text-xs text-gray-500">
+                  {Math.round((cong.count / stats.total_volunteers) * 100)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Volunteers</h1>
