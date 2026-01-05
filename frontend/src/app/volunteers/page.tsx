@@ -9,6 +9,7 @@ import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
 import BulkEditModal from '../../components/BulkEditModal';
 import BulkReassignmentWizard from '../../components/BulkReassignmentWizard';
+import BulkStatusUpdateModal from '../../components/BulkStatusUpdateModal';
 import { canManageVolunteers, canImportVolunteers, canExportVolunteers } from '@/lib/permissions';
 
 interface VolunteerRole {
@@ -88,6 +89,7 @@ export default function VolunteersPage() {
   const [selectedVolunteerIds, setSelectedVolunteerIds] = useState<Set<string>>(new Set());
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   const [isReassignmentWizardOpen, setIsReassignmentWizardOpen] = useState(false);
+  const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
 
   // Fetch user's organizational roles
   useEffect(() => {
@@ -345,6 +347,13 @@ export default function VolunteersPage() {
     fetchStats();
   };
 
+  const handleBulkStatusComplete = () => {
+    setSelectedVolunteerIds(new Set());
+    setIsBulkStatusModalOpen(false);
+    fetchVolunteers();
+    fetchStats();
+  };
+
   const getRoleIcon = (volunteer: Volunteer) => {
     if (volunteer.is_overseer) {
       return <UserCheck className="h-8 w-8 text-green-600" />;
@@ -482,6 +491,14 @@ export default function VolunteersPage() {
               {selectedVolunteerIds.size > 0 && (
                 <>
                   <button
+                    onClick={() => setIsBulkStatusModalOpen(true)}
+                    className="inline-flex items-center px-4 py-2 min-h-[44px] bg-orange-600 text-white rounded-md hover:bg-orange-700"
+                  >
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Status ({selectedVolunteerIds.size})</span>
+                    <span className="sm:hidden">Status</span>
+                  </button>
+                  <button
                     onClick={() => setIsReassignmentWizardOpen(true)}
                     className="inline-flex items-center px-4 py-2 min-h-[44px] bg-purple-600 text-white rounded-md hover:bg-purple-700"
                   >
@@ -494,8 +511,8 @@ export default function VolunteersPage() {
                     className="inline-flex items-center px-4 py-2 min-h-[44px] bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Bulk Edit ({selectedVolunteerIds.size})</span>
-                    <span className="sm:hidden">Edit ({selectedVolunteerIds.size})</span>
+                    <span className="hidden sm:inline">Edit ({selectedVolunteerIds.size})</span>
+                    <span className="sm:hidden">Edit</span>
                   </button>
                 </>
               )}
@@ -1023,6 +1040,14 @@ export default function VolunteersPage() {
         isOpen={isReassignmentWizardOpen}
         onClose={() => setIsReassignmentWizardOpen(false)}
         onComplete={handleReassignmentComplete}
+      />
+
+      <BulkStatusUpdateModal
+        selectedVolunteerIds={Array.from(selectedVolunteerIds)}
+        volunteers={volunteers}
+        isOpen={isBulkStatusModalOpen}
+        onClose={() => setIsBulkStatusModalOpen(false)}
+        onComplete={handleBulkStatusComplete}
       />
     </div>
   );
