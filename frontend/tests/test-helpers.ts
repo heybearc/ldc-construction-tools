@@ -5,14 +5,19 @@ import { Page } from '@playwright/test';
  */
 
 export async function login(page: Page, email?: string, password?: string) {
-  const testEmail = email || process.env.TEST_USER_EMAIL || 'admin@test.com';
-  const testPassword = password || process.env.TEST_USER_PASSWORD || 'admin123';
+  const testEmail = email || process.env.TEST_USER_EMAIL || 'admin@ldctools.local';
+  const testPassword = password || process.env.TEST_USER_PASSWORD || 'AdminPass123!';
   
-  await page.goto('/login');
+  await page.goto('/auth/signin');
+  await page.waitForLoadState('networkidle');
+  await page.waitForSelector('input[name="email"]', { state: 'visible' });
   await page.fill('input[name="email"]', testEmail);
   await page.fill('input[name="password"]', testPassword);
-  await page.click('button[type="submit"]');
-  await page.waitForURL(/\/(volunteers|dashboard)/, { timeout: 10000 });
+  await Promise.all([
+    page.waitForNavigation({ timeout: 15000 }),
+    page.click('button[type="submit"]')
+  ]);
+  await page.waitForTimeout(1000);
 }
 
 export async function navigateToVolunteers(page: Page) {
@@ -40,9 +45,53 @@ export async function clearAllFilters(page: Page) {
   }
 }
 
+export async function takeScreenshot(page: Page, testName: string) {
+  await page.screenshot({ 
+    path: `test-results/screenshots/${testName}-${Date.now()}.png`,
+    fullPage: true 
+  });
+}
+
 export async function takeScreenshotOnFailure(page: Page, testName: string) {
   await page.screenshot({ 
     path: `test-results/screenshots/${testName}-${Date.now()}.png`,
     fullPage: true 
   });
+}
+
+export async function navigateTo(page: Page, path: string) {
+  await page.goto(path);
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(500);
+}
+
+export async function waitForDataLoad(page: Page) {
+  const loadingSelectors = ['text=Loading...', '[data-loading="true"]', '.loading'];
+  for (const selector of loadingSelectors) {
+    try {
+      await page.waitForSelector(selector, { state: 'hidden', timeout: 2000 });
+    } catch {
+      // Continue if selector not found
+    }
+  }
+  await page.waitForTimeout(500);
+}
+
+export async function isVisible(page: Page, selector: string): Promise<boolean> {
+  try {
+    await page.waitForSelector(selector, { state: 'visible', timeout: 3000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function clickAndWait(page: Page, selector: string) {
+  await page.click(selector);
+  await page.waitForTimeout(500);
+}
+
+export async function fillAndWait(page: Page, selector: string, value: string) {
+  await page.fill(selector, value);
+  await page.waitForTimeout(300);
 }

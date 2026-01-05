@@ -1,52 +1,77 @@
 ---
-description: Automated testing workflow for pre-deployment validation
+description: Automated testing workflow for pre-deployment validation with feature-specific tests
 ---
 
 # /test-release - Automated Testing Workflow
 
-Run automated tests before deploying to verify all functionality works correctly.
+**Two-tier testing strategy:** Quick smoke tests + comprehensive feature validation before production release.
 
-## Quick Usage
+## 🚀 Quick Usage
 
 ```bash
-# Run smoke tests (1-2 minutes)
+# Tier 1: Smoke tests (1-2 min) - Run before every deployment
 npm run test:smoke:quick
 
-# Or use the quick test script
-./scripts/quick-test.sh smoke
+# Tier 2: Feature tests (5-10 min) - Run before PRODUCTION release
+npx playwright test tests/volunteers.spec.ts
 ```
 
-## Full Workflow
+---
 
-### Step 1: Setup (First Time Only)
+## 📋 Full Workflow
+
+### **Step 1: Deploy to STANDBY**
 ```bash
-# Copy environment template
-cp .env.test.example .env.test
-
-# Edit .env.test with your test credentials
-# TEST_USER_EMAIL=admin@test.com
-# TEST_USER_PASSWORD=admin123
-```
-
-### Step 2: Run Tests Before Deployment
-```bash
-# Quick smoke tests (recommended before every deployment)
-npm run test:smoke:quick
-```
-
-**Expected:** All tests pass ✅ in 1-2 minutes
-
-### Step 3: Deploy to STANDBY
-```bash
-# Your deployment commands
+# Deploy your code to STANDBY first
 git push origin feature-branch
-ssh root@10.92.3.25 "cd /opt/ldc-construction-tools/frontend && git pull && npm run build && pm2 restart ldc-tools-green"
+ssh root@10.92.3.25 "cd /opt/ldc-construction-tools/frontend && git pull && npm install --legacy-peer-deps && npm run build && pm2 restart ldc-tools-green"
 ```
 
-### Step 4: Test STANDBY Environment
+### **Step 2: Tier 1 - Smoke Tests (Quick Validation)**
 ```bash
-# Test against STANDBY server
-BASE_URL=http://10.92.3.25:3001 npm run test:smoke:quick
+# Test STANDBY - catches major breakage (1-2 min)
+BASE_URL=http://10.92.3.25:3001 TEST_USER_EMAIL=admin@ldctools.local TEST_USER_PASSWORD='AdminPass123!' npm run test:smoke:quick
+```
+
+**What this tests:**
+- ✅ Login works
+- ✅ Pages load without crashing
+- ✅ No critical JavaScript errors
+
+**If smoke tests FAIL:** Fix issues before proceeding
+
+### **Step 3: Tier 2 - Feature Tests (Comprehensive Validation)**
+```bash
+# Test all Phase 1 features on STANDBY (5-10 min)
+BASE_URL=http://10.92.3.25:3001 TEST_USER_EMAIL=admin@ldctools.local TEST_USER_PASSWORD='AdminPass123!' npx playwright test tests/volunteers.spec.ts
+```
+
+**What this tests:**
+- ✅ Multi-field search functionality
+- ✅ Saved search filters
+- ✅ Quick filters (Active/Inactive/Has Email/Has Phone)
+- ✅ Phone number validation and formatting
+- ✅ Email verification badges
+- ✅ Congregation distribution card
+- ✅ Bulk edit modal
+- ✅ Bulk reassignment wizard
+- ✅ Bulk status updates
+- ✅ Filtered CSV/PDF exports
+- ✅ Select All functionality
+- ✅ View mode toggle (Grid/List)
+
+**If feature tests FAIL:** Review failures, fix issues, redeploy to STANDBY, and re-test
+
+### **Step 4: Deploy to PRODUCTION**
+```bash
+# Only after ALL tests pass on STANDBY
+ssh root@10.92.3.23 "cd /opt/ldc-construction-tools/frontend && git pull && npm install --legacy-peer-deps && npm run build && pm2 restart ldc-tools-blue"
+```
+
+### **Step 5: Verify PRODUCTION**
+```bash
+# Quick smoke test on PRODUCTION (1-2 min)
+BASE_URL=http://10.92.3.23:3001 TEST_USER_EMAIL=admin@ldctools.local TEST_USER_PASSWORD='AdminPass123!' npm run test:smoke:quick
 ```
 
 **Expected:** All tests pass ✅
