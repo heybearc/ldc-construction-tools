@@ -7,6 +7,7 @@ import { Search, Filter, Users, Phone, Mail, Building2, UserCheck, UserX, Edit, 
 import { useSession } from 'next-auth/react';
 import EditVolunteerModal from '../../components/EditVolunteerModal';
 import AddVolunteerModal from '../../components/AddVolunteerModal';
+import BulkEditModal from '../../components/BulkEditModal';
 import { canManageVolunteers, canImportVolunteers, canExportVolunteers } from '@/lib/permissions';
 
 interface VolunteerRole {
@@ -81,6 +82,10 @@ export default function VolunteersPage() {
   const [hasEmailFilter, setHasEmailFilter] = useState<string>('');
   const [hasPhoneFilter, setHasPhoneFilter] = useState<string>('');
   const [isAssignedFilter, setIsAssignedFilter] = useState<string>('');
+  
+  // Bulk selection states
+  const [selectedVolunteerIds, setSelectedVolunteerIds] = useState<Set<string>>(new Set());
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
 
   // Fetch user's organizational roles
   useEffect(() => {
@@ -305,6 +310,32 @@ export default function VolunteersPage() {
     }
   };
 
+  // Bulk selection handlers
+  const toggleVolunteerSelection = (volunteerId: string) => {
+    const newSelection = new Set(selectedVolunteerIds);
+    if (newSelection.has(volunteerId)) {
+      newSelection.delete(volunteerId);
+    } else {
+      newSelection.add(volunteerId);
+    }
+    setSelectedVolunteerIds(newSelection);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedVolunteerIds.size === filteredVolunteers.length) {
+      setSelectedVolunteerIds(new Set());
+    } else {
+      setSelectedVolunteerIds(new Set(filteredVolunteers.map(v => v.id)));
+    }
+  };
+
+  const handleBulkEditComplete = () => {
+    setSelectedVolunteerIds(new Set());
+    setIsBulkEditModalOpen(false);
+    fetchVolunteers();
+    fetchStats();
+  };
+
   const getRoleIcon = (volunteer: Volunteer) => {
     if (volunteer.is_overseer) {
       return <UserCheck className="h-8 w-8 text-green-600" />;
@@ -438,14 +469,26 @@ export default function VolunteersPage() {
             </div>
           )}
           {canManage && (
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 min-h-[44px] bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Add Volunteer</span>
-              <span className="sm:hidden">Add</span>
-            </button>
+            <>
+              {selectedVolunteerIds.size > 0 && (
+                <button
+                  onClick={() => setIsBulkEditModalOpen(true)}
+                  className="inline-flex items-center px-4 py-2 min-h-[44px] bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Bulk Edit ({selectedVolunteerIds.size})</span>
+                  <span className="sm:hidden">Edit ({selectedVolunteerIds.size})</span>
+                </button>
+              )}
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="inline-flex items-center px-4 py-2 min-h-[44px] bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Add Volunteer</span>
+                <span className="sm:hidden">Add</span>
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -628,12 +671,48 @@ export default function VolunteersPage() {
         </div>
       </div>
 
+      {/* Bulk Selection Controls */}
+      {canManage && filteredVolunteers.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-4 flex items-center justify-between">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={selectedVolunteerIds.size === filteredVolunteers.length && filteredVolunteers.length > 0}
+              onChange={toggleSelectAll}
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span className="ml-3 text-sm font-medium text-gray-700">
+              Select All ({filteredVolunteers.length} volunteers)
+            </span>
+          </label>
+          {selectedVolunteerIds.size > 0 && (
+            <button
+              onClick={() => setSelectedVolunteerIds(new Set())}
+              className="text-sm text-red-600 hover:text-red-800"
+            >
+              Clear Selection
+            </button>
+          )}
+        </div>
+      )}
+
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVolunteers.map((volunteer) => (
-          <div key={volunteer.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
+          <div key={volunteer.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6 relative">
+            {canManage && (
+              <div className="absolute top-4 left-4 z-10">
+                <input
+                  type="checkbox"
+                  checked={selectedVolunteerIds.has(volunteer.id)}
+                  onChange={() => toggleVolunteerSelection(volunteer.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                />
+              </div>
+            )}
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center">
+              <div className="flex items-center ml-8">
                 {getRoleIcon(volunteer)}
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -911,6 +990,13 @@ export default function VolunteersPage() {
           onSave={handleAddVolunteer}
         />
       )}
+
+      <BulkEditModal
+        selectedVolunteerIds={Array.from(selectedVolunteerIds)}
+        isOpen={isBulkEditModalOpen}
+        onClose={() => setIsBulkEditModalOpen(false)}
+        onSave={handleBulkEditComplete}
+      />
     </div>
   );
 }
