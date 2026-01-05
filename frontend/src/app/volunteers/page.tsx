@@ -232,9 +232,20 @@ export default function VolunteersPage() {
 
   const handleExport = (format: string) => {
     const params = new URLSearchParams({ format });
+    
+    // Apply current filters to export
+    if (searchTerm) params.append('search', searchTerm);
+    if (roleFilter) params.append('role', roleFilter);
+    if (congregationFilter) params.append('congregation', congregationFilter);
+    if (statusFilter) params.append('status', statusFilter);
+    if (servingAsFilter) params.append('serving_as', servingAsFilter);
+    if (hasEmailFilter) params.append('has_email', hasEmailFilter);
+    if (hasPhoneFilter) params.append('has_phone', hasPhoneFilter);
+    if (isAssignedFilter) params.append('is_assigned', isAssignedFilter);
+    
+    // Legacy export filters
     if (exportFilters.trade_team) params.append('trade_team', exportFilters.trade_team);
     if (exportFilters.trade_crew) params.append('trade_crew', exportFilters.trade_crew);
-    if (exportFilters.role) params.append('role', exportFilters.role);
     
     window.location.href = `/api/v1/volunteers/export?${params.toString()}`;
     setShowExportMenu(false);
@@ -247,22 +258,46 @@ export default function VolunteersPage() {
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
     
+    // Add filter information
+    let yPos = 28;
+    const activeFilters: string[] = [];
+    if (searchTerm) activeFilters.push(`Search: ${searchTerm}`);
+    if (roleFilter) activeFilters.push(`Role: ${roleFilter}`);
+    if (congregationFilter) activeFilters.push(`Congregation: ${congregationFilter}`);
+    if (statusFilter && statusFilter !== 'active') activeFilters.push(`Status: ${statusFilter}`);
+    if (servingAsFilter) activeFilters.push(`Serving As: ${servingAsFilter}`);
+    if (hasEmailFilter) activeFilters.push(`Email: ${hasEmailFilter}`);
+    if (hasPhoneFilter) activeFilters.push(`Phone: ${hasPhoneFilter}`);
+    if (isAssignedFilter) activeFilters.push(`Assignment: ${isAssignedFilter}`);
+    
+    if (activeFilters.length > 0) {
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      doc.text(`Filters: ${activeFilters.join(' | ')}`, 105, yPos, { align: 'center' });
+      yPos += 6;
+    }
+    
+    doc.setTextColor(0);
+    doc.text(`Total: ${filteredVolunteers.length} volunteers`, 105, yPos, { align: 'center' });
+    yPos += 4;
+    
     const tableData = filteredVolunteers.map(v => [
       `${v.first_name} ${v.last_name}`,
       v.ba_id || '—',
       v.congregation || '—',
-      v.role || '—',
+      v.trade_team_name || '—',
       v.phone || '—',
-      v.email || '—'
+      v.email_personal || v.email_jw || '—'
     ]);
 
     autoTable(doc, {
-      startY: 28,
-      head: [['Name', 'BA ID', 'Congregation', 'Role', 'Phone', 'Email']],
+      startY: yPos + 2,
+      head: [['Name', 'BA ID', 'Congregation', 'Trade Team', 'Phone', 'Email']],
       body: tableData,
       styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
-      margin: { left: 10, right: 10, top: 28 }
+      headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
+      margin: { left: 10, right: 10 }
     });
 
     doc.save(`volunteers-${new Date().toISOString().split('T')[0]}.pdf`);
