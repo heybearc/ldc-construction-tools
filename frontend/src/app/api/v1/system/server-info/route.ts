@@ -4,6 +4,10 @@ import { promises as fs } from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
+// Force dynamic rendering - do not cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const execAsync = promisify(exec);
 const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
 
