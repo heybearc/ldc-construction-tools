@@ -14,20 +14,64 @@ const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
 // Query HAProxy to determine which backend is live
 async function queryHAProxyStatus(): Promise<'BLUE' | 'GREEN' | null> {
   try {
-    // Query HAProxy stats to see which backend is active for ldc-tools
-    const { stdout } = await execAsync(
-      'echo "show stat" | socat stdio tcp4-connect:10.92.3.26:9999 2>/dev/null | grep "ldc-tools" | grep -v "#" || echo ""',
-      { timeout: 2000 }
-    );
+    // Query HAProxy HTTP stats endpoint (industry standard approach)
+    const response = await fetch('http://10.92.3.26:8404/stats;csv', {
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from('admin:Cloudy_92!').toString('base64')
+      },
+      signal: AbortSignal.timeout(2000)
+    });
     
-    // Parse HAProxy stats to find which backend has status UP and is receiving traffic
-    if (stdout.includes('ldc-tools-green') && stdout.includes('UP')) {
-      return 'GREEN';
-    } else if (stdout.includes('ldc-tools-blue') && stdout.includes('UP')) {
-      return 'BLUE';
+    if (!response.ok) {
+      return null;
+    }
+    
+    const csvData = await response.text();
+    const lines = csvData.split('\n');
+    
+    // Parse CSV to find which backend is receiving traffic
+    // CSV format: pxname,svname,qcur,qmax,scur,smax,slim,stot,...,status,...
+    // scur (index 4) = current sessions - indicates which backend is actively serving traffic
+    
+    for (const line of lines) {
+      if (line.startsWith('#') || !line.trim()) continue;
+      
+      const fields = line.split(',');
+      const pxname = fields[0];
+      const svname = fields[1];
+      const scur = parseInt(fields[4]) || 0;
+      const status = fields[17];
+      
+      // Check ldc-tools backends for active sessions
+      // The backend receiving traffic will have scur > 0
+      if (pxname === 'ldc-tools-green' && svname !== 'BACKEND' && status === 'UP' && scur > 0) {
+        return 'GREEN';
+      }
+      if (pxname === 'ldc-tools-blue' && svname !== 'BACKEND' && status === 'UP' && scur > 0) {
+        return 'BLUE';
+      }
+    }
+    
+    // Fallback: if no active sessions, check which backend is UP (both might be up but idle)
+    for (const line of lines) {
+      if (line.startsWith('#') || !line.trim()) continue;
+      
+      const fields = line.split(',');
+      const pxname = fields[0];
+      const svname = fields[1];
+      const status = fields[17];
+      
+      // Return the first UP backend found
+      if (pxname === 'ldc-tools-green' && svname !== 'BACKEND' && status === 'UP') {
+        return 'GREEN';
+      }
+      if (pxname === 'ldc-tools-blue' && svname !== 'BACKEND' && status === 'UP') {
+        return 'BLUE';
+      }
     }
   } catch (error) {
     // HAProxy query failed, will fall back to state file
+    console.error('HAProxy query failed:', error);
   }
   return null;
 }
