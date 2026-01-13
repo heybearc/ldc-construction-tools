@@ -33,23 +33,33 @@ async function queryHAProxyStatus(): Promise<'BLUE' | 'GREEN' | null> {
     // CSV format: pxname,svname,qcur,qmax,scur,smax,slim,stot,...,status,...
     // scur (index 4) = current sessions - indicates which backend is actively serving traffic
     
+    // First pass: check for backends with recent traffic (stot > 0)
+    let greenTotal = 0;
+    let blueTotal = 0;
+    
     for (const line of lines) {
       if (line.startsWith('#') || !line.trim()) continue;
       
       const fields = line.split(',');
       const pxname = fields[0];
       const svname = fields[1];
-      const scur = parseInt(fields[4]) || 0;
-      const status = fields[17];
+      const stot = parseInt(fields[7]) || 0; // Total sessions
       
-      // Check BACKEND lines (aggregated stats) for active sessions
-      // The backend receiving traffic will have scur > 0 on its BACKEND line
-      if (pxname === 'ldc-tools-green' && svname === 'BACKEND' && status === 'UP' && scur > 0) {
-        return 'GREEN';
+      // Check BACKEND lines for total sessions
+      if (pxname === 'ldc-tools-green' && svname === 'BACKEND') {
+        greenTotal = stot;
       }
-      if (pxname === 'ldc-tools-blue' && svname === 'BACKEND' && status === 'UP' && scur > 0) {
-        return 'BLUE';
+      if (pxname === 'ldc-tools-blue' && svname === 'BACKEND') {
+        blueTotal = stot;
       }
+    }
+    
+    // The backend with more total sessions is the active one
+    if (greenTotal > blueTotal && greenTotal > 0) {
+      return 'GREEN';
+    }
+    if (blueTotal > greenTotal && blueTotal > 0) {
+      return 'BLUE';
     }
     
     // Fallback: if no active sessions, check which backend is UP (both might be up but idle)
