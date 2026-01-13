@@ -1,1 +1,1 @@
-../../../jw-attendant-scheduler/mcp-blue-green/server.js
+/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-blue-green/server.js
