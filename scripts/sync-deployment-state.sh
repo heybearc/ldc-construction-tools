@@ -2,11 +2,11 @@
 # Sync deployment state files on LDC Tools containers
 # This ensures the UI badge shows correct LIVE/STANDBY status
 
-STATE_JSON='{"liveServer":"BLUE","standbyServer":"GREEN","lastSwitch":null}'
+STATE_JSON='{"liveServer":"GREEN","standbyServer":"BLUE","lastSwitch":"2026-01-13T12:40:43.526Z"}'
 
 echo "Syncing deployment state files for LDC Tools..."
-echo "BLUE (10.92.3.23) = LIVE"
-echo "GREEN (10.92.3.25) = STANDBY"
+echo "GREEN (10.92.3.25) = LIVE"
+echo "BLUE (10.92.3.23) = STANDBY"
 echo ""
 
 # Update BLUE container
