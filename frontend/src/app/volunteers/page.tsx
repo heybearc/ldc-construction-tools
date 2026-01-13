@@ -119,9 +119,13 @@ export default function VolunteersPage() {
     fetchStats();
   }, []);
 
-  // Re-fetch when filters change
+  // Debounced search - only trigger API call after user stops typing
   useEffect(() => {
-    fetchVolunteers();
+    const timeoutId = setTimeout(() => {
+      fetchVolunteers();
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timeoutId);
   }, [searchTerm, roleFilter, congregationFilter, statusFilter, servingAsFilter, hasEmailFilter, hasPhoneFilter, isAssignedFilter]);
 
   const fetchVolunteers = async () => {
