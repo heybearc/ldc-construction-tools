@@ -46,15 +46,23 @@ export async function GET(request: NextRequest) {
 
     // Multi-field search
     if (search) {
+      const searchTerm = search.trim();
       where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { baId: { contains: search, mode: 'insensitive' } },
-        { congregation: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
-        { emailPersonal: { contains: search, mode: 'insensitive' } },
-        { emailJw: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: searchTerm, mode: 'insensitive' } },
+        { lastName: { contains: searchTerm, mode: 'insensitive' } },
+        { baId: { contains: searchTerm, mode: 'insensitive' } },
+        { congregation: { contains: searchTerm, mode: 'insensitive' } },
+        { phone: { contains: searchTerm, mode: 'insensitive' } },
+        { emailPersonal: { contains: searchTerm, mode: 'insensitive' } },
+        { emailJw: { contains: searchTerm, mode: 'insensitive' } },
       ];
+      
+      // For multi-word searches (e.g., "Amber Smith"), also search in concatenated full name
+      if (searchTerm.includes(' ')) {
+        // Prisma doesn't support searching in concatenated fields directly in where clause
+        // So we'll fetch all volunteers and filter in memory for full name matches
+        // This is handled after the query below
+      }
     }
 
     // Role filter
@@ -115,7 +123,7 @@ export async function GET(request: NextRequest) {
       where.tradeTeamId = null;
     }
 
-    const volunteers = await prisma.volunteer.findMany({
+    let volunteers = await prisma.volunteer.findMany({
       where,
       include: {
         crew: {
@@ -134,6 +142,15 @@ export async function GET(request: NextRequest) {
       },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
+
+    // For multi-word searches, filter by full name match
+    if (search && search.trim().includes(' ')) {
+      const searchTerm = search.trim().toLowerCase();
+      volunteers = volunteers.filter(v => {
+        const fullName = `${v.firstName} ${v.lastName}`.toLowerCase();
+        return fullName.includes(searchTerm);
+      });
+    }
 
     // Transform to match expected frontend format
     const transformed = volunteers.map(v => ({
