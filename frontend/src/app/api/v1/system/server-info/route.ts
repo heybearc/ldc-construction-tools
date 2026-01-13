@@ -15,8 +15,9 @@ const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
 async function queryHAProxyConfig(): Promise<'BLUE' | 'GREEN' | null> {
   try {
     // SSH to HAProxy and read the config file to see which backend is configured
+    // Look for the main routing line: "use_backend ldc-tools-X if is_ldc" (not is_ldc_blue/is_ldc_green)
     const { stdout } = await execAsync(
-      'ssh -o ConnectTimeout=2 root@10.92.3.26 "grep \'use_backend ldc-tools.*if is_ldc\' /etc/haproxy/haproxy.cfg | grep -v blue | grep -v green | head -1"',
+      'ssh -o ConnectTimeout=2 root@10.92.3.26 "grep \'use_backend ldc-tools.*if is_ldc$\' /etc/haproxy/haproxy.cfg"',
       { timeout: 3000 }
     );
     
