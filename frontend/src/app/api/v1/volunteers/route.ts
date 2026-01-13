@@ -47,9 +47,15 @@ export async function GET(request: NextRequest) {
     // Multi-field search
     if (search) {
       const searchTerm = search.trim();
+      
+      // For multi-word searches, search for the first word to get broader results
+      // Then filter by full name match on the client side
+      const searchWords = searchTerm.split(/\s+/);
+      const firstWord = searchWords[0];
+      
       where.OR = [
-        { firstName: { contains: searchTerm, mode: 'insensitive' } },
-        { lastName: { contains: searchTerm, mode: 'insensitive' } },
+        { firstName: { contains: firstWord, mode: 'insensitive' } },
+        { lastName: { contains: firstWord, mode: 'insensitive' } },
         { baId: { contains: searchTerm, mode: 'insensitive' } },
         { congregation: { contains: searchTerm, mode: 'insensitive' } },
         { phone: { contains: searchTerm, mode: 'insensitive' } },
@@ -136,25 +142,15 @@ export async function GET(request: NextRequest) {
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
 
-    // For searches with spaces, also check if the full name matches
-    // This allows "Amber A" to match "Amber Allen"
-    if (search && search.trim()) {
+    // For multi-word searches, filter by full name match
+    if (search && search.trim().includes(' ')) {
       const searchTerm = search.trim().toLowerCase();
       
-      // If the search already returned results from individual field matches, we're good
-      // But also include any volunteers where the full name matches the search term
-      const fullNameMatches = volunteers.filter(v => {
+      // Filter to only show volunteers where the full name contains the search term
+      volunteers = volunteers.filter(v => {
         const fullName = `${v.firstName} ${v.lastName}`.toLowerCase();
         return fullName.includes(searchTerm);
       });
-      
-      // Combine results and remove duplicates
-      const allMatches = [...volunteers, ...fullNameMatches];
-      const uniqueVolunteers = Array.from(
-        new Map(allMatches.map(v => [v.id, v])).values()
-      );
-      
-      volunteers = uniqueVolunteers;
     }
 
     // Transform to match expected frontend format
