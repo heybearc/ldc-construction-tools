@@ -42,12 +42,12 @@ async function queryHAProxyStatus(): Promise<'BLUE' | 'GREEN' | null> {
       const scur = parseInt(fields[4]) || 0;
       const status = fields[17];
       
-      // Check ldc-tools backends for active sessions
-      // The backend receiving traffic will have scur > 0
-      if (pxname === 'ldc-tools-green' && svname !== 'BACKEND' && status === 'UP' && scur > 0) {
+      // Check BACKEND lines (aggregated stats) for active sessions
+      // The backend receiving traffic will have scur > 0 on its BACKEND line
+      if (pxname === 'ldc-tools-green' && svname === 'BACKEND' && status === 'UP' && scur > 0) {
         return 'GREEN';
       }
-      if (pxname === 'ldc-tools-blue' && svname !== 'BACKEND' && status === 'UP' && scur > 0) {
+      if (pxname === 'ldc-tools-blue' && svname === 'BACKEND' && status === 'UP' && scur > 0) {
         return 'BLUE';
       }
     }
@@ -61,11 +61,11 @@ async function queryHAProxyStatus(): Promise<'BLUE' | 'GREEN' | null> {
       const svname = fields[1];
       const status = fields[17];
       
-      // Return the first UP backend found
-      if (pxname === 'ldc-tools-green' && svname !== 'BACKEND' && status === 'UP') {
+      // Return the first UP backend found (checking BACKEND summary line)
+      if (pxname === 'ldc-tools-green' && svname === 'BACKEND' && status === 'UP') {
         return 'GREEN';
       }
-      if (pxname === 'ldc-tools-blue' && svname !== 'BACKEND' && status === 'UP') {
+      if (pxname === 'ldc-tools-blue' && svname === 'BACKEND' && status === 'UP') {
         return 'BLUE';
       }
     }
