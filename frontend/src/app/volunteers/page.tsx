@@ -130,10 +130,10 @@ export default function VolunteersPage() {
   }, [searchTerm, roleFilter, congregationFilter, statusFilter, servingAsFilter, hasEmailFilter, hasPhoneFilter, isAssignedFilter]);
 
   const fetchVolunteers = async () => {
+    // Store if search input is currently focused BEFORE any state changes
+    const searchWasFocused = document.activeElement === searchInputRef.current;
+    
     try {
-      // Store if search input is currently focused
-      const searchWasFocused = document.activeElement === searchInputRef.current;
-      
       setLoading(true);
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
@@ -155,12 +155,12 @@ export default function VolunteersPage() {
     } finally {
       setLoading(false);
       
-      // Restore focus to search input if it was focused before
-      if (document.activeElement !== searchInputRef.current && searchInputRef.current) {
-        // Use setTimeout to ensure DOM has updated
-        setTimeout(() => {
+      // Restore focus if search input was focused before the API call
+      if (searchWasFocused && searchInputRef.current) {
+        // Use requestAnimationFrame to ensure DOM has fully updated
+        requestAnimationFrame(() => {
           searchInputRef.current?.focus();
-        }, 0);
+        });
       }
     }
   };
