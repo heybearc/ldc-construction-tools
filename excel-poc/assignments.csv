@@ -1,0 +1,21 @@
+AssignmentID,VolunteerName,ProjectName,TradeTeam,StartDate,EndDate,Role,Status,Notes
+A001,John Smith,Kingdom Hall - Smithville,Electrical,2026-01-15,2026-06-30,Crew Lead,Confirmed,Lead electrician for project
+A002,William Garcia,Kingdom Hall - Smithville,Electrical,2026-01-15,2026-06-30,Worker,Confirmed,Assisting with panel work
+A003,Michael Johnson,Assembly Hall Renovation,Plumbing,2026-02-01,2026-08-15,Crew Lead,Confirmed,Lead plumber
+A004,Richard Martinez,Assembly Hall Renovation,Plumbing,2026-02-01,2026-08-15,Worker,Confirmed,HVAC work
+A005,David Williams,Quick Build - Riverside,Site Work,2026-03-01,2026-04-15,Supervisor,Assigned,Site supervisor
+A006,Christopher Taylor,Quick Build - Riverside,Site Work,2026-03-01,2026-04-15,Worker,Assigned,Grading work
+A007,James Brown,Kingdom Hall Remodel - Oakdale,Structural,2026-01-20,2026-05-30,Crew Lead,Confirmed,Framing lead
+A008,Daniel Thomas,Kingdom Hall Remodel - Oakdale,Structural,2026-01-20,2026-05-30,Worker,Confirmed,Framing crew
+A009,Robert Jones,Assembly Hall Renovation,Roofing,2026-02-01,2026-08-15,Crew Lead,Confirmed,New roof installation
+A010,Matthew Hernandez,Assembly Hall Renovation,Roofing,2026-02-01,2026-08-15,Worker,Confirmed,Metal roof work
+A011,Joseph Rodriguez,Kingdom Hall Remodel - Oakdale,Drywall & Paint,2026-01-20,2026-05-30,Crew Lead,Confirmed,Drywall and painting
+A012,Donald Jackson,Kingdom Hall Remodel - Oakdale,Drywall & Paint,2026-01-20,2026-05-30,Worker,Confirmed,Drywall finishing
+A013,Thomas Wilson,Kingdom Hall Remodel - Oakdale,Flooring & Tile,2026-01-20,2026-05-30,Crew Lead,Confirmed,New flooring installation
+A014,Benjamin Nelson,Kingdom Hall Remodel - Oakdale,Flooring & Tile,2026-01-20,2026-05-30,Worker,Confirmed,Tile work
+A015,Charles Anderson,Kingdom Hall - Smithville,Finish Carpentry,2026-01-15,2026-06-30,Crew Lead,Confirmed,Trim and cabinets
+A016,Tyler Evans,Kingdom Hall - Smithville,Finish Carpentry,2026-01-15,2026-06-30,Worker,Confirmed,Baseboards and crown
+A017,Kenneth Gonzalez,Assembly Hall Renovation,Electrical,2026-02-01,2026-08-15,Worker,Assigned,Solar panel installation
+A018,Kevin Harris,Kingdom Hall - Smithville,Plumbing,2026-01-15,2026-06-30,Worker,Confirmed,Fixture installation
+A019,Brian Clark,Assembly Hall Renovation,Roofing,2026-02-01,2026-08-15,Worker,Assigned,Gutter installation
+A020,George Lewis,Kingdom Hall Remodel - Oakdale,Drywall & Paint,2026-01-20,2026-05-30,Worker,Confirmed,Painting work

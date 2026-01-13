@@ -1,55 +1,90 @@
 import { NextResponse } from 'next/server';
 import os from 'os';
 import { promises as fs } from 'fs';
-import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
+const execAsync = promisify(exec);
 const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
+
+// Query HAProxy to determine which backend is live
+async function queryHAProxyStatus(): Promise<'BLUE' | 'GREEN' | null> {
+  try {
+    // Query HAProxy stats to see which backend is active for ldc-tools
+    const { stdout } = await execAsync(
+      'echo "show stat" | socat stdio tcp4-connect:10.92.3.26:9999 2>/dev/null | grep "ldc-tools" | grep -v "#" || echo ""',
+      { timeout: 2000 }
+    );
+    
+    // Parse HAProxy stats to find which backend has status UP and is receiving traffic
+    if (stdout.includes('ldc-tools-green') && stdout.includes('UP')) {
+      return 'GREEN';
+    } else if (stdout.includes('ldc-tools-blue') && stdout.includes('UP')) {
+      return 'BLUE';
+    }
+  } catch (error) {
+    // HAProxy query failed, will fall back to state file
+  }
+  return null;
+}
 
 export async function GET() {
   try {
-    // Get the server's hostname to determine which server we're on
-    const hostname = os.hostname();
-    
-    // Determine server based on environment or hostname
-    // Container 133 (BLUE) = 10.92.3.23
-    // Container 135 (GREEN) = 10.92.3.25
-    
+    // Determine which server we're on by checking local IP
     let server: 'BLUE' | 'GREEN' = 'BLUE';
     let container = 133;
     let ip = '10.92.3.23';
     
-    // Check if we can determine from hostname or environment
-    if (hostname.includes('135') || process.env.SERVER_NAME === 'GREEN') {
-      server = 'GREEN';
-      container = 135;
-      ip = '10.92.3.25';
-    } else if (hostname.includes('133') || process.env.SERVER_NAME === 'BLUE') {
-      server = 'BLUE';
-      container = 133;
-      ip = '10.92.3.23';
-    }
-    
-    // Determine if this is LIVE or STANDBY by reading deployment state file
-    let status: 'LIVE' | 'STANDBY' = 'STANDBY';
-    
     try {
-      // Try to read the deployment state file
-      const stateData = await fs.readFile(STATE_FILE, 'utf-8');
-      const state = JSON.parse(stateData);
+      const { stdout } = await execAsync('hostname -I 2>/dev/null || hostname -i 2>/dev/null');
+      const localIp = stdout.trim().split(' ')[0];
       
-      // Check which server is currently LIVE
-      if (state.liveServer === server) {
-        status = 'LIVE';
-      } else {
-        status = 'STANDBY';
+      if (localIp.includes('10.92.3.25')) {
+        server = 'GREEN';
+        container = 135;
+        ip = '10.92.3.25';
+      } else if (localIp.includes('10.92.3.23')) {
+        server = 'BLUE';
+        container = 133;
+        ip = '10.92.3.23';
       }
     } catch (error) {
-      // If state file doesn't exist or can't be read, use environment variable
-      if (process.env.SERVER_STATUS) {
-        status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
-      } else {
-        // Default fallback: BLUE is typically LIVE initially
-        status = server === 'BLUE' ? 'LIVE' : 'STANDBY';
+      // Fallback to environment variable if IP detection fails
+      if (process.env.SERVER_NAME === 'GREEN') {
+        server = 'GREEN';
+        container = 135;
+        ip = '10.92.3.25';
+      }
+    }
+    
+    // Determine LIVE/STANDBY status - try multiple sources in order of reliability
+    let status: 'LIVE' | 'STANDBY' = 'STANDBY';
+    let statusSource = 'default';
+    
+    // 1. First try: Query HAProxy directly (most reliable)
+    const haproxyLiveServer = await queryHAProxyStatus();
+    if (haproxyLiveServer) {
+      status = haproxyLiveServer === server ? 'LIVE' : 'STANDBY';
+      statusSource = 'haproxy';
+    } else {
+      // 2. Second try: Read deployment state file
+      try {
+        const stateData = await fs.readFile(STATE_FILE, 'utf-8');
+        const state = JSON.parse(stateData);
+        
+        if (state.liveServer === server) {
+          status = 'LIVE';
+          statusSource = 'statefile';
+        } else {
+          status = 'STANDBY';
+          statusSource = 'statefile';
+        }
+      } catch (error) {
+        // 3. Third try: Environment variable
+        if (process.env.SERVER_STATUS) {
+          status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
+          statusSource = 'env';
+        }
       }
     }
     
@@ -58,7 +93,8 @@ export async function GET() {
       status,
       ip,
       container,
-      hostname
+      hostname: os.hostname(),
+      statusSource // For debugging
     });
   } catch (error) {
     console.error('Error getting server info:', error);

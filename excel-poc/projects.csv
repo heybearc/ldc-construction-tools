@@ -1,0 +1,6 @@
+ProjectID,ProjectName,Location,StartDate,EndDate,Status,ConstructionGroup,ProjectManager,EstimatedWorkers,Notes
+P001,Kingdom Hall - Smithville,123 Main St Smithville,2026-01-15,2026-06-30,Active,CG-0205,John Smith,25,New construction - 2 classrooms
+P002,Assembly Hall Renovation,456 Oak Ave Riverside,2026-02-01,2026-08-15,Active,CG-0205,Michael Johnson,30,Major renovation - new roof and HVAC
+P003,Quick Build - Riverside,789 Elm St Riverside,2026-03-01,2026-04-15,Planning,CG-0205,David Williams,40,Quick build weekend project
+P004,Kingdom Hall Remodel - Oakdale,321 Pine Rd Oakdale,2026-01-20,2026-05-30,Active,CG-0205,James Brown,20,Interior remodel - new flooring and paint
+P005,Maintenance Building,654 Cedar Ln Smithville,2026-04-01,2026-07-31,Planning,CG-0205,Robert Jones,15,New maintenance facility

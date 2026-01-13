@@ -1,0 +1,51 @@
+ID,FirstName,LastName,Email,Phone,Congregation,TradeTeam,Skills,Availability,Status,EmergencyContact,Notes
+1,John,Smith,john.smith@example.com,555-0101,Smithville,Electrical,"Electrical, Wiring",Full-time,Active,Jane Smith 555-0102,Licensed electrician
+2,Michael,Johnson,michael.j@example.com,555-0103,Riverside,Plumbing,"Plumbing, Pipefitting",Full-time,Active,Sarah Johnson 555-0104,Master plumber
+3,David,Williams,david.w@example.com,555-0105,Oakdale,Site Work,"Excavation, Grading",Part-time,Active,Mary Williams 555-0106,Heavy equipment operator
+4,James,Brown,james.b@example.com,555-0107,Smithville,Structural,"Framing, Concrete",Full-time,Active,Linda Brown 555-0108,10 years experience
+5,Robert,Jones,robert.j@example.com,555-0109,Riverside,Roofing,"Roofing, Shingles",Weekends,Active,Patricia Jones 555-0110,Certified roofer
+6,William,Garcia,william.g@example.com,555-0111,Oakdale,Electrical,"Electrical, Panel Work",Full-time,Active,Maria Garcia 555-0112,Commercial experience
+7,Richard,Martinez,richard.m@example.com,555-0113,Smithville,Plumbing,"Plumbing, HVAC",Part-time,Active,Jennifer Martinez 555-0114,HVAC certified
+8,Joseph,Rodriguez,joseph.r@example.com,555-0115,Riverside,Drywall & Paint,"Drywall, Taping",Full-time,Active,Lisa Rodriguez 555-0116,Professional painter
+9,Thomas,Wilson,thomas.w@example.com,555-0117,Oakdale,Flooring & Tile,"Tile, Hardwood",Weekends,Active,Nancy Wilson 555-0118,Tile specialist
+10,Charles,Anderson,charles.a@example.com,555-0119,Smithville,Finish Carpentry,"Trim, Cabinets",Full-time,Active,Karen Anderson 555-0120,Cabinet maker
+11,Christopher,Taylor,chris.t@example.com,555-0121,Riverside,Site Work,"Grading, Drainage",Part-time,Active,Betty Taylor 555-0122,Site supervisor
+12,Daniel,Thomas,daniel.t@example.com,555-0123,Oakdale,Structural,"Framing, Steel",Full-time,Active,Helen Thomas 555-0124,Steel worker
+13,Matthew,Hernandez,matthew.h@example.com,555-0125,Smithville,Roofing,"Roofing, Metal",Weekends,Active,Dorothy Hernandez 555-0126,Metal roof specialist
+14,Anthony,Moore,anthony.m@example.com,555-0127,Riverside,Electrical,"Electrical, Controls",Full-time,Active,Sandra Moore 555-0128,Control systems
+15,Mark,Martin,mark.m@example.com,555-0129,Oakdale,Plumbing,"Plumbing, Gas Lines",Part-time,Active,Ashley Martin 555-0130,Gas certified
+16,Donald,Jackson,donald.j@example.com,555-0131,Smithville,Drywall & Paint,"Drywall, Finishing",Full-time,Active,Kimberly Jackson 555-0132,Drywall expert
+17,Steven,Thompson,steven.t@example.com,555-0133,Riverside,Flooring & Tile,"Carpet, Vinyl",Weekends,Active,Donna Thompson 555-0134,Flooring installer
+18,Paul,White,paul.w@example.com,555-0135,Oakdale,Finish Carpentry,"Doors, Windows",Full-time,Active,Carol White 555-0136,Window specialist
+19,Andrew,Lopez,andrew.l@example.com,555-0137,Smithville,Site Work,"Concrete, Foundations",Part-time,Active,Michelle Lopez 555-0138,Concrete finisher
+20,Joshua,Lee,joshua.l@example.com,555-0139,Riverside,Structural,"Framing, Roofing",Full-time,Active,Emily Lee 555-0140,Framing crew lead
+21,Kenneth,Gonzalez,kenneth.g@example.com,555-0141,Oakdale,Electrical,"Electrical, Solar",Weekends,Active,Amanda Gonzalez 555-0142,Solar installer
+22,Kevin,Harris,kevin.h@example.com,555-0143,Smithville,Plumbing,"Plumbing, Fixtures",Full-time,Active,Melissa Harris 555-0144,Fixture specialist
+23,Brian,Clark,brian.c@example.com,555-0145,Riverside,Roofing,"Roofing, Gutters",Part-time,Active,Deborah Clark 555-0146,Gutter installer
+24,George,Lewis,george.l@example.com,555-0147,Oakdale,Drywall & Paint,"Painting, Staining",Full-time,Active,Stephanie Lewis 555-0148,Professional painter
+25,Timothy,Robinson,timothy.r@example.com,555-0149,Smithville,Flooring & Tile,"Tile, Stone",Weekends,Active,Rebecca Robinson 555-0150,Stone mason
+26,Ronald,Walker,ronald.w@example.com,555-0151,Riverside,Finish Carpentry,"Trim, Molding",Full-time,Active,Laura Walker 555-0152,Trim carpenter
+27,Edward,Perez,edward.p@example.com,555-0153,Oakdale,Site Work,"Excavation, Utilities",Part-time,Active,Sharon Perez 555-0154,Utility installer
+28,Jason,Hall,jason.h@example.com,555-0155,Smithville,Structural,"Concrete, Masonry",Full-time,Active,Cynthia Hall 555-0156,Mason
+29,Jeffrey,Allen,jeffrey.a@example.com,555-0157,Riverside,Electrical,"Electrical, Lighting",Weekends,Active,Kathleen Allen 555-0158,Lighting designer
+30,Ryan,Young,ryan.y@example.com,555-0159,Oakdale,Plumbing,"Plumbing, Drains",Full-time,Active,Amy Young 555-0160,Drain specialist
+31,Jacob,Hernandez,jacob.h@example.com,555-0161,Smithville,Roofing,"Roofing, Repairs",Part-time,Active,Angela Hernandez 555-0162,Roof repair
+32,Gary,King,gary.k@example.com,555-0163,Riverside,Drywall & Paint,"Drywall, Texturing",Full-time,Active,Brenda King 555-0164,Texture specialist
+33,Nicholas,Wright,nicholas.w@example.com,555-0165,Oakdale,Flooring & Tile,"Hardwood, Laminate",Weekends,Active,Nicole Wright 555-0166,Hardwood installer
+34,Eric,Lopez,eric.l@example.com,555-0167,Smithville,Finish Carpentry,"Stairs, Railings",Full-time,Active,Christina Lopez 555-0168,Stair builder
+35,Jonathan,Hill,jonathan.h@example.com,555-0169,Riverside,Site Work,"Grading, Paving",Part-time,Active,Katherine Hill 555-0170,Paving crew
+36,Stephen,Scott,stephen.s@example.com,555-0171,Oakdale,Structural,"Framing, Trusses",Full-time,Active,Christine Scott 555-0172,Truss installer
+37,Larry,Green,larry.g@example.com,555-0173,Smithville,Electrical,"Electrical, Service",Weekends,Active,Samantha Green 555-0174,Service electrician
+38,Justin,Adams,justin.a@example.com,555-0175,Riverside,Plumbing,"Plumbing, Water Heaters",Full-time,Active,Janet Adams 555-0176,Water heater tech
+39,Scott,Baker,scott.b@example.com,555-0177,Oakdale,Roofing,"Roofing, Flashing",Part-time,Active,Catherine Baker 555-0178,Flashing specialist
+40,Brandon,Gonzalez,brandon.g@example.com,555-0179,Smithville,Drywall & Paint,"Painting, Spray",Full-time,Active,Heather Gonzalez 555-0180,Spray painter
+41,Benjamin,Nelson,benjamin.n@example.com,555-0181,Riverside,Flooring & Tile,"Tile, Grout",Weekends,Active,Diane Nelson 555-0182,Tile setter
+42,Samuel,Carter,samuel.c@example.com,555-0183,Oakdale,Finish Carpentry,"Cabinets, Counters",Full-time,Active,Julie Carter 555-0184,Cabinet installer
+43,Raymond,Mitchell,raymond.m@example.com,555-0185,Smithville,Site Work,"Concrete, Flatwork",Part-time,Active,Joyce Mitchell 555-0186,Concrete finisher
+44,Gregory,Perez,gregory.p@example.com,555-0187,Riverside,Structural,"Framing, Walls",Full-time,Active,Virginia Perez 555-0188,Wall framer
+45,Alexander,Roberts,alex.r@example.com,555-0189,Oakdale,Electrical,"Electrical, Troubleshooting",Weekends,Active,Victoria Roberts 555-0190,Troubleshooter
+46,Patrick,Turner,patrick.t@example.com,555-0191,Smithville,Plumbing,"Plumbing, Remodels",Full-time,Active,Lauren Turner 555-0192,Remodel plumber
+47,Frank,Phillips,frank.p@example.com,555-0193,Riverside,Roofing,"Roofing, Underlayment",Part-time,Active,Megan Phillips 555-0194,Roofing installer
+48,Dennis,Campbell,dennis.c@example.com,555-0195,Oakdale,Drywall & Paint,"Drywall, Repair",Full-time,Active,Olivia Campbell 555-0196,Drywall repair
+49,Jerry,Parker,jerry.p@example.com,555-0197,Smithville,Flooring & Tile,"Vinyl, LVP",Weekends,Active,Rachel Parker 555-0198,LVP installer
+50,Tyler,Evans,tyler.e@example.com,555-0199,Riverside,Finish Carpentry,"Baseboards, Crown",Full-time,Active,Emma Evans 555-0200,Trim specialist

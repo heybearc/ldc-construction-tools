@@ -44,16 +44,6 @@ export default function EmailConfigurationPage() {
   const loadEmailConfig = async () => {
     setLoading(true);
     try {
-      // Try to load from localStorage first (temporary solution until backend is ready)
-      const savedConfig = localStorage.getItem('ldc_email_config');
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-        setConfig(prevConfig => ({ ...prevConfig, ...parsedConfig }));
-        setLoading(false);
-        return;
-      }
-
-      // Fallback to API call (will fail until backend is implemented)
       const response = await fetch('/api/v1/admin/email/config');
       if (response.ok) {
         const data = await response.json();
@@ -63,12 +53,6 @@ export default function EmailConfigurationPage() {
       }
     } catch (error) {
       console.error('Failed to load email configuration:', error);
-      // Load from localStorage as fallback
-      const savedConfig = localStorage.getItem('ldc_email_config');
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-        setConfig(prevConfig => ({ ...prevConfig, ...parsedConfig }));
-      }
     } finally {
       setLoading(false);
     }
@@ -86,36 +70,22 @@ export default function EmailConfigurationPage() {
     }
     
     try {
-      // Mark configuration as active when successfully saved
-      const activeConfig = { ...config, isActive: true, updatedAt: new Date().toISOString() };
-      
-      // Save to localStorage (temporary solution until backend is ready)
-      localStorage.setItem('ldc_email_config', JSON.stringify(activeConfig));
-      
-      // Try to save to backend API (will fail until backend is implemented)
-      try {
-        const response = await fetch('/api/v1/admin/email/config', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(activeConfig),
-        });
+      const response = await fetch('/api/v1/admin/email/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
 
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-          setConfig(activeConfig);
-          setStatus({ type: 'success', message: 'Email configuration saved successfully to server!' });
-          return;
-        }
-      } catch (apiError) {
-        console.log('Backend API not available, using localStorage fallback');
-      }
+      const data = await response.json();
       
-      // Fallback success (localStorage saved)
-      setConfig(activeConfig);
-      setStatus({ type: 'success', message: 'Email configuration saved successfully! (Backend API pending - using local storage)' });
+      if (response.ok && data.success) {
+        setConfig(data.config);
+        setStatus({ type: 'success', message: 'Email configuration saved successfully!' });
+      } else {
+        setStatus({ type: 'error', message: data.message || 'Failed to save configuration' });
+      }
       
     } catch (error) {
       setStatus({ type: 'error', message: 'Error saving configuration' });

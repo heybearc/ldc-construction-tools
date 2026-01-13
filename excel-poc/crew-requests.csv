@@ -1,0 +1,11 @@
+RequestID,ProjectName,TradeTeamNeeded,NumberOfWorkers,StartDate,EndDate,RequestedBy,DateRequested,Status,Priority,Notes
+CR001,Quick Build - Riverside,Site Work,8,2026-03-01,2026-03-05,David Williams,2026-01-05,Pending,High,Need experienced excavation crew
+CR002,Quick Build - Riverside,Structural,12,2026-03-06,2026-03-15,David Williams,2026-01-05,Pending,High,Framing crew for quick build
+CR003,Assembly Hall Renovation,Electrical,4,2026-02-15,2026-03-01,Michael Johnson,2026-01-06,Approved,Medium,Additional electricians for panel work
+CR004,Kingdom Hall - Smithville,Finish Carpentry,3,2026-05-01,2026-06-15,John Smith,2026-01-06,Pending,Medium,Trim carpenters for final phase
+CR005,Maintenance Building,Site Work,5,2026-04-01,2026-04-10,Robert Jones,2026-01-06,Pending,Low,Foundation and site prep
+CR006,Assembly Hall Renovation,Roofing,6,2026-02-10,2026-03-15,Michael Johnson,2026-01-05,Fulfilled,High,Roof replacement crew - FULFILLED
+CR007,Kingdom Hall Remodel - Oakdale,Drywall & Paint,4,2026-03-01,2026-04-30,James Brown,2026-01-05,Approved,Medium,Drywall and painting crew
+CR008,Quick Build - Riverside,Plumbing,5,2026-03-10,2026-03-20,David Williams,2026-01-06,Pending,High,Plumbing rough-in crew
+CR009,Kingdom Hall - Smithville,Electrical,2,2026-04-01,2026-05-15,John Smith,2026-01-06,Pending,Medium,Lighting and controls specialists
+CR010,Maintenance Building,Structural,4,2026-04-15,2026-05-30,Robert Jones,2026-01-06,Pending,Low,Framing crew for building

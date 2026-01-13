@@ -1,0 +1,271 @@
+# Excel Dashboard Formulas for LDC Tools POC
+
+## Dashboard Layout
+
+Create a new sheet named "Dashboard" with the following sections:
+
+---
+
+## SECTION 1: SUMMARY STATISTICS (Rows 1-10)
+
+### Cell A1: Title
+="CONSTRUCTION GROUP 0205 - VOLUNTEER DASHBOARD"
+(Format: Bold, 18pt, Centered across A1:F1)
+
+### Cell A3: Total Volunteers
+="Total Volunteers:"
+### Cell B3: Count
+=COUNTA(Volunteers[FirstName])
+
+### Cell A4: Active Projects
+="Active Projects:"
+### Cell B4: Count
+=COUNTIF(Projects[Status],"Active")
+
+### Cell A5: Pending Crew Requests
+="Pending Crew Requests:"
+### Cell B5: Count
+=COUNTIF(CrewRequests[Status],"Pending")
+
+### Cell A6: Total Assignments
+="Total Assignments:"
+### Cell B6: Count
+=COUNTA(Assignments[AssignmentID])
+
+---
+
+## SECTION 2: VOLUNTEERS BY TRADE TEAM (Rows 12-22)
+
+### Cell A12: Header
+="VOLUNTEERS BY TRADE TEAM"
+(Format: Bold, 14pt)
+
+### Cell A13-A20: Trade Team Names (manual entry)
+A13: Site Work
+A14: Structural
+A15: Roofing
+A16: Electrical
+A17: Plumbing
+A18: Drywall & Paint
+A19: Flooring & Tile
+A20: Finish Carpentry
+
+### Cell B13-B20: Count Formulas
+B13: =COUNTIF(Volunteers[TradeTeam],"Site Work")
+B14: =COUNTIF(Volunteers[TradeTeam],"Structural")
+B15: =COUNTIF(Volunteers[TradeTeam],"Roofing")
+B16: =COUNTIF(Volunteers[TradeTeam],"Electrical")
+B17: =COUNTIF(Volunteers[TradeTeam],"Plumbing")
+B18: =COUNTIF(Volunteers[TradeTeam],"Drywall & Paint")
+B19: =COUNTIF(Volunteers[TradeTeam],"Flooring & Tile")
+B20: =COUNTIF(Volunteers[TradeTeam],"Finish Carpentry")
+
+### Cell C13-C20: Percentage Formulas
+C13: =B13/$B$3
+C14: =B14/$B$3
+C15: =B15/$B$3
+C16: =B16/$B$3
+C17: =B17/$B$3
+C18: =B18/$B$3
+C19: =B19/$B$3
+C20: =B20/$B$3
+(Format all as Percentage with 1 decimal place)
+
+---
+
+## SECTION 3: VOLUNTEERS BY CONGREGATION (Rows 24-28)
+
+### Cell A24: Header
+="VOLUNTEERS BY CONGREGATION"
+(Format: Bold, 14pt)
+
+### Cell A25-A27: Congregation Names
+A25: Smithville
+A26: Riverside
+A27: Oakdale
+
+### Cell B25-B27: Count Formulas
+B25: =COUNTIF(Volunteers[Congregation],"Smithville")
+B26: =COUNTIF(Volunteers[Congregation],"Riverside")
+B27: =COUNTIF(Volunteers[Congregation],"Oakdale")
+
+---
+
+## SECTION 4: ACTIVE PROJECTS SUMMARY (Rows 30-40)
+
+### Cell A30: Header
+="ACTIVE PROJECTS"
+(Format: Bold, 14pt)
+
+### Cell A31-E31: Column Headers
+A31: Project Name
+B31: Location
+C31: Status
+D31: Assigned Workers
+E31: Project Manager
+
+### Rows 32-36: Use FILTER formula (Excel 365)
+A32: =FILTER(Projects[ProjectName],Projects[Status]="Active","No active projects")
+B32: =FILTER(Projects[Location],Projects[Status]="Active","")
+C32: =FILTER(Projects[Status],Projects[Status]="Active","")
+D32: Formula to count assignments per project (see below)
+E32: =FILTER(Projects[ProjectManager],Projects[Status]="Active","")
+
+### Cell D32: Count Assignments for Project
+=COUNTIF(Assignments[ProjectName],A32)
+(Copy down to D33:D36)
+
+---
+
+## SECTION 5: CREW REQUESTS STATUS (Rows 42-52)
+
+### Cell A42: Header
+="CREW REQUESTS STATUS"
+(Format: Bold, 14pt)
+
+### Cell A43-F43: Column Headers
+A43: Request ID
+B43: Project
+C43: Trade Team
+D43: Workers Needed
+E43: Status
+F43: Priority
+
+### Rows 44-53: Show all crew requests sorted by priority
+Use FILTER or manual reference to CrewRequests table
+A44: =CrewRequests[RequestID]
+B44: =CrewRequests[ProjectName]
+C44: =CrewRequests[TradeTeamNeeded]
+D44: =CrewRequests[NumberOfWorkers]
+E44: =CrewRequests[Status]
+F44: =CrewRequests[Priority]
+
+---
+
+## SECTION 6: AVAILABILITY SUMMARY (Rows 55-60)
+
+### Cell A55: Header
+="VOLUNTEER AVAILABILITY"
+(Format: Bold, 14pt)
+
+### Cell A56-A58: Availability Types
+A56: Full-time
+A57: Part-time
+A58: Weekends
+
+### Cell B56-B58: Count Formulas
+B56: =COUNTIF(Volunteers[Availability],"Full-time")
+B57: =COUNTIF(Volunteers[Availability],"Part-time")
+B58: =COUNTIF(Volunteers[Availability],"Weekends")
+
+---
+
+## CHARTS TO CREATE
+
+### Chart 1: Volunteers by Trade Team (Bar Chart)
+- Data Range: A13:B20
+- Chart Type: Horizontal Bar Chart
+- Position: D12:F22
+- Title: "Volunteers by Trade Team"
+
+### Chart 2: Volunteers by Congregation (Pie Chart)
+- Data Range: A25:B27
+- Chart Type: Pie Chart
+- Position: D24:F34
+- Title: "Volunteers by Congregation"
+
+### Chart 3: Availability Distribution (Donut Chart)
+- Data Range: A56:B58
+- Chart Type: Donut Chart
+- Position: D36:F46
+- Title: "Volunteer Availability"
+
+---
+
+## CONDITIONAL FORMATTING
+
+### Crew Requests Status (Column E44:E53)
+- Pending = Yellow fill
+- Approved = Light Blue fill
+- Fulfilled = Green fill
+- Cancelled = Red fill
+
+### Priority (Column F44:F53)
+- High = Red text, bold
+- Medium = Orange text
+- Low = Gray text
+
+---
+
+## DATA VALIDATION SETUP
+
+### For Volunteers Sheet:
+1. TradeTeam column: List from TradeTeams[TeamName]
+2. Status column: List = Active, Inactive, On Leave
+3. Availability column: List = Full-time, Part-time, Weekends
+4. Congregation column: List = Smithville, Riverside, Oakdale
+
+### For Assignments Sheet:
+1. VolunteerName column: List from Volunteers (FirstName + LastName)
+2. ProjectName column: List from Projects[ProjectName]
+3. TradeTeam column: List from TradeTeams[TeamName]
+4. Role column: List = Worker, Crew Lead, Supervisor
+5. Status column: List = Assigned, Confirmed, Completed, Cancelled
+
+### For CrewRequests Sheet:
+1. ProjectName column: List from Projects[ProjectName]
+2. TradeTeamNeeded column: List from TradeTeams[TeamName]
+3. Status column: List = Pending, Approved, Fulfilled, Cancelled
+4. Priority column: List = High, Medium, Low
+
+---
+
+## TIPS FOR IMPLEMENTATION
+
+1. Convert all data ranges to Tables first (Insert → Table)
+2. Name tables: Volunteers, TradeTeams, Projects, Assignments, CrewRequests
+3. Use structured references (e.g., Volunteers[FirstName])
+4. Set up data validation before entering data
+5. Create charts after formulas are working
+6. Apply conditional formatting last
+7. Protect Dashboard sheet (allow only viewing)
+8. Save as .xlsx format
+
+---
+
+## ADVANCED FEATURES (Optional)
+
+### Dynamic Project List (Excel 365)
+Use FILTER function to show only active projects:
+=FILTER(Projects,Projects[Status]="Active","No active projects")
+
+### Available Volunteers Report
+Create new sheet "Available" with formula:
+=FILTER(Volunteers,(Volunteers[Status]="Active")*(COUNTIF(Assignments[VolunteerName],Volunteers[FirstName]&" "&Volunteers[LastName])=0),"No available volunteers")
+
+### Volunteer Lookup
+Create dropdown to select volunteer and show all their assignments:
+Cell A1: Dropdown with volunteer names
+Cell A3: =FILTER(Assignments,Assignments[VolunteerName]=A1,"No assignments")
+
+---
+
+## MAINTENANCE
+
+### Weekly Tasks:
+- Update volunteer statuses
+- Add new assignments
+- Update crew request statuses
+- Review dashboard for accuracy
+
+### Monthly Tasks:
+- Archive completed projects
+- Remove inactive volunteers
+- Update trade team leads
+- Review and clean data
+
+---
+
+Created: January 6, 2026
+Version: 1.0.0
+For: Construction Group 0205
