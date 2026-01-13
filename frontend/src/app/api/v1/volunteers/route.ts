@@ -56,13 +56,6 @@ export async function GET(request: NextRequest) {
         { emailPersonal: { contains: searchTerm, mode: 'insensitive' } },
         { emailJw: { contains: searchTerm, mode: 'insensitive' } },
       ];
-      
-      // For multi-word searches (e.g., "Amber Smith"), also search in concatenated full name
-      if (searchTerm.includes(' ')) {
-        // Prisma doesn't support searching in concatenated fields directly in where clause
-        // So we'll fetch all volunteers and filter in memory for full name matches
-        // This is handled after the query below
-      }
     }
 
     // Role filter
@@ -143,13 +136,25 @@ export async function GET(request: NextRequest) {
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
 
-    // For multi-word searches, filter by full name match
-    if (search && search.trim().includes(' ')) {
+    // For searches with spaces, also check if the full name matches
+    // This allows "Amber A" to match "Amber Allen"
+    if (search && search.trim()) {
       const searchTerm = search.trim().toLowerCase();
-      volunteers = volunteers.filter(v => {
+      
+      // If the search already returned results from individual field matches, we're good
+      // But also include any volunteers where the full name matches the search term
+      const fullNameMatches = volunteers.filter(v => {
         const fullName = `${v.firstName} ${v.lastName}`.toLowerCase();
         return fullName.includes(searchTerm);
       });
+      
+      // Combine results and remove duplicates
+      const allMatches = [...volunteers, ...fullNameMatches];
+      const uniqueVolunteers = Array.from(
+        new Map(allMatches.map(v => [v.id, v])).values()
+      );
+      
+      volunteers = uniqueVolunteers;
     }
 
     // Transform to match expected frontend format
