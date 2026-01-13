@@ -115,34 +115,33 @@ export async function GET() {
       }
     }
     
-    // Determine LIVE/STANDBY status - try multiple sources in order of reliability
+    // Determine LIVE/STANDBY status - use state file as primary source
+    // The state file is updated by the MCP deployment tool during traffic switches
     let status: 'LIVE' | 'STANDBY' = 'STANDBY';
     let statusSource = 'default';
     
-    // 1. First try: Query HAProxy directly (most reliable)
-    const haproxyLiveServer = await queryHAProxyStatus();
-    if (haproxyLiveServer) {
-      status = haproxyLiveServer === server ? 'LIVE' : 'STANDBY';
-      statusSource = 'haproxy';
-    } else {
-      // 2. Second try: Read deployment state file
-      try {
-        const stateData = await fs.readFile(STATE_FILE, 'utf-8');
-        const state = JSON.parse(stateData);
-        
-        if (state.liveServer === server) {
-          status = 'LIVE';
-          statusSource = 'statefile';
-        } else {
-          status = 'STANDBY';
-          statusSource = 'statefile';
-        }
-      } catch (error) {
-        // 3. Third try: Environment variable
-        if (process.env.SERVER_STATUS) {
-          status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
-          statusSource = 'env';
-        }
+    // Primary source: Read deployment state file (updated by MCP tool)
+    try {
+      const stateData = await fs.readFile(STATE_FILE, 'utf-8');
+      const state = JSON.parse(stateData);
+      
+      if (state.liveServer === server) {
+        status = 'LIVE';
+        statusSource = 'statefile';
+      } else {
+        status = 'STANDBY';
+        statusSource = 'statefile';
+      }
+    } catch (error) {
+      // Fallback: Try HAProxy query if state file unavailable
+      const haproxyLiveServer = await queryHAProxyStatus();
+      if (haproxyLiveServer) {
+        status = haproxyLiveServer === server ? 'LIVE' : 'STANDBY';
+        statusSource = 'haproxy-fallback';
+      } else if (process.env.SERVER_STATUS) {
+        // Last resort: Environment variable
+        status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
+        statusSource = 'env';
       }
     }
     
