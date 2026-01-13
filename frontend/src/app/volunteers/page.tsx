@@ -116,7 +116,7 @@ export default function VolunteersPage() {
   const canExport = canExportVolunteers(session, userOrgRoles);
 
   useEffect(() => {
-    fetchVolunteers();
+    fetchVolunteers(true); // Initial load with loading spinner
     fetchStats();
   }, []);
 
@@ -129,12 +129,13 @@ export default function VolunteersPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, roleFilter, congregationFilter, statusFilter, servingAsFilter, hasEmailFilter, hasPhoneFilter, isAssignedFilter]);
 
-  const fetchVolunteers = async () => {
-    // Store if search input is currently focused BEFORE any state changes
-    const searchWasFocused = document.activeElement === searchInputRef.current;
-    
+  const fetchVolunteers = async (isInitialLoad = false) => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial page load, not during search/filter
+      if (isInitialLoad) {
+        setLoading(true);
+      }
+      
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (roleFilter) params.append('role', roleFilter);
@@ -153,14 +154,8 @@ export default function VolunteersPage() {
     } catch (error) {
       console.error('Error fetching volunteers:', error);
     } finally {
-      setLoading(false);
-      
-      // Restore focus if search input was focused before the API call
-      if (searchWasFocused && searchInputRef.current) {
-        // Use requestAnimationFrame to ensure DOM has fully updated
-        requestAnimationFrame(() => {
-          searchInputRef.current?.focus();
-        });
+      if (isInitialLoad) {
+        setLoading(false);
       }
     }
   };
