@@ -122,14 +122,18 @@ export default function VolunteersPage() {
 
   // Debounced search - only trigger API call after user stops typing
   useEffect(() => {
+    const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      fetchVolunteers();
+      fetchVolunteers(false, controller.signal);
     }, 300); // 300ms delay
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort(); // Cancel any pending requests
+    };
   }, [searchTerm, roleFilter, congregationFilter, statusFilter, servingAsFilter, hasEmailFilter, hasPhoneFilter, isAssignedFilter]);
 
-  const fetchVolunteers = async (isInitialLoad = false) => {
+  const fetchVolunteers = async (isInitialLoad = false, signal?: AbortSignal) => {
     try {
       // Only show loading spinner on initial page load, not during search/filter
       if (isInitialLoad) {
@@ -146,12 +150,16 @@ export default function VolunteersPage() {
       if (hasPhoneFilter) params.append('hasPhone', hasPhoneFilter);
       if (isAssignedFilter) params.append('isAssigned', isAssignedFilter);
       
-      const response = await fetch(`/api/v1/volunteers?${params}`);
+      const response = await fetch(`/api/v1/volunteers?${params}`, { signal });
       if (response.ok) {
         const data = await response.json();
         setVolunteers(data);
       }
     } catch (error) {
+      // Ignore abort errors (these are expected when user types quickly)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error('Error fetching volunteers:', error);
     } finally {
       if (isInitialLoad) {
