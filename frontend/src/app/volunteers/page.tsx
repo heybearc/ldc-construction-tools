@@ -78,6 +78,7 @@ export default function VolunteersPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [userOrgRoles, setUserOrgRoles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // Quick filter states
   const [statusFilter, setStatusFilter] = useState<string>('active');
@@ -130,6 +131,9 @@ export default function VolunteersPage() {
 
   const fetchVolunteers = async () => {
     try {
+      // Store if search input is currently focused
+      const searchWasFocused = document.activeElement === searchInputRef.current;
+      
       setLoading(true);
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
@@ -150,6 +154,14 @@ export default function VolunteersPage() {
       console.error('Error fetching volunteers:', error);
     } finally {
       setLoading(false);
+      
+      // Restore focus to search input if it was focused before
+      if (document.activeElement !== searchInputRef.current && searchInputRef.current) {
+        // Use setTimeout to ensure DOM has updated
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 0);
+      }
     }
   };
 
@@ -585,6 +597,7 @@ export default function VolunteersPage() {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search by name, BA ID, or congregation..."
               value={searchTerm}
