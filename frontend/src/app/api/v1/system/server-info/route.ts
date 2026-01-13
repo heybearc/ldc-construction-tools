@@ -11,6 +11,27 @@ export const revalidate = 0;
 const execAsync = promisify(exec);
 const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
 
+// Query HAProxy config to determine which backend is active
+async function queryHAProxyConfig(): Promise<'BLUE' | 'GREEN' | null> {
+  try {
+    // SSH to HAProxy and read the config file to see which backend is configured
+    const { stdout } = await execAsync(
+      'ssh -o ConnectTimeout=2 root@10.92.3.26 "grep \'use_backend ldc-tools.*if is_ldc\' /etc/haproxy/haproxy.cfg | grep -v blue | grep -v green | head -1"',
+      { timeout: 3000 }
+    );
+    
+    // Parse the line: "use_backend ldc-tools-green if is_ldc" or "use_backend ldc-tools-blue if is_ldc"
+    if (stdout.includes('ldc-tools-green')) {
+      return 'GREEN';
+    } else if (stdout.includes('ldc-tools-blue')) {
+      return 'BLUE';
+    }
+  } catch (error) {
+    console.error('HAProxy config query failed:', error);
+  }
+  return null;
+}
+
 export async function GET() {
   try {
     // Determine which server we're on by checking local IP
@@ -40,24 +61,31 @@ export async function GET() {
       }
     }
     
-    // Determine LIVE/STANDBY status from state file
-    // The state file is updated by the MCP deployment tool during traffic switches
+    // Determine LIVE/STANDBY status - HAProxy config is source of truth
     let status: 'LIVE' | 'STANDBY' = 'STANDBY';
     let statusSource = 'default';
     
-    try {
-      const stateData = await fs.readFile(STATE_FILE, 'utf-8');
-      const state = JSON.parse(stateData);
-      
-      status = state.liveServer === server ? 'LIVE' : 'STANDBY';
-      statusSource = 'statefile';
-    } catch (error) {
-      // Fallback to environment variable if state file unavailable
-      if (process.env.SERVER_STATUS) {
-        status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
-        statusSource = 'env';
+    // Primary: Query HAProxy config file (actual routing configuration)
+    const haproxyLiveServer = await queryHAProxyConfig();
+    if (haproxyLiveServer) {
+      status = haproxyLiveServer === server ? 'LIVE' : 'STANDBY';
+      statusSource = 'haproxy-config';
+    } else {
+      // Fallback: Read state file (updated by MCP tool alongside HAProxy)
+      try {
+        const stateData = await fs.readFile(STATE_FILE, 'utf-8');
+        const state = JSON.parse(stateData);
+        
+        status = state.liveServer === server ? 'LIVE' : 'STANDBY';
+        statusSource = 'statefile-fallback';
+      } catch (error) {
+        // Last resort: Environment variable
+        if (process.env.SERVER_STATUS) {
+          status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
+          statusSource = 'env';
+        }
+        console.error('Failed to determine status:', error);
       }
-      console.error('Failed to read state file:', error);
     }
     
     return NextResponse.json({
