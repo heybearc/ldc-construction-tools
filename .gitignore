@@ -117,3 +117,10 @@ temp/
 .wmacs/state/
 ssh_config_*
 *.wmacs.tmp
+
+# --- Runtime / deployment state ---
+deployment-state.json
+frontend/data/
+
+# --- Local debug scripts ---
+frontend/test-env.js
