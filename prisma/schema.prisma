@@ -1,0 +1,966 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  name                String?
+  email               String              @unique
+  emailVerified       DateTime?
+  image               String?
+  firstName           String?
+  lastName            String?
+  role                UserRole            @default(READ_ONLY)  // System permission role only
+  ldcRole             String?             // DEPRECATED: Use volunteer.roles instead. Kept for backwards compatibility during migration.
+  adminLevel          AdminLevel?         // Optional admin access level
+  status              UserStatus          @default(INVITED)
+  // Link to Volunteer (source of truth for organizational roles)
+  volunteerId         String?             @unique
+  volunteer           Volunteer?          @relation(fields: [volunteerId], references: [id])
+  // Multi-tenant: Primary CG assignment
+  // For users with a linked volunteer, CG is derived from volunteer.constructionGroupId
+  // For the break-glass SUPER_ADMIN account (no volunteer), CG can be set directly
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup?  @relation(fields: [constructionGroupId], references: [id])
+  passwordHash        String?
+  lastLogin           DateTime?
+  loginCount          Int                 @default(0)
+  invitedBy           String?
+  invitedAt           DateTime?
+  lastSeenReleaseVersion String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  accounts            Account[]
+  sessions            Session[]
+  sentInvitations     UserInvitation[]    @relation("InvitedBy")
+  CrewMembers         CrewMembers[]
+  TradeTeamMembers    TradeTeamMembers[]
+  auditLogs           AuditLog[]
+  projectAssignments  ProjectAssignment[]
+  roleAssignments     RoleAssignment[]
+  feedback            Feedback[]
+  feedbackComments    FeedbackComment[]
+  tradeTeamOversight  TradeTeamOversight[]
+  tradeCrewOversight  TradeCrewOversight[]
+  personnelContacts   PersonnelContact[]
+  announcements       Announcement[]
+  assignedCrewRequests CrewChangeRequest[] @relation("AssignedCrewRequests")
+  completedCrewRequests CrewChangeRequest[] @relation("CompletedCrewRequests")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserInvitation {
+  id              String           @id @default(cuid())
+  email           String
+  firstName       String
+  lastName        String
+  role            UserRole
+  invitedBy       String
+  invitationToken String           @unique
+  expiresAt       DateTime
+  status          InvitationStatus @default(PENDING)
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  remindersSent   Int              @default(0)
+  lastReminderAt  DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  invitedByUser   User             @relation("InvitedBy", fields: [invitedBy], references: [id])
+}
+
+model EmailConfiguration {
+  id                   String    @id @default(cuid())
+  provider             String
+  displayName          String
+  smtpHost             String?
+  smtpPort             Int?
+  username             String?
+  appPasswordEncrypted String?
+  fromEmail            String
+  fromName             String
+  encryption           String?
+  isDefault            Boolean   @default(false)
+  isActive             Boolean   @default(true)
+  testStatus           String    @default("untested")
+  lastTested           DateTime?
+  regionId             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@map("email_configurations")
+}
+
+model Role {
+  id                 String              @id @default(cuid())
+  name               String              @unique
+  displayName        String
+  description        String?
+  type               RoleType
+  scope              RoleScope
+  level              Int                 @default(0)
+  permissions        String[]
+  isActive           Boolean             @default(true)
+  regionId           String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  projectAssignments ProjectAssignment[]
+  assignments        RoleAssignment[]
+
+  @@map("roles")
+}
+
+model RoleAssignment {
+  id                   String         @id @default(cuid())
+  userId               String
+  roleId               String
+  assignmentType       AssignmentType
+  scope                String?
+  startDate            DateTime       @default(now())
+  endDate              DateTime?
+  isActive             Boolean        @default(true)
+  assignedBy           String
+  consultationRequired Boolean        @default(false)
+  consultationStatus   String?
+  notes                String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  role                 Role           @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId, scope])
+  @@map("role_assignments")
+}
+
+model RoleChangeLog {
+  id               String   @id @default(cuid())
+  roleAssignmentId String?
+  userId           String
+  roleId           String
+  action           String
+  previousData     String?
+  newData          String?
+  reason           String?
+  performedBy      String
+  impactAssessment String?
+  createdAt        DateTime @default(now())
+
+  @@map("role_change_logs")
+}
+
+model Project {
+  id                  String                   @id @default(cuid())
+  name                String
+  description         String?
+  scopeOfWork         String?
+  isRequired          Boolean            @default(true)
+  status              ProjectStatus            @default(PLANNING)
+  priority            ProjectPriority          @default(MEDIUM)
+  // Multi-tenant: CG ownership
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup?       @relation(fields: [constructionGroupId], references: [id])
+  // Legacy fields
+  regionId            String
+  zoneId              String?
+  startDate           DateTime?
+  endDate             DateTime?
+  estimatedDuration   Int?
+  actualDuration      Int?
+  budget              Decimal?                 @db.Decimal(10, 2)
+  actualCost          Decimal?                 @db.Decimal(10, 2)
+  projectManager      String?
+  projectNumber       String?
+  location            String?
+  projectType         String?
+  currentPhase        String?
+  jwSharepointUrl     String?
+  builderAssistantUrl String?
+  isActive            Boolean                  @default(true)
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  assignments         ProjectAssignment[]
+  staffingRequests    ProjectStaffingRequest[]
+  crewAssignments     ProjectCrewAssignment[]
+  scheduleVersions    ProjectScheduleVersion[]
+  congregationAssignments ProjectCongregationAssignment[]
+
+  @@map("projects")
+}
+
+model ProjectAssignment {
+  id             String         @id @default(cuid())
+  projectId      String
+  userId         String
+  roleId         String
+  assignmentType AssignmentType
+  startDate      DateTime       @default(now())
+  endDate        DateTime?
+  isActive       Boolean        @default(true)
+  assignedBy     String
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role           Role           @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId, roleId])
+  @@map("project_assignments")
+}
+
+model TradeTeam {
+  id                  String             @id @default(cuid())
+  name                String
+  description         String?
+  scopeOfWork         String?
+  isRequired          Boolean            @default(true)
+  // Multi-tenant: CG scope
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup? @relation(fields: [constructionGroupId], references: [id])
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  TradeTeamMembers    TradeTeamMembers[]
+  crews               Crew[]
+  scheduleEntries     ProjectScheduleEntry[]
+  oversight           TradeTeamOversight[]
+  volunteers          Volunteer[]
+  volunteerRoles      VolunteerRole[]
+
+  @@map("trade_teams")
+}
+
+model Crew {
+  id                  String             @id @default(cuid())
+  name                String
+  description         String?
+  scopeOfWork         String?
+  isRequired          Boolean            @default(true)
+  tradeTeamId         String
+  // Multi-tenant: CG scope (inherited from TradeTeam but explicit for queries)
+  constructionGroupId String?
+  constructionGroup   ConstructionGroup? @relation(fields: [constructionGroupId], references: [id])
+  status              CrewStatus         @default(ACTIVE)
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  CrewMembers         CrewMembers[]
+  tradeTeam           TradeTeam          @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+  oversight           TradeCrewOversight[]
+  projectAssignments  ProjectCrewAssignment[]
+  scheduleEntries     ProjectScheduleEntry[]
+  volunteers          Volunteer[]
+  volunteerRoles      VolunteerRole[]
+
+  @@map("crews")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  subject     String
+  htmlContent String
+  textContent String?
+  variables   Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("email_templates")
+}
+
+model AuditLog {
+  id                        String              @id @default(cuid())
+  userId                    String?
+  action                    String
+  resource                  String
+  resourceId                String?
+  oldValues                 Json?
+  newValues                 Json?
+  ipAddress                 String?
+  userAgent                 String?
+  timestamp                 DateTime            @default(now())
+  // Multi-tenant fields
+  fromConstructionGroupId   String?
+  toConstructionGroupId     String?
+  metadata                  Json?
+  user                      User?               @relation(fields: [userId], references: [id])
+  fromConstructionGroup     ConstructionGroup?  @relation("AuditLogFromCG", fields: [fromConstructionGroupId], references: [id])
+  toConstructionGroup       ConstructionGroup?  @relation("AuditLogToCG", fields: [toConstructionGroupId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([action, timestamp])
+  @@index([resource, resourceId])
+  @@index([fromConstructionGroupId, toConstructionGroupId])
+  @@map("audit_logs")
+}
+
+model CrewMembers {
+  A     String
+  B     String
+  crews Crew   @relation(fields: [A], references: [id], onDelete: Cascade)
+  User  User   @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_CrewMembers_AB_pkey")
+  @@index([B], map: "_CrewMembers_B_index")
+  @@map("_CrewMembers")
+}
+
+model TradeTeamMembers {
+  A           String
+  B           String
+  trade_teams TradeTeam @relation(fields: [A], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_TradeTeamMembers_AB_pkey")
+  @@index([B], map: "_TradeTeamMembers_B_index")
+  @@map("_TradeTeamMembers")
+}
+
+// ============================================
+// MULTI-TENANT HIERARCHY MODELS
+// Branch -> Zone -> Region -> ConstructionGroup
+// ============================================
+
+model Branch {
+  id          String   @id @default(cuid())
+  code        String   @unique  // "US", "CA", "MX", etc.
+  name        String            // "United States Branch"
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  zones       Zone[]
+
+  @@map("branches")
+}
+
+model Zone {
+  id          String   @id @default(cuid())
+  code        String   @unique  // "01", "02", "03", "04", "05"
+  name        String            // "Zone 1"
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  regions     Region[]
+
+  @@map("zones")
+}
+
+model Region {
+  id                 String              @id @default(cuid())
+  code               String              @unique  // "01.12", "02.05", etc.
+  name               String                       // "Region 01.12"
+  zoneId             String
+  zone               Zone                @relation(fields: [zoneId], references: [id])
+  description        String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  constructionGroups ConstructionGroup[]
+
+  @@map("regions")
+}
+
+model ConstructionGroup {
+  id            String      @id @default(cuid())
+  code          String      @unique  // "CG-01.12-001"
+  name          String               // "Region 01.12 Construction Group"
+  regionId      String
+  region        Region      @relation(fields: [regionId], references: [id])
+  description   String?
+  cgProjectUrl  String?              // URL to CG Project page for instructions
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // All scoped data
+  users       User[]
+  tradeTeams  TradeTeam[]
+  crews       Crew[]
+  projects    Project[]
+  personnelContacts PersonnelContact[]
+  volunteers    Volunteer[]
+  congregations   Congregation[]
+  announcements   Announcement[]
+  crewChangeRequests CrewChangeRequest[]
+  auditLogsFrom   AuditLog[]  @relation("AuditLogFromCG")
+  auditLogsTo     AuditLog[]  @relation("AuditLogToCG")
+
+  @@map("construction_groups")
+}
+
+// Cross-CG staffing for large projects / disaster relief
+model ProjectStaffingRequest {
+  id               String                @id @default(cuid())
+  projectId        String
+  project          Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestingCGId   String                // CG that owns the project
+  targetCGId       String                // CG being asked for help
+  requestedRoles   String[]              // Roles/trades needed
+  requestedCount   Int                   // Number of volunteers needed
+  status           StaffingRequestStatus @default(PENDING)
+  requestedBy      String                // User who made request
+  respondedBy      String?               // User who approved/declined
+  responseNotes    String?
+  startDate        DateTime?
+  endDate          DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@map("project_staffing_requests")
+}
+
+enum StaffingRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  COMPLETED
+  CANCELLED
+}
+
+// System permission roles only (not organizational roles)
+enum UserRole {
+  SUPER_ADMIN  // Full system access
+  ADMIN        // CG-level administration
+  USER         // Standard access within scope
+  READ_ONLY    // View-only access
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum InvitationStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+enum RoleType {
+  TRADE_TEAM_OVERSEER
+  TRADE_TEAM_ASSISTANT
+  TRADE_TEAM_SUPPORT
+  CREW_OVERSEER
+  CREW_ASSISTANT
+  CREW_SUPPORT
+  CREW_VOLUNTEER
+  ZONE_OVERSEER
+  PERSONNEL_CONTACT
+  SUPER_ADMIN
+}
+
+enum RoleScope {
+  GLOBAL
+  REGIONAL
+  PROJECT
+  TEAM
+}
+
+enum AssignmentType {
+  BRANCH_APPOINTED
+  FIELD_CONTINUOUS
+  FIELD_TEMPORARY
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum CrewStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum EmailProvider {
+  GMAIL
+  CUSTOM_SMTP
+}
+
+enum EmailSecurity {
+  NONE
+  SSL_TLS
+  STARTTLS
+}
+
+enum AdminLevel {
+  SUPER_ADMIN
+  ADMIN
+  READ_ONLY_ADMIN
+}
+
+enum FeedbackType {
+  BUG
+  ENHANCEMENT
+  FEATURE
+  QUESTION
+}
+
+enum FeedbackPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// ============================================
+// OVERSIGHT ROLES - Trade Team & Crew Leadership
+// Per USLDC-2230-E Guidelines
+// ============================================
+
+// Trade Team Oversight Roles
+enum TradeTeamOversightRole {
+  TTO        // Trade Team Overseer (1 per team)
+  TTOA       // Trade Team Overseer Assistant (up to 2)
+  TT_SUPPORT // Trade Team Support (multiple)
+}
+
+// Trade Crew Oversight Roles  
+enum TradeCrewOversightRole {
+  TCO        // Trade Crew Overseer (1 per crew)
+  TCOA       // Trade Crew Overseer Assistant (up to 3)
+  TC_SUPPORT // Trade Crew Support (multiple)
+}
+
+// Personnel Contact Roles (CG-level)
+enum PersonnelContactRole {
+  PC         // Personnel Contact (1 per CG)
+  PCA        // Personnel Contact Assistant (multiple)
+  PC_SUPPORT // Personnel Contact Support (multiple)
+}
+
+// Trade Team Oversight - assigns users to trade team leadership roles
+model TradeTeamOversight {
+  id          String                   @id @default(cuid())
+  tradeTeamId String
+  userId      String
+  role        TradeTeamOversightRole
+  isActive    Boolean                  @default(true)
+  startDate   DateTime                 @default(now())
+  endDate     DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  
+  tradeTeam   TradeTeam                @relation(fields: [tradeTeamId], references: [id], onDelete: Cascade)
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tradeTeamId, userId, role])
+  @@map("trade_team_oversight")
+}
+
+// Trade Crew Oversight - assigns users to crew leadership roles
+model TradeCrewOversight {
+  id          String                   @id @default(cuid())
+  crewId      String
+  userId      String
+  role        TradeCrewOversightRole
+  isActive    Boolean                  @default(true)
+  startDate   DateTime                 @default(now())
+  endDate     DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  
+  crew        Crew                     @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([crewId, userId, role])
+  @@map("trade_crew_oversight")
+}
+
+// Personnel Contact - CG-level personnel management roles
+model PersonnelContact {
+  id                    String                @id @default(cuid())
+  constructionGroupId   String
+  userId                String
+  role                  PersonnelContactRole
+  isActive              Boolean               @default(true)
+  startDate             DateTime              @default(now())
+  endDate               DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  constructionGroup     ConstructionGroup     @relation(fields: [constructionGroupId], references: [id], onDelete: Cascade)
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([constructionGroupId, userId, role])
+  @@map("personnel_contacts")
+}
+
+// Phase 3: Crew-to-Project Assignments
+model ProjectCrewAssignment {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  crewId      String
+  crew        Crew      @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  startDate   DateTime?
+  endDate     DateTime?
+  notes       String?
+  isActive    Boolean   @default(true)
+  assignedBy  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([projectId, crewId])
+  @@map("project_crew_assignments")
+}
+
+// Phase 4: Project Schedule Management
+model ProjectScheduleVersion {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  versionNumber Int
+  name        String   // e.g., "December 2025", "Revised Jan 2026"
+  notes       String?  // Why this version was created
+  isActive    Boolean  @default(true)  // Current active version
+  isCurrent   Boolean  @default(false) // The version being used
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  entries     ProjectScheduleEntry[]
+  
+  @@unique([projectId, versionNumber])
+  @@map("project_schedule_versions")
+}
+
+model ProjectScheduleEntry {
+  id              String   @id @default(cuid())
+  scheduleVersionId String
+  scheduleVersion ProjectScheduleVersion @relation(fields: [scheduleVersionId], references: [id], onDelete: Cascade)
+  
+  tradeTeamId     String?
+  tradeTeam       TradeTeam? @relation(fields: [tradeTeamId], references: [id])
+  crewId          String?
+  crew            Crew?    @relation(fields: [crewId], references: [id])
+  
+  eventName       String   // e.g., "Drywall - Texture", "Rough-In"
+  category        String?  // e.g., "Interiors", "Exteriors", "Site Support"
+  startDate       DateTime
+  endDate         DateTime
+  volunteerCount  Int?     // Expected volunteer/crew count
+  notes           String?
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("project_schedule_entries")
+}
+
+// Phase 5: Volunteer Management (migrated from FastAPI)
+// Volunteers are the SOURCE OF TRUTH for all personnel
+// Users can optionally link to a Volunteer for login access
+model Volunteer {
+  id                  String              @id @default(cuid())
+  firstName           String
+  lastName            String
+  baId                String?             // Builder Assistant ID
+  phone               String?
+  emailPersonal       String?
+  emailJw             String?             // JW.org email
+  congregation        String?
+  servingAs           String[]            // Elder, Ministerial Servant, Regular Pioneer, Publisher
+  
+  // Optional link to platform User account (for login access)
+  user                User?
+  
+  // Trade Team/Crew assignment (legacy - will be replaced by VolunteerRole)
+  crewId              String?
+  tradeTeamId         String?
+  tradeTeam           TradeTeam?          @relation(fields: [tradeTeamId], references: [id])
+  crew                Crew?               @relation(fields: [crewId], references: [id])
+  
+  // Multi-tenant: CG scope
+  constructionGroupId String
+  constructionGroup   ConstructionGroup   @relation(fields: [constructionGroupId], references: [id])
+  
+  // Multiple organizational roles via junction table
+  roles               VolunteerRole[]
+  
+  isOverseer          Boolean             @default(false)
+  isAssistant         Boolean             @default(false)
+  isActive            Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  @@map("volunteers")
+}
+
+// Phase 6: Supporting Congregations
+model Congregation {
+  id                  String   @id @default(cuid())
+  name                String
+  state               String?
+  congregationNumber  String?  // e.g., "130682"
+  coordinatorName     String?
+  coordinatorPhone    String?
+  coordinatorEmail    String?  // W/ Pub Email
+  congregationEmail   String?
+  
+  // Multi-tenant: CG scope
+  constructionGroupId String
+  constructionGroup   ConstructionGroup @relation(fields: [constructionGroupId], references: [id])
+  
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  projectAssignments  ProjectCongregationAssignment[]
+  
+  @@map("congregations")
+}
+
+model ProjectCongregationAssignment {
+  id              String   @id @default(cuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  congregationId  String
+  congregation    Congregation @relation(fields: [congregationId], references: [id], onDelete: Cascade)
+  
+  // Food Contact for this project
+  foodContactName   String?
+  foodContactPhone  String?
+  foodContactEmail  String?
+  
+  // Volunteer Contact for this project
+  volunteerContactName   String?
+  volunteerContactPhone  String?
+  volunteerContactEmail  String?
+  
+  // Security Contact for this project
+  securityContactName   String?
+  securityContactPhone  String?
+  securityContactEmail  String?
+  
+  notes           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([projectId, congregationId])
+  @@map("project_congregation_assignments")
+}
+
+model Announcement {
+  id                    String              @id @default(cuid())
+  title                 String
+  message               String              @db.Text
+  type                  AnnouncementType    @default(INFO)
+  isActive              Boolean             @default(true)
+  startDate             DateTime?
+  endDate               DateTime?
+  constructionGroupId   String?
+  targetRoles           String[]            @default([])
+  createdBy             String
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  constructionGroup     ConstructionGroup?  @relation(fields: [constructionGroupId], references: [id], onDelete: Cascade)
+  creator               User                @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  @@index([isActive])
+  @@index([constructionGroupId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+enum AnnouncementType {
+  INFO
+  WARNING
+  URGENT
+}
+
+model Feedback {
+  id          String             @id @default(cuid())
+  type        FeedbackType
+  title       String
+  description String
+  priority    FeedbackPriority   @default(MEDIUM)
+  status      FeedbackStatus     @default(NEW)
+  submittedBy String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [submittedBy], references: [id], onDelete: Cascade)
+  attachments FeedbackAttachment[]
+  comments    FeedbackComment[]
+
+  @@index([submittedBy])
+  @@index([status])
+  @@map("feedback")
+}
+
+model FeedbackAttachment {
+  id         String            @id @default(cuid())
+  feedbackId String?
+  commentId  String?
+  filename   String
+  fileData   String            @db.Text  // Base64 encoded image data
+  fileSize   Int
+  mimeType   String
+  createdAt  DateTime          @default(now())
+  feedback   Feedback?         @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  comment    FeedbackComment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([feedbackId])
+  @@index([commentId])
+  @@map("feedback_attachments")
+}
+
+model FeedbackComment {
+  id          String               @id @default(cuid())
+  feedbackId  String
+  authorId    String
+  content     String
+  createdAt   DateTime             @default(now())
+  author      User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  feedback    Feedback             @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  attachments FeedbackAttachment[]
+
+  @@index([feedbackId])
+  @@map("feedback_comments")
+}
+
+// Volunteer Roles - Junction table for multiple organizational roles per volunteer
+model VolunteerRole {
+  id                String             @id @default(cuid())
+  volunteerId       String
+  volunteer         Volunteer          @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  
+  // Role information
+  roleCategory      VolunteerRoleCategory  // CG_OVERSIGHT, CONSTRUCTION_STAFF, TRADE_TEAM, TRADE_CREW
+  roleName          String             // Full name: "Personnel Contact (PC)"
+  roleCode          String             // Short code: "PC"
+  
+  // Entity assignment (what this role is for)
+  entityId          String?            // CG ID, Team ID, Crew ID, or Project ID
+  entityType        String?            // "CG", "TEAM", "CREW", "PROJECT"
+  tradeTeamId       String?
+  tradeTeam         TradeTeam?         @relation(fields: [tradeTeamId], references: [id], onDelete: SetNull)
+  crewId            String?
+  crew              Crew?              @relation(fields: [crewId], references: [id], onDelete: SetNull)
+  
+  // Role metadata
+  isPrimary         Boolean            @default(true)   // Primary role vs secondary
+  startDate         DateTime           @default(now())
+  endDate           DateTime?
+  isActive          Boolean            @default(true)
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  @@unique([volunteerId, roleCategory, roleName, entityId])
+  @@index([volunteerId])
+  @@index([entityId, entityType])
+  @@index([tradeTeamId])
+  @@index([crewId])
+  @@map("volunteer_roles")
+}
+
+// Volunteer role categories
+enum VolunteerRoleCategory {
+  CG_OVERSIGHT                // CGO, ACGO, CGO Support
+  CG_STAFF                    // CG Members, Safety Coordinator, PCC, Regulatory, Estimator, Scheduler
+  REGION_SUPPORT_SERVICES     // Equipment, Housing, Personnel, Regulatory, Safety, Sourcing, Training, Translation
+  TRADE_TEAM                  // TTO, TTOA, TT Support
+  TRADE_CREW                  // TCO, TCOA, TC Support, Crew Volunteer
+}
+
+model CrewChangeRequest {
+  id                    String    @id @default(cuid())
+  requestType           String    // ADD_TO_CREW, REMOVE_FROM_CREW, ADD_TO_PROJECT_ROSTER, ADD_TO_CREW_AND_PROJECT
+  requestorName         String
+  requestorEmail        String
+  volunteerName         String
+  volunteerBaId         String?
+  tradeTeamId           String?
+  crewId                String?
+  crewName              String?
+  projectId             String?
+  projectRosterName     String?
+  comments              String?   @db.Text
+  batchId               String?   // Groups multiple requests submitted together
+  status                String    @default("NEW") // NEW, IN_PROGRESS, COMPLETED, REJECTED
+  assignedToId          String?
+  resolutionNotes       String?   @db.Text
+  completedAt           DateTime?
+  completedById         String?
+  constructionGroupId   String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  assignedTo            User?               @relation("AssignedCrewRequests", fields: [assignedToId], references: [id], onDelete: SetNull)
+  completedBy           User?               @relation("CompletedCrewRequests", fields: [completedById], references: [id], onDelete: SetNull)
+  constructionGroup     ConstructionGroup   @relation(fields: [constructionGroupId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([constructionGroupId])
+  @@index([createdAt])
+  @@index([batchId])
+  @@map("crew_change_requests")
+}

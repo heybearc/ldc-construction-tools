@@ -1,0 +1,42 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="16" cy="16" r="15" fill="#1e40af"/>
+  
+  <!-- LDC Text in Arch at Top (simplified for small size) -->
+  <defs>
+    <path id="faviconArchPath" d="M 6,16 A 10,10 0 0,1 26,16" />
+  </defs>
+  <text font-family="Arial, sans-serif" font-size="5" font-weight="bold" fill="white" letter-spacing="0.5">
+    <textPath href="#faviconArchPath" startOffset="50%" text-anchor="middle">
+      LDC
+    </textPath>
+  </text>
+  
+  <!-- Modern Kingdom Hall Building (simplified) -->
+  <!-- Main building -->
+  <rect x="9" y="17" width="14" height="9" fill="#e8d4b8" stroke="#c4a57b" stroke-width="0.5"/>
+  
+  <!-- Flat roof with overhang -->
+  <rect x="8" y="16" width="16" height="1.5" fill="#9ca3af"/>
+  
+  <!-- Entrance -->
+  <rect x="11" y="19" width="3" height="7" fill="#d4bfa0"/>
+  
+  <!-- Glass doors -->
+  <rect x="11.5" y="20" width="1" height="5" fill="#60a5fa"/>
+  <rect x="12.8" y="20" width="1" height="5" fill="#60a5fa"/>
+  
+  <!-- Windows -->
+  <rect x="16" y="19" width="2.5" height="2.5" fill="#60a5fa"/>
+  <rect x="19" y="19" width="2.5" height="2.5" fill="#60a5fa"/>
+  
+  <!-- Red accent stripe -->
+  <rect x="9" y="25" width="14" height="1" fill="#dc2626"/>
+  
+  <!-- Scaffolding (simplified) -->
+  <line x1="24" y1="17" x2="24" y2="26" stroke="#f59e0b" stroke-width="1"/>
+  
+  <!-- Hard hat -->
+  <ellipse cx="6" cy="27" rx="1.5" ry="0.8" fill="#fbbf24"/>
+  <path d="M4.5 27 L6 25.5 L7.5 27 Z" fill="#fbbf24"/>
+</svg>

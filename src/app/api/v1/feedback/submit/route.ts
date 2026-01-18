@@ -1,0 +1,69 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
+import { prisma } from '@/lib/prisma';
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const { type, title, description, priority, screenshots = [] } = body;
+
+    if (!type || !title || !description) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Missing required fields: type, title, description' 
+      }, { status: 400 });
+    }
+
+    const validTypes = ['BUG', 'ENHANCEMENT', 'FEATURE'];
+    const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+
+    if (!validTypes.includes(type.toUpperCase())) {
+      return NextResponse.json({ success: false, error: 'Invalid feedback type' }, { status: 400 });
+    }
+
+    if (priority && !validPriorities.includes(priority.toUpperCase())) {
+      return NextResponse.json({ success: false, error: 'Invalid priority level' }, { status: 400 });
+    }
+
+    const feedback = await prisma.feedback.create({
+      data: {
+        type: type.toUpperCase(),
+        title: title.trim(),
+        description: description.trim(),
+        priority: (priority || 'MEDIUM').toUpperCase(),
+        submittedBy: user.id,
+        attachments: {
+          create: screenshots.map((screenshot: string, index: number) => ({
+            filename: `screenshot-${index + 1}.png`,
+            fileData: screenshot,
+            fileSize: screenshot.length,
+            mimeType: 'image/png'
+          }))
+        }
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: { id: feedback.id, message: 'Feedback submitted successfully' }
+    });
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    return NextResponse.json({ success: false, error: 'Failed to submit feedback' }, { status: 500 });
+  }
+}

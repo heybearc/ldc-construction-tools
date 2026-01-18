@@ -117,3 +117,15 @@ temp/
 .wmacs/state/
 ssh_config_*
 *.wmacs.tmp
+
+# --- Runtime deployment state (DO NOT COMMIT) ---
+deployment-state.json
+
+# --- Build artifacts ---
+.next/
+node_modules/
+dist/
+build/
+out/
+coverage/
+*.log
