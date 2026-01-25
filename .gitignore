@@ -120,3 +120,10 @@ ssh_config_*
 
 # Workflow symlinks (repo-local, created by setup script)
 .windsurf/workflows/*.md
+
+# --- Runtime / deployment state ---
+deployment-state.json
+frontend/data/
+
+# --- Local debug scripts ---
+frontend/test-env.js
