@@ -11,7 +11,7 @@ For shared architectural decisions that apply to all apps, see `.cloudy-work/_cl
 - **Why:** Consistent environment, no local dependency conflicts
 - **When:** Established as standard practice
 - **Pattern:** Local Mac for Windsurf/git, containers for builds/tests/execution
-- **Canonical path:** `/opt/ldc-construction-tools/frontend`
+- **Canonical path:** `/opt/ldc-tools/frontend`
 
 ## D-LDC-002: Blue-green deployment model
 - **Decision:** Use blue-green containers for zero-downtime deployments

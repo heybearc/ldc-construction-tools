@@ -3,7 +3,7 @@ module.exports = {
     name: "ldc-production",
     script: "node_modules/.bin/next",
     args: "start -p 3001",
-    cwd: "/opt/ldc-construction-tools/frontend",
+    cwd: "/opt/ldc-tools/frontend",
     exec_mode: "fork",
     instances: 1,
     autorestart: true,

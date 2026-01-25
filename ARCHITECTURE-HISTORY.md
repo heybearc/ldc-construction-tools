@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
 
 **Single Process Deployment:**
 ```bash
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 npm install --legacy-peer-deps
 npm run build
 pm2 restart ldc-tools-green
@@ -250,7 +250,7 @@ pm2 restart ldc-tools-green
 ### Confirm No Backend Exists
 ```bash
 # No backend directory
-ls -la /Users/cory/Projects/ldc-construction-tools/backend
+ls -la /Users/cory/Projects/ldc-tools/backend
 # Result: No such file or directory ✅
 
 # No Python backend code

@@ -3,7 +3,7 @@
 **App:** LDC Construction Tools  
 **Port:** 3001  
 **Containers:** ldc-staging (135), ldc-prod (133)  
-**Canonical path:** `/opt/ldc-construction-tools/frontend`
+**Canonical path:** `/opt/ldc-tools/frontend`
 
 ---
 

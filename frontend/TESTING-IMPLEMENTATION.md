@@ -216,7 +216,7 @@ npm run test:report
 # When you say: /test-release ldctools
 # I automatically run:
 
-cd applications/ldc-construction-tools/frontend
+cd applications/ldc-tools/frontend
 
 BASE_URL=http://10.92.3.25:3001 \
 TEST_USER_EMAIL=admin@ldctools.local \

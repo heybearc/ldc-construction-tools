@@ -187,8 +187,8 @@ jobs:
             echo \"📦 Extracting release artifact...\"
             
             # Create release directory
-            mkdir -p /opt/ldc-construction-tools/releases/${COMMIT_SHA}
-            cd /opt/ldc-construction-tools/releases/${COMMIT_SHA}
+            mkdir -p /opt/ldc-tools/releases/${COMMIT_SHA}
+            cd /opt/ldc-tools/releases/${COMMIT_SHA}
             
             # Extract release
             tar -xzf /tmp/ldc-release-${COMMIT_SHA}.tar.gz
@@ -204,10 +204,10 @@ jobs:
             
             echo \"🔗 Updating symlink...\"
             # Atomic symlink update
-            ln -sfn /opt/ldc-construction-tools/releases/${COMMIT_SHA} /opt/ldc-construction-tools/current
+            ln -sfn /opt/ldc-tools/releases/${COMMIT_SHA} /opt/ldc-tools/current
             
             echo \"♻️ Restarting PM2...\"
-            cd /opt/ldc-construction-tools/current
+            cd /opt/ldc-tools/current
             pm2 restart ldc-production --update-env || pm2 start npm --name ldc-production -- start
             
             echo \"🧹 Cleaning up...\"
@@ -215,7 +215,7 @@ jobs:
             rm -f /tmp/ldc-release-${COMMIT_SHA}.tar.gz
             
             # Keep only last 5 releases
-            cd /opt/ldc-construction-tools/releases
+            cd /opt/ldc-tools/releases
             ls -t | tail -n +6 | xargs rm -rf 2>/dev/null || true
             
             echo \"✅ Deployment complete!\"
@@ -378,8 +378,8 @@ jobs:
             set -e
             
             # Create release directory
-            mkdir -p /opt/ldc-construction-tools/releases/${COMMIT_SHA}
-            cd /opt/ldc-construction-tools/releases/${COMMIT_SHA}
+            mkdir -p /opt/ldc-tools/releases/${COMMIT_SHA}
+            cd /opt/ldc-tools/releases/${COMMIT_SHA}
             
             # Extract and build
             tar -xzf /tmp/ldc-release-${COMMIT_SHA}.tar.gz
@@ -388,15 +388,15 @@ jobs:
             npm run build
             
             # Update symlink
-            ln -sfn /opt/ldc-construction-tools/releases/${COMMIT_SHA} /opt/ldc-construction-tools/current
+            ln -sfn /opt/ldc-tools/releases/${COMMIT_SHA} /opt/ldc-tools/current
             
             # Restart
-            cd /opt/ldc-construction-tools/current
+            cd /opt/ldc-tools/current
             pm2 restart ldc-production --update-env
             
             # Cleanup
             rm -f /tmp/ldc-release-${COMMIT_SHA}.tar.gz
-            cd /opt/ldc-construction-tools/releases
+            cd /opt/ldc-tools/releases
             ls -t | tail -n +6 | xargs rm -rf 2>/dev/null || true
           '"
           

@@ -45,7 +45,7 @@ The LDC Tools backup system provides comprehensive database and filesystem backu
 
 ### **Create a Full Backup**
 ```bash
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools
 ./scripts/create-backup.sh full manual
 ```
 
@@ -301,7 +301,7 @@ ssh prox "pct exec 131 -- bash -c '
 ### **Manual Files Backup**
 ```bash
 ssh prox "pct exec 133 -- bash -c '
-    cd /opt/ldc-construction-tools
+    cd /opt/ldc-tools
     tar -czf /tmp/manual-backup.tar.gz \
         --exclude=node_modules \
         --exclude=.next \

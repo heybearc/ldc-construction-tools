@@ -192,7 +192,7 @@
 
 ### Root Directory (Clean)
 ```
-ldc-construction-tools/
+ldc-tools/
 ├── .cloudy-work/              # Submodule (context management)
 ├── .git/                      # Git repository
 ├── .github/                   # GitHub workflows

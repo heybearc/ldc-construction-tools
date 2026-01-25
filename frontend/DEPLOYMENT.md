@@ -26,7 +26,7 @@
 #### Deploy to BLUE (STANDBY)
 ```bash
 ssh root@10.92.3.23
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 git pull
 npm install
 npm run build
@@ -36,7 +36,7 @@ pm2 restart ldc-frontend
 #### Deploy to GREEN (LIVE)
 ```bash
 ssh root@10.92.3.25
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 git pull
 npm install
 npm run build
@@ -109,7 +109,7 @@ Update NPM proxy or load balancer to point main domain to desired container.
 ```bash
 # 1. Deploy to STANDBY (currently GREEN)
 ssh root@10.92.3.25
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 pm2 delete ldc-frontend
 git pull origin main
 rm -rf .next node_modules/.cache

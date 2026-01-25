@@ -109,7 +109,7 @@ backup_files() {
     BACKUP_FILE="$FILES_BACKUP_DIR/${APP_NAME}_${container_name}_${TIMESTAMP}.tar.gz"
     
     ssh $PROXMOX_HOST "pct exec $container -- bash -c '
-        cd /opt/ldc-construction-tools
+        cd /opt/ldc-tools
         tar -czf /tmp/ldc-backup-${container_name}.tar.gz \
             --exclude=node_modules \
             --exclude=.next \
@@ -134,8 +134,8 @@ backup_files() {
         print_success "Files backup created: $BACKUP_FILE ($BACKUP_SIZE)"
         
         # Get current git info
-        GIT_BRANCH=$(ssh $PROXMOX_HOST "pct exec $container -- bash -c 'cd /opt/ldc-construction-tools && git branch --show-current'")
-        GIT_COMMIT=$(ssh $PROXMOX_HOST "pct exec $container -- bash -c 'cd /opt/ldc-construction-tools && git rev-parse HEAD'")
+        GIT_BRANCH=$(ssh $PROXMOX_HOST "pct exec $container -- bash -c 'cd /opt/ldc-tools && git branch --show-current'")
+        GIT_COMMIT=$(ssh $PROXMOX_HOST "pct exec $container -- bash -c 'cd /opt/ldc-tools && git rev-parse HEAD'")
         
         # Create metadata
         ssh $PROXMOX_HOST "pct exec $DB_CONTAINER -- bash -c '
@@ -163,7 +163,7 @@ EOF
 create_git_tag() {
     print_status "Creating git safety tag..."
     
-    cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
+    cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools
     
     TAG_NAME="backup-${BACKUP_REASON}-${TIMESTAMP}"
     git tag -a "$TAG_NAME" -m "Backup checkpoint: $BACKUP_REASON at $TIMESTAMP"

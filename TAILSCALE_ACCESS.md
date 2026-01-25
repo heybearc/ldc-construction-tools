@@ -52,7 +52,7 @@ ssh prox "pct enter 133"
 
 # Examples
 ssh prox "pct exec 133 -- pm2 status"
-ssh prox "pct exec 133 -- cd /opt/ldc-construction-tools && git status"
+ssh prox "pct exec 133 -- cd /opt/ldc-tools && git status"
 ```
 
 **GREEN (Container 135) - 10.92.3.25**
@@ -110,10 +110,10 @@ ssh prox "pct exec 135 -- pm2 restart ldc-production"
 ### **Check Git Status**
 ```bash
 # BLUE
-ssh prox "pct exec 133 -- bash -c 'cd /opt/ldc-construction-tools && git status'"
+ssh prox "pct exec 133 -- bash -c 'cd /opt/ldc-tools && git status'"
 
 # GREEN
-ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-construction-tools && git status'"
+ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-tools && git status'"
 ```
 
 ### **Database Operations**
@@ -136,7 +136,7 @@ ssh prox "pct exec 131 -- sudo -u postgres pg_dump ldc_tools | gzip > /mnt/data/
 ```bash
 # Deploy to STANDBY (GREEN)
 ssh prox "pct exec 135 -- bash -c '
-    cd /opt/ldc-construction-tools
+    cd /opt/ldc-tools
     git pull origin main
     cd frontend
     npm install --legacy-peer-deps
@@ -148,7 +148,7 @@ ssh prox "pct exec 135 -- bash -c '
 ### **Backup Operations**
 ```bash
 # Create backup (works via Tailscale)
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools
 ./scripts/create-backup.sh full manual
 
 # Restore backup
@@ -186,7 +186,7 @@ curl -I https://green.ldctools.com
 
 **2. Make Changes Locally**
 ```bash
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools
 git checkout -b feature/remote-work
 # Make changes
 git commit -am "feat: Working remotely via Tailscale"
@@ -196,7 +196,7 @@ git push origin feature/remote-work
 **3. Deploy via GitHub Actions**
 ```bash
 # GitHub Actions automatically deploys to STANDBY
-# Monitor at: https://github.com/heybearc/ldc-construction-tools/actions
+# Monitor at: https://github.com/heybearc/ldc-tools/actions
 ```
 
 **4. Test on STANDBY**
@@ -298,7 +298,7 @@ ssh prox "pct exec 136 -- systemctl reload haproxy"
 ### **Emergency Backup**
 ```bash
 # Quick backup via Tailscale
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools
 ./scripts/create-backup.sh full emergency
 ```
 
@@ -356,11 +356,11 @@ ssh 10.92.0.5 "hostname"
 ### **Optimization Tips**
 ```bash
 # Use compression for large transfers
-ssh prox "pct exec 133 -- tar -czf - /opt/ldc-construction-tools/frontend" | tar -xzf - -C /tmp/
+ssh prox "pct exec 133 -- tar -czf - /opt/ldc-tools/frontend" | tar -xzf - -C /tmp/
 
 # Batch commands to reduce round trips
 ssh prox "pct exec 133 -- bash -c '
-    cd /opt/ldc-construction-tools
+    cd /opt/ldc-tools
     git pull
     npm install
     npm run build

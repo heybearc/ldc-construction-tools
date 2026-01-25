@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const execAsync = promisify(exec);
-const STATE_FILE = '/opt/ldc-construction-tools/deployment-state.json';
+const STATE_FILE = '/opt/ldc-tools/deployment-state.json';
 
 // Query HAProxy config to determine which backend is active
 async function queryHAProxyConfig(): Promise<'BLUE' | 'GREEN' | null> {

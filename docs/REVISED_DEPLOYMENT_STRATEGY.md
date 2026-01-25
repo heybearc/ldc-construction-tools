@@ -53,7 +53,7 @@ Frontend LXC (133) + Backend LXC (134)
 ### Single LDC Construction Tools LXC
 ```
 Container ID: 133
-Hostname: ldc-construction-tools
+Hostname: ldc-tools
 IP Address: 10.92.3.23
 Resources:
   - CPU: 2 cores
@@ -84,7 +84,7 @@ GRANT ALL PRIVILEGES ON DATABASE ldc_construction_tools TO ldc_user;
 ### Phase 2: Container Creation (15 minutes)
 ```bash
 pct create 133 local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst \
-  --hostname ldc-construction-tools \
+  --hostname ldc-tools \
   --cores 2 \
   --memory 3072 \
   --rootfs hdd-pool:10 \

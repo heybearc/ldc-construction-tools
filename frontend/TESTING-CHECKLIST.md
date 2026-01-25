@@ -107,7 +107,7 @@ npm run test:smoke:quick
 ```bash
 # Your deployment commands here
 git push origin feature-branch
-ssh root@10.92.3.25 "cd /opt/ldc-construction-tools/frontend && git pull && npm run build && pm2 restart ldc-tools-green"
+ssh root@10.92.3.25 "cd /opt/ldc-tools/frontend && git pull && npm run build && pm2 restart ldc-tools-green"
 ```
 
 ### **Step 3: Test STANDBY**

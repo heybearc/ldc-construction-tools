@@ -172,7 +172,7 @@ restore_files() {
     # Create safety backup of current files
     print_status "Creating safety backup of current files..."
     ssh $PROXMOX_HOST "pct exec $container -- bash -c '
-        cd /opt/ldc-construction-tools
+        cd /opt/ldc-tools
         tar -czf /tmp/pre-restore-${container_name}-$(date +%Y%m%d_%H%M%S).tar.gz \
             --exclude=node_modules \
             --exclude=.next \
@@ -195,7 +195,7 @@ restore_files() {
     
     # Extract backup
     ssh $PROXMOX_HOST "pct exec $container -- bash -c '
-        cd /opt/ldc-construction-tools
+        cd /opt/ldc-tools
         tar -xzf /tmp/restore-backup.tar.gz
         rm /tmp/restore-backup.tar.gz
     '"
@@ -203,7 +203,7 @@ restore_files() {
     # Reinstall dependencies and rebuild
     print_status "Reinstalling dependencies..."
     ssh $PROXMOX_HOST "pct exec $container -- bash -c '
-        cd /opt/ldc-construction-tools/frontend
+        cd /opt/ldc-tools/frontend
         npm install --legacy-peer-deps
         npm run build
     '"
@@ -211,7 +211,7 @@ restore_files() {
     # Restart application
     print_status "Restarting application..."
     ssh $PROXMOX_HOST "pct exec $container -- bash -c '
-        cd /opt/ldc-construction-tools/frontend
+        cd /opt/ldc-tools/frontend
         pm2 restart ldc-production
     '"
     

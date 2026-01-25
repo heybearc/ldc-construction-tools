@@ -43,7 +43,7 @@ Available commands:
 #### 6.1 Local Development First
 ```bash
 # Work on local codebase ONLY
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools
 # Make ALL changes locally, test locally
 ```
 
@@ -58,8 +58,8 @@ git push origin staging
 #### 6.3 Deploy to Staging
 ```bash
 # Clean deployment to staging
-ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-construction-tools && git reset --hard HEAD && git clean -fd'"
-ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-construction-tools && git pull origin staging'"
+ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-tools && git reset --hard HEAD && git clean -fd'"
+ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-tools && git pull origin staging'"
 # Restart services if needed
 ```
 

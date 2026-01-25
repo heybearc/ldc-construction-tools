@@ -83,7 +83,7 @@ jobs:
     - name: Create deployment artifact
       run: |
         echo "📦 Creating deployment artifact..."
-        tar -czf ldc-construction-tools-${{ github.sha }}.tar.gz \
+        tar -czf ldc-tools-${{ github.sha }}.tar.gz \
           --exclude='.git' \
           --exclude='node_modules' \
           --exclude='.next' \
@@ -94,8 +94,8 @@ jobs:
     - name: Upload deployment artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ldc-construction-tools-${{ github.sha }}
-        path: ldc-construction-tools-${{ github.sha }}.tar.gz
+        name: ldc-tools-${{ github.sha }}
+        path: ldc-tools-${{ github.sha }}.tar.gz
         retention-days: 30
 
   deploy-staging:
@@ -110,7 +110,7 @@ jobs:
     - name: Download deployment artifact
       uses: actions/download-artifact@v4
       with:
-        name: ldc-construction-tools-${{ github.sha }}
+        name: ldc-tools-${{ github.sha }}
     
     - name: Setup SSH with WMACS Configuration
       run: |
@@ -134,7 +134,7 @@ jobs:
         echo "🛡️ Initiating WMACS Guardian deployment..."
         
         # Extract artifact
-        tar -xzf ldc-construction-tools-${{ github.sha }}.tar.gz
+        tar -xzf ldc-tools-${{ github.sha }}.tar.gz
         
         # Deploy using WMACS Guardian
         node wmacs/wmacs-guardian.js start staging --deployment-mode || {
@@ -171,7 +171,7 @@ jobs:
           echo "✅ WMACS Guardian Deployment Successful"
           echo "🌐 Staging Environment: http://${{ env.STAGING_HOST }}:3001"
           echo "🔧 API Documentation: http://${{ env.STAGING_HOST }}:8000/docs"
-          echo "📦 Artifact: ldc-construction-tools-${{ github.sha }}"
+          echo "📦 Artifact: ldc-tools-${{ github.sha }}"
         else
           echo "❌ WMACS Guardian Deployment Failed"
           echo "🔍 Check logs for WMACS Guardian recovery actions"

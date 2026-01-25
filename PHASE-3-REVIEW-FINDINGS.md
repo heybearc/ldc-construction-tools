@@ -78,17 +78,17 @@
 All 6 SDD module directories are **obsolete**:
 
 1. **`lib/role-management/`** ❌ DELETE
-   - Package: `@ldc-construction-tools/role-management`
+   - Package: `@ldc-tools/role-management`
    - 10 items, ~130KB
    - **Not imported by frontend**
 
 2. **`lib/trade-teams/`** ❌ DELETE
-   - Package: `@ldc-construction-tools/trade-teams`
+   - Package: `@ldc-tools/trade-teams`
    - 8 items
    - **Not imported by frontend**
 
 3. **`lib/volunteer-management/`** ❌ DELETE
-   - Package: `@ldc-construction-tools/volunteer-management`
+   - Package: `@ldc-tools/volunteer-management`
    - 8 items
    - **Not imported by frontend**
 

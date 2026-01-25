@@ -109,7 +109,7 @@ npm run build
 **Solution:**
 ```bash
 # After database restore, ensure schema matches
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 npx prisma db pull  # Pull schema from database
 npx prisma generate  # Regenerate client
 rm -rf .next
@@ -178,14 +178,14 @@ pm2 save  # Save PM2 process list
 # BLUE = 10.92.3.23 | GREEN = 10.92.3.25
 
 # 2. On development machine
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools/frontend
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools/frontend
 git add .
 git commit -m "feat: description of changes"
 git push origin main
 
 # 3. Deploy to STANDBY ONLY (example: GREEN is STANDBY)
 ssh root@10.92.3.25
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 
 # 4. Stop application completely
 pm2 delete ldc-frontend
@@ -249,7 +249,7 @@ pm2 logs ldc-frontend --lines 50
 # Example: If BLUE is now STANDBY after switch
 
 ssh root@10.92.3.23
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 
 pm2 delete ldc-frontend
 git pull origin main
@@ -273,7 +273,7 @@ curl http://localhost:3001/api/v1/admin/system/info
 
 ```bash
 # 1. On development machine
-cd /Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools/frontend
+cd /Users/cory/Documents/Cloudy-Work/applications/ldc-tools/frontend
 
 # Update schema
 vim prisma/schema.prisma
@@ -292,7 +292,7 @@ git push origin main
 
 # 2. On target server
 ssh root@<server-ip>
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 
 # Stop application
 pm2 delete ldc-frontend
@@ -353,7 +353,7 @@ sleep 30
 
 # SSH back in and deploy
 ssh root@<server-ip>
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 git pull origin main
 rm -rf .next node_modules/.cache
 npm run build
@@ -399,7 +399,7 @@ module.exports = {
     name: 'ldc-frontend',
     script: 'npm',
     args: 'start',
-    cwd: '/opt/ldc-construction-tools/frontend',
+    cwd: '/opt/ldc-tools/frontend',
     instances: 1,
     autorestart: true,
     watch: false,

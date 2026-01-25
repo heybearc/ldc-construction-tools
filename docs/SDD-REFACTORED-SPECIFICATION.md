@@ -36,7 +36,7 @@ lib/
 
 ## Module Mapping from Original Specification
 
-### 1. Role Management Module (`@ldc-construction-tools/role-management`)
+### 1. Role Management Module (`@ldc-tools/role-management`)
 **Original Features**: Visual Organizational Dashboard with Role Management
 - Regional role management (CFR, FR, DC, DL, PFR, LCC, PTC, CCGO, ACGO)
 - Project-specific roles (PSC, LPRC, PCC, SC, MT, MTA)
@@ -51,7 +51,7 @@ lib/
 - **Services**: Role validation, change workflow, audit logging
 - **Specifications**: USLDC-2829-E compliance requirements
 
-### 2. Trade Teams Module (`@ldc-construction-tools/trade-teams`)
+### 2. Trade Teams Module (`@ldc-tools/trade-teams`)
 **Original Features**: Trade Team & Crew Management
 - 8 standard trade teams with 40+ crews
 - Builder Assistant group management
@@ -65,7 +65,7 @@ lib/
 - **Services**: Team management, crew coordination, ratio calculations
 - **Specifications**: Complete organizational structure requirements
 
-### 3. Volunteer Management Module (`@ldc-construction-tools/volunteer-management`)
+### 3. Volunteer Management Module (`@ldc-tools/volunteer-management`)
 **Original Features**: Volunteer coordination and tracking
 - Volunteer profile management with skills and certifications
 - Participation history and compliance status
@@ -79,7 +79,7 @@ lib/
 - **Services**: Skill matching, availability tracking, compliance monitoring
 - **Specifications**: Data privacy and GDPR compliance
 
-### 4. Assignment Workflow Module (`@ldc-construction-tools/assignment-workflow`)
+### 4. Assignment Workflow Module (`@ldc-tools/assignment-workflow`)
 **Original Features**: Assignment Management & Adjustment Workflow (USLDC-2829-E)
 - Assignment category tracking (branch-appointed vs field-assigned)
 - Multi-level approval process and impact assessment
@@ -92,7 +92,7 @@ lib/
 - **Services**: Workflow engine, approval routing, compliance validation
 - **Specifications**: USLDC-2829-E memo compliance requirements
 
-### 5. Calendar Scheduling Module (`@ldc-construction-tools/calendar-scheduling`)
+### 5. Calendar Scheduling Module (`@ldc-tools/calendar-scheduling`)
 **Original Features**: Enhanced Calendar & Work Assignment Management
 - Interactive calendar for trade crew work assignments
 - Multi-day spanning with visual representation
@@ -105,7 +105,7 @@ lib/
 - **Services**: Scheduling engine, resource allocation, availability checking
 - **Specifications**: JW Hub Project Task integration requirements
 
-### 6. Communication Hub Module (`@ldc-construction-tools/communication-hub`)
+### 6. Communication Hub Module (`@ldc-tools/communication-hub`)
 **Original Features**: Multi-Channel Communication System
 - Email, SMS, and in-app notifications
 - Role-based notification matrix and template management
@@ -118,7 +118,7 @@ lib/
 - **Services**: Multi-channel delivery, preference management, audit logging
 - **Specifications**: Communication compliance and delivery tracking
 
-### 7. Project Coordination Module (`@ldc-construction-tools/project-coordination`)
+### 7. Project Coordination Module (`@ldc-tools/project-coordination`)
 **Original Features**: Trade Crew Overseer Selection & Project Management
 - Project-based TCO selection system with qualification verification
 - Workload balancing and historical performance metrics
@@ -131,7 +131,7 @@ lib/
 - **Services**: Qualification verification, workload balancing, roster management
 - **Specifications**: Builder Assistant integration requirements
 
-### 8. Compliance Tracking Module (`@ldc-construction-tools/compliance-tracking`)
+### 8. Compliance Tracking Module (`@ldc-tools/compliance-tracking`)
 **Original Features**: Safety Training & Documentation Management
 - Safety training verification and compliance monitoring
 - Digital forms management with electronic signatures
@@ -144,7 +144,7 @@ lib/
 - **Services**: Compliance monitoring, document routing, expiration alerts
 - **Specifications**: Safety and regulatory compliance requirements
 
-### 9. Reporting Analytics Module (`@ldc-construction-tools/reporting-analytics`)
+### 9. Reporting Analytics Module (`@ldc-tools/reporting-analytics`)
 **Original Features**: Reporting & Analytics Dashboard
 - Personnel analytics and project reporting
 - Performance metrics and executive summaries
@@ -157,7 +157,7 @@ lib/
 - **Services**: Data aggregation, metric calculation, export functionality
 - **Specifications**: Executive reporting and analytics requirements
 
-### 10. Local Volunteer Registration Module (`@ldc-construction-tools/local-volunteer-registration`)
+### 10. Local Volunteer Registration Module (`@ldc-tools/local-volunteer-registration`)
 **Original Features**: Public Registration System
 - Non-authenticated volunteer registration interface
 - Comprehensive data collection and skill assessment

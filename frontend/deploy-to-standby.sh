@@ -73,7 +73,7 @@ echo ""
 
 # Deploy to STANDBY
 ssh root@$STANDBY_IP << 'ENDSSH'
-cd /opt/ldc-construction-tools/frontend
+cd /opt/ldc-tools/frontend
 echo "Stopping application..."
 pm2 delete ldc-frontend || true
 echo "Pulling latest code..."
@@ -111,7 +111,7 @@ echo "   Update proxy/DNS: ldctools.com -> $STANDBY_IP ($STANDBY_NAME)"
 echo ""
 echo "4️⃣  After traffic switch, sync new STANDBY ($LIVE_NAME):"
 echo "   ssh root@$LIVE_IP"
-echo "   cd /opt/ldc-construction-tools/frontend"
+echo "   cd /opt/ldc-tools/frontend"
 echo "   pm2 delete ldc-frontend"
 echo "   git pull origin main"
 echo "   rm -rf .next node_modules/.cache"

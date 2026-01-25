@@ -1043,7 +1043,7 @@ ls -lh /backups/
 ssh root@10.92.3.23
 
 # Pull latest code
-cd /opt/ldc-construction-tools
+cd /opt/ldc-tools
 git pull origin feature/phase-2-cg-management-audit
 
 # Run migrations and build
@@ -1071,7 +1071,7 @@ pm2 restart ldc-tools-blue
 ssh root@10.92.3.22
 
 # Pull latest code
-cd /opt/ldc-construction-tools
+cd /opt/ldc-tools
 git checkout main
 git pull origin main
 
@@ -1127,7 +1127,7 @@ If issues are detected:
 ssh root@10.92.3.22
 
 # Revert to previous version
-cd /opt/ldc-construction-tools
+cd /opt/ldc-tools
 git checkout <previous_commit_hash>
 
 # Rollback database migrations

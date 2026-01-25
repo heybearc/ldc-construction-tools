@@ -131,8 +131,8 @@ git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin production-stable --tags
 
 # Deploy to servers
-ssh prox "pct exec 133 -- bash -c 'cd /opt/ldc-construction-tools/frontend && git pull origin main'"
-ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-construction-tools/frontend && git pull origin main'"
+ssh prox "pct exec 133 -- bash -c 'cd /opt/ldc-tools/frontend && git pull origin main'"
+ssh prox "pct exec 135 -- bash -c 'cd /opt/ldc-tools/frontend && git pull origin main'"
 ```
 
 ## Next Steps

@@ -22,14 +22,14 @@ Each module follows the SDD pattern:
 ### Module Dependencies
 ```typescript
 // Import modules in your application
-import { RoleManagementAPI } from '@ldc-construction-tools/role-management';
-import { TradeTeamsAPI } from '@ldc-construction-tools/trade-teams';
-import { VolunteerManagementAPI } from '@ldc-construction-tools/volunteer-management';
+import { RoleManagementAPI } from '@ldc-tools/role-management';
+import { TradeTeamsAPI } from '@ldc-tools/trade-teams';
+import { VolunteerManagementAPI } from '@ldc-tools/volunteer-management';
 ```
 
 ## Available Modules
 
-### 1. Role Management (`@ldc-construction-tools/role-management`)
+### 1. Role Management (`@ldc-tools/role-management`)
 **Purpose**: Manages organizational roles with regional and project-specific scoping
 
 **Key Features**:
@@ -43,7 +43,7 @@ import { VolunteerManagementAPI } from '@ldc-construction-tools/volunteer-manage
 - `/api/v1/role-assignments/stats` - Statistics
 - `/api/v1/role-assignments/health` - Health check
 
-### 2. Trade Teams (`@ldc-construction-tools/trade-teams`)
+### 2. Trade Teams (`@ldc-tools/trade-teams`)
 **Purpose**: Manages 8 trade teams and 40+ trade crews with organizational hierarchy
 
 **Key Features**:
@@ -57,7 +57,7 @@ import { VolunteerManagementAPI } from '@ldc-construction-tools/volunteer-manage
 - `/api/v1/trade-teams/{id}/crews` - Get team crews
 - `/api/v1/trade-teams/stats` - Statistics
 
-### 3. Volunteer Management (`@ldc-construction-tools/volunteer-management`)
+### 3. Volunteer Management (`@ldc-tools/volunteer-management`)
 **Purpose**: Comprehensive volunteer coordination with skills tracking and assignments
 
 **Key Features**:
@@ -116,7 +116,7 @@ The project uses SDD Foundation workflows for:
 ### Frontend Integration
 ```typescript
 // Example: Using Trade Teams module in React
-import { TradeTeamsDashboard } from '@ldc-construction-tools/trade-teams';
+import { TradeTeamsDashboard } from '@ldc-tools/trade-teams';
 
 function App() {
   return (
@@ -131,7 +131,7 @@ function App() {
 ### Backend Integration
 ```typescript
 // Example: Using Volunteer Management API
-import { VolunteerManagementService } from '@ldc-construction-tools/volunteer-management';
+import { VolunteerManagementService } from '@ldc-tools/volunteer-management';
 
 const volunteerService = new VolunteerManagementService({
   apiBaseUrl: 'http://localhost:8000',
@@ -150,9 +150,9 @@ The root `tsconfig.json` includes path mapping for all modules:
 {
   "compilerOptions": {
     "paths": {
-      "@ldc-construction-tools/role-management": ["./lib/role-management/src"],
-      "@ldc-construction-tools/trade-teams": ["./lib/trade-teams/src"],
-      "@ldc-construction-tools/volunteer-management": ["./lib/volunteer-management/src"]
+      "@ldc-tools/role-management": ["./lib/role-management/src"],
+      "@ldc-tools/trade-teams": ["./lib/trade-teams/src"],
+      "@ldc-tools/volunteer-management": ["./lib/volunteer-management/src"]
     }
   }
 }

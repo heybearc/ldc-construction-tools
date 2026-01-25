@@ -89,7 +89,7 @@
 
 ### Build Verification
 ```bash
-ssh ldc-staging 'cd /opt/ldc-construction-tools/frontend && npm run build'
+ssh ldc-staging 'cd /opt/ldc-tools/frontend && npm run build'
 ```
 
 **Result:** ✅ **BUILD SUCCEEDED**
@@ -100,7 +100,7 @@ ssh ldc-staging 'cd /opt/ldc-construction-tools/frontend && npm run build'
 
 ### Type Check Verification
 ```bash
-ssh ldc-staging 'cd /opt/ldc-construction-tools/frontend && npm run type-check'
+ssh ldc-staging 'cd /opt/ldc-tools/frontend && npm run type-check'
 ```
 
 **Result:** ⚠️ **PRE-EXISTING ERROR** (unrelated to cleanup)
@@ -110,7 +110,7 @@ ssh ldc-staging 'cd /opt/ldc-construction-tools/frontend && npm run type-check'
 
 ### Smoke Test Verification
 ```bash
-ssh ldc-staging 'cd /opt/ldc-construction-tools/frontend && npm run test:smoke:quick'
+ssh ldc-staging 'cd /opt/ldc-tools/frontend && npm run test:smoke:quick'
 ```
 
 **Result:** ⚠️ **PRE-EXISTING TEST FAILURES** (unrelated to cleanup)
@@ -139,7 +139,7 @@ ssh ldc-staging 'cd /opt/ldc-construction-tools/frontend && npm run test:smoke:q
 
 ### Clean Structure
 ```
-ldc-construction-tools/
+ldc-tools/
 ├── frontend/                  # Next.js application (INTACT)
 ├── .cloudy-work/              # Context management (INTACT)
 ├── .windsurf/
