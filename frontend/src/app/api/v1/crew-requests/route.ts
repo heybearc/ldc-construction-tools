@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       const personnelRoles = await prisma.volunteerRole.findFirst({
         where: {
           volunteerId: userRecord.volunteerId,
-          roleCode: { in: ['PC', 'PCA', 'PC_SUPPORT'] },
+          roleCode: { in: ['PC', 'PCA', 'PC-Support'] },
           endDate: null
         }
       });
