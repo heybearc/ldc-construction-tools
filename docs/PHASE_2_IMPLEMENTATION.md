@@ -1030,7 +1030,7 @@ WHERE u.id = 'user_id';
 ssh root@10.92.3.21
 
 # Create backup
-pg_dump -U postgres ldc_construction_tools > /backups/ldc_tools_pre_phase2_$(date +%Y%m%d_%H%M%S).sql
+pg_dump -U postgres ldc_tools > /backups/ldc_tools_pre_phase2_$(date +%Y%m%d_%H%M%S).sql
 
 # Verify backup
 ls -lh /backups/
@@ -1107,7 +1107,7 @@ pm2 logs ldc-tools-green
 pm2 logs ldc-tools-green --err
 
 # Monitor database connections
-psql -U postgres -d ldc_construction_tools -c "SELECT count(*) FROM pg_stat_activity;"
+psql -U postgres -d ldc_tools -c "SELECT count(*) FROM pg_stat_activity;"
 ```
 
 ### Post-Deployment Tasks
@@ -1136,7 +1136,7 @@ npx prisma migrate resolve --rolled-back 20241230_phase2_3_multi_tenant_audit_lo
 npx prisma migrate resolve --rolled-back 20241230_phase2_2_remove_user_region_zone
 
 # Restore database from backup (if needed)
-psql -U postgres ldc_construction_tools < /backups/ldc_tools_pre_phase2_YYYYMMDD_HHMMSS.sql
+psql -U postgres ldc_tools < /backups/ldc_tools_pre_phase2_YYYYMMDD_HHMMSS.sql
 
 # Rebuild and restart
 npm run build
@@ -1190,7 +1190,7 @@ npx prisma migrate deploy
 **Diagnostics**:
 ```bash
 # Check if audit logs are being created
-psql -U postgres -d ldc_construction_tools -c "SELECT count(*) FROM audit_logs;"
+psql -U postgres -d ldc_tools -c "SELECT count(*) FROM audit_logs;"
 
 # Check for errors in application logs
 pm2 logs ldc-tools-blue --err | grep AUDIT

@@ -22,7 +22,7 @@ pct create 130 local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst \
 - [ ] Create container with above specifications
 - [ ] Install PostgreSQL 15: `apt update && apt install postgresql-15 postgresql-contrib`
 - [ ] Configure PostgreSQL to listen on all interfaces
-- [ ] Create databases: `ldc_construction_tools` and `jw_attendant_scheduler`
+- [ ] Create databases: `ldc_tools` and `jw_attendant_scheduler`
 - [ ] Create users with secure passwords
 - [ ] Configure firewall to allow port 5432 from 10.92.3.0/24
 - [ ] Set up automated backups to `/mnt/data/backups/postgresql/`
@@ -90,7 +90,7 @@ pct create 132 local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst \
 ## Database Migration Tasks
 
 ### PostgreSQL Database Setup
-- [ ] Create `ldc_construction_tools` database
+- [ ] Create `ldc_tools` database
 - [ ] Create `ldc_user` with secure password
 - [ ] Grant appropriate permissions
 - [ ] Test connection from backend container
@@ -210,7 +210,7 @@ pm2 status                     # Frontend container
 ### Database Access
 ```bash
 # Connect to PostgreSQL
-psql -h 10.92.3.20 -U ldc_user -d ldc_construction_tools
+psql -h 10.92.3.20 -U ldc_user -d ldc_tools
 ```
 
 **Estimated Setup Time: 4-6 hours**  

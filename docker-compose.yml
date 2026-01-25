@@ -5,7 +5,7 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: ldc_construction_tools
+      POSTGRES_DB: ldc_tools
       POSTGRES_USER: ldc_user
       POSTGRES_PASSWORD: ldc_password
     ports:
@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ldc_user -d ldc_construction_tools"]
+      test: ["CMD-SHELL", "pg_isready -U ldc_user -d ldc_tools"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -26,7 +26,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://ldc_user:ldc_password@db:5432/ldc_construction_tools
+      - DATABASE_URL=postgresql://ldc_user:ldc_password@db:5432/ldc_tools
       - SECRET_KEY=development-secret-key-change-in-production
       - ENVIRONMENT=development
     depends_on:

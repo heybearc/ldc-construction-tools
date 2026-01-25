@@ -1,77 +1,61 @@
 # LDC Tools Task State
 
-**Last updated:** 2026-01-25 2:05pm  
+**Last updated:** 2026-01-25 3:57pm  
 **Current branch:** main  
-**Working on:** Repository rename complete - ready for local directory rename
+**Working on:** Ready for normal development - rename complete
 
 ---
 
 ## Current Task
-**Repository Rename: ldc-construction-tools → ldc-tools** - ✅ PHASE 3 COMPLETE
+**Repository Rename Complete** - ✅ ALL PHASES COMPLETE
 
-### What was accomplished today
-Completed full repository rename from "ldc-construction-tools" to "ldc-tools":
-- **GitHub repo:** Renamed to `ldc-tools` (confirmed by GitHub)
-- **30 files updated:** All references changed (package.json, docs, scripts, workflows)
-- **Container paths:** Updated `/opt/ldc-construction-tools` → `/opt/ldc-tools`
-- **Local paths:** Updated in all scripts and documentation
-- **MCP configs:** Updated Windsurf MCP server paths
-- **Committed & pushed:** All changes live on GitHub (commit c4a1fdc)
-- **Verification:** Zero references to old name remain (excluding checklist)
+### What was accomplished today (2026-01-25)
+**Complete repository rename from "ldc-construction-tools" to "ldc-tools":**
+- ✅ **All 9 phases complete** (GitHub, app repo, local directory, containers, control plane, MCP, submodules, verification, documentation cleanup)
+- ✅ **GitHub repo:** Renamed to `ldc-tools`
+- ✅ **Local directory:** `/Users/cory/Projects/ldc-tools`
+- ✅ **Container paths:** `/opt/ldc-tools` on both ldc-staging (135) and ldc-prod (133)
+- ✅ **Database name:** Verified as `ldc_tools` (PostgreSQL standard)
+- ✅ **Documentation cleanup:** 7 files updated, 22 database name references fixed
+- ✅ **Verification:** 0 references to old name in active code/docs
+- ✅ **Zero technical debt:** No symlinks, clean rename across all systems
+- ✅ **Control plane updated:** 80 files, 344 references updated in Cloudy-Work
+- ✅ **All submodules synced:** TheoShift, QuantShift, LDC Tools all have latest governance
+
+**See `RENAME-COMPLETE.md` for full details.**
 
 ### Recent completions
-- ✅ Repository rename Phase 3 complete (30 files updated)
-- ✅ All documentation references updated
-- ✅ All container paths updated (/opt/ldc-tools)
-- ✅ All GitHub workflows updated
-- ✅ Package.json renamed to ldc-tools-mcp
-- ✅ Changes committed and pushed to GitHub
-- ✅ Comprehensive repository cleanup (100+ files removed/archived - completed earlier)
+- ✅ Complete repository rename (all 9 phases)
+- ✅ Database name verification and documentation updates
+- ✅ Comprehensive repository cleanup (100+ files removed/archived)
 - ✅ Architecture history documented (`ARCHITECTURE-HISTORY.md`)
 
 ### Key findings
 - **FastAPI backend was intentionally removed in v1.18.0** - Not broken, just documentation debt
 - **Application is Next.js-only** - API routes + Prisma ORM, no separate backend
-- **QoS scripts referenced wrong project** - "JW Attendant Scheduler" instead of LDC Tools
-- **SDD modules not used** - 0 imports found in frontend codebase
+- **Database name:** `ldc_tools` (verified on containers)
 
 ---
 
 ## Known Issues
-**Pre-existing (unrelated to cleanup):**
+**Pre-existing (unrelated to rename):**
 - TypeScript error in `ImportExportButtons.tsx` (lines 52, 184)
 - Smoke tests failing on STANDBY (authentication/environment issues)
 
 ---
 
-## Next Steps - Phase 4: Local Directory Rename
+## Next Steps
 
-**⚠️ CRITICAL: Must close Windsurf before proceeding**
+**Rename work is complete. Ready for:**
+1. Feature development
+2. Bug fixes (TypeScript errors, smoke test issues)
+3. Normal operations (deploy, test, release)
 
-1. **Close this Windsurf window**
-2. **Rename local directory:**
-   ```bash
-   mv /Users/cory/Projects/ldc-construction-tools /Users/cory/Projects/ldc-tools
-   ```
-3. **Update git remote (optional):**
-   ```bash
-   cd /Users/cory/Projects/ldc-tools
-   git remote set-url origin git@github.com:heybearc/ldc-tools.git
-   ```
-4. **Reopen in Windsurf** from new location: `/Users/cory/Projects/ldc-tools`
-5. **Update container paths on deployment** (when deploying next)
+**No rename-related work remaining.**
 
 ---
 
 ## Deferred for Later
+- Fix TypeScript error in `ImportExportButtons.tsx`
+- Debug smoke test failures on STANDBY
 - Roadmap files review (`ROADMAP.md`, `ROADMAP_CHECKLIST.md`)
-- Deployment docs review (may have backend references)
-- Container path updates (will happen on next deployment)
-
----
-
-## Exact Next Command
-**Close Windsurf, then run:**
-```bash
-mv /Users/cory/Projects/ldc-construction-tools /Users/cory/Projects/ldc-tools
-```

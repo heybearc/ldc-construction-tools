@@ -127,10 +127,14 @@ export async function POST(request: NextRequest) {
       project_id,
       project_roster_name,
       comments,
-      override_requestor_name,
-      override_requestor_email,
+      override_requestor_name: rawRequestorName,
+      override_requestor_email: rawRequestorEmail,
       batch_id,
     } = body;
+    
+    // Trim whitespace from override fields (handles copy-paste from spreadsheets)
+    const override_requestor_name = rawRequestorName?.trim() || null;
+    const override_requestor_email = rawRequestorEmail?.trim() || null;
 
     // Validation
     if (!request_type || !volunteer_name) {

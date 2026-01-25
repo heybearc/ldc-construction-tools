@@ -209,8 +209,8 @@ export default function CrewRequestPage() {
         project_id: formData.project_id || null,
         project_roster_name: projectName,
         comments: formData.comments || null,
-        override_requestor_name: formData.override_requestor_name || null,
-        override_requestor_email: formData.override_requestor_email || null,
+        override_requestor_name: formData.override_requestor_name?.trim() || null,
+        override_requestor_email: formData.override_requestor_email?.trim() || null,
         batch_id: batchId,
       }));
 

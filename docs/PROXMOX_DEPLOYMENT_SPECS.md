@@ -99,7 +99,7 @@ All containers must use `10.92.0.10` as primary DNS per your infrastructure stan
 ### PostgreSQL Setup
 ```sql
 -- Create databases
-CREATE DATABASE ldc_construction_tools;
+CREATE DATABASE ldc_tools;
 CREATE DATABASE jw_attendant_scheduler;
 
 -- Create users
@@ -107,13 +107,13 @@ CREATE USER ldc_user WITH PASSWORD 'secure_password_here';
 CREATE USER jw_user WITH PASSWORD 'secure_password_here';
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE ldc_construction_tools TO ldc_user;
+GRANT ALL PRIVILEGES ON DATABASE ldc_tools TO ldc_user;
 GRANT ALL PRIVILEGES ON DATABASE jw_attendant_scheduler TO jw_user;
 ```
 
 ### Connection Strings
 ```
-LDC Construction Tools: postgresql://ldc_user:password@10.92.3.20:5432/ldc_construction_tools
+LDC Tools: postgresql://ldc_user:password@10.92.3.20:5432/ldc_tools
 JW Attendant Scheduler: postgresql://jw_user:password@10.92.3.20:5432/jw_attendant_scheduler
 ```
 

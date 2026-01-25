@@ -88,7 +88,7 @@ curl -f http://10.92.3.25:8000/health
 curl -f http://10.92.3.25:3001/
 
 # 4. Database Connectivity
-ssh prox 'pct exec 131 -- su - postgres -c "psql -d ldc_construction_tools_staging -c \"SELECT COUNT(*) FROM role_assignments;\""'
+ssh prox 'pct exec 131 -- su - postgres -c "psql -d ldc_tools_staging -c \"SELECT COUNT(*) FROM role_assignments;\""'
 ```
 
 #### **Production Deployment Process**
@@ -131,7 +131,7 @@ ssh prox 'pct exec 131 -- su - postgres -c "psql -d ldc_construction_tools_stagi
 **Infrastructure:**
 - **Production Container**: 134 (10.92.3.24)
 - **Database**: PostgreSQL Container 131 (10.92.3.21)
-- **Production Database**: `ldc_construction_tools_production`
+- **Production Database**: `ldc_tools_production`
 
 **Deployment Commands:**
 ```bash

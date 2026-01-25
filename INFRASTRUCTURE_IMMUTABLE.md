@@ -22,7 +22,7 @@ DATABASE: Container 131 (10.92.3.21) - SHARED PostgreSQL Server
 ## DATABASE CONFIGURATION
 
 **PostgreSQL Server**: Container 131 (10.92.3.21:5432)
-- **LDC Database**: `ldc_construction_tools`
+- **LDC Database**: `ldc_tools`
 - **JW Database**: `jw_attendant_scheduler`
 - **Status**: ALREADY EXISTS AND CONFIGURED
 
@@ -68,7 +68,7 @@ curl -s http://10.92.3.25:3001/api/health || echo "Staging down"
 curl -s http://10.92.3.23:3001/api/health || echo "Production down"
 
 # Check database
-ssh root@10.92.3.21 "psql -U postgres -l | grep ldc_construction_tools" || echo "DB check failed"
+ssh root@10.92.3.21 "psql -U postgres -l | grep ldc_tools" || echo "DB check failed"
 ```
 
 ---

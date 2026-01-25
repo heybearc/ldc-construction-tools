@@ -67,18 +67,18 @@ Database: Connects to existing PostgreSQL LXC 131
 ```
 
 ### Database Strategy
-- **Use existing PostgreSQL LXC 131**: Add `ldc_construction_tools` database
+- **Use existing PostgreSQL LXC 131**: Add `ldc_tools` database
 - **Shared database server**: Efficient resource utilization
-- **Connection**: `postgresql://ldc_user:password@10.92.3.21:5432/ldc_construction_tools`
+- **Connection**: `postgresql://ldc_user:password@10.92.3.21:5432/ldc_tools`
 
 ## Implementation Plan
 
 ### Phase 1: Database Setup (30 minutes)
 ```sql
 -- On PostgreSQL LXC 131
-CREATE DATABASE ldc_construction_tools;
+CREATE DATABASE ldc_tools;
 CREATE USER ldc_user WITH PASSWORD 'secure_password_here';
-GRANT ALL PRIVILEGES ON DATABASE ldc_construction_tools TO ldc_user;
+GRANT ALL PRIVILEGES ON DATABASE ldc_tools TO ldc_user;
 ```
 
 ### Phase 2: Container Creation (15 minutes)
@@ -123,7 +123,7 @@ export default async function handler(req, res) {
 ### Database Migration
 1. **Export current SQLite data**: `sqlite3 database.db .dump > data.sql`
 2. **Convert to PostgreSQL format**: Adjust SQL syntax
-3. **Import to PostgreSQL**: `psql -h 10.92.3.21 -U ldc_user -d ldc_construction_tools < data.sql`
+3. **Import to PostgreSQL**: `psql -h 10.92.3.21 -U ldc_user -d ldc_tools < data.sql`
 
 ## Resource Efficiency Comparison
 
