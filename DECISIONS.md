@@ -33,3 +33,15 @@ For shared architectural decisions that apply to all apps, see `.cloudy-work/_cl
 - **Decision:** Removed all obsolete code, scripts, and documentation; archived historical items
 - **Consequences:** Repository is clean, well-documented, and ready for continued development
 - **Details:** See `CLEANUP-COMPLETE-REPORT.md` for full cleanup summary
+
+## D-LDC-005: Repository renamed to ldc-tools
+- **Date:** 2026-01-25
+- **Context:** Repository name "ldc-construction-tools" was verbose; "ldc-tools" is clearer and matches display name
+- **Decision:** Renamed GitHub repo and updated all references in codebase
+- **Scope:** 30 files updated (package.json, docs, scripts, workflows, configs)
+- **Consequences:** 
+  - GitHub repo: `heybearc/ldc-tools`
+  - Package name: `ldc-tools-mcp`
+  - Container paths: `/opt/ldc-tools/frontend`
+  - Local directory rename pending (Phase 4)
+- **Reference:** See `rename-checklist.md` for complete rename plan

@@ -1,29 +1,33 @@
 # LDC Tools Task State
 
-**Last updated:** 2026-01-25 8:11am  
+**Last updated:** 2026-01-25 2:05pm  
 **Current branch:** main  
-**Working on:** Repository cleanup complete
+**Working on:** Repository rename complete - ready for local directory rename
 
 ---
 
 ## Current Task
-**Comprehensive Repository Cleanup** - ✅ COMPLETE
+**Repository Rename: ldc-construction-tools → ldc-tools** - ✅ PHASE 3 COMPLETE
 
-### What was accomplished
-Completed 3-phase cleanup removing 100+ obsolete files from FastAPI → Next.js migration:
-- **Phase 1:** Deleted 70+ obsolete items (APEX/WMACS systems, broken symlinks, empty debug files)
-- **Phase 2:** Archived 21+ historical documents (WMACS/APEX history, phase audits)
-- **Phase 3:** Deleted 50+ items (QoS scripts, SDD modules, bin utilities, Windsurf WMACS customizations)
-- **Documentation:** Updated README.md and DEVELOPMENT.md to reflect Next.js-only architecture
-- **Verification:** Build succeeded on STANDBY, confirming no breakage
+### What was accomplished today
+Completed full repository rename from "ldc-construction-tools" to "ldc-tools":
+- **GitHub repo:** Renamed to `ldc-tools` (confirmed by GitHub)
+- **30 files updated:** All references changed (package.json, docs, scripts, workflows)
+- **Container paths:** Updated `/opt/ldc-construction-tools` → `/opt/ldc-tools`
+- **Local paths:** Updated in all scripts and documentation
+- **MCP configs:** Updated Windsurf MCP server paths
+- **Committed & pushed:** All changes live on GitHub (commit c4a1fdc)
+- **Verification:** Zero references to old name remain (excluding checklist)
 
 ### Recent completions
-- ✅ Comprehensive repository cleanup (100+ files removed/archived)
+- ✅ Repository rename Phase 3 complete (30 files updated)
+- ✅ All documentation references updated
+- ✅ All container paths updated (/opt/ldc-tools)
+- ✅ All GitHub workflows updated
+- ✅ Package.json renamed to ldc-tools-mcp
+- ✅ Changes committed and pushed to GitHub
+- ✅ Comprehensive repository cleanup (100+ files removed/archived - completed earlier)
 - ✅ Architecture history documented (`ARCHITECTURE-HISTORY.md`)
-- ✅ MCP server directory archived (not being used)
-- ✅ Windsurf WMACS customizations removed
-- ✅ Core documentation updated (README, DEVELOPMENT)
-- ✅ Verification run on STANDBY (build succeeded)
 
 ### Key findings
 - **FastAPI backend was intentionally removed in v1.18.0** - Not broken, just documentation debt
@@ -40,12 +44,34 @@ Completed 3-phase cleanup removing 100+ obsolete files from FastAPI → Next.js 
 
 ---
 
-## Deferred for Next Phase
+## Next Steps - Phase 4: Local Directory Rename
+
+**⚠️ CRITICAL: Must close Windsurf before proceeding**
+
+1. **Close this Windsurf window**
+2. **Rename local directory:**
+   ```bash
+   mv /Users/cory/Projects/ldc-construction-tools /Users/cory/Projects/ldc-tools
+   ```
+3. **Update git remote (optional):**
+   ```bash
+   cd /Users/cory/Projects/ldc-tools
+   git remote set-url origin git@github.com:heybearc/ldc-tools.git
+   ```
+4. **Reopen in Windsurf** from new location: `/Users/cory/Projects/ldc-tools`
+5. **Update container paths on deployment** (when deploying next)
+
+---
+
+## Deferred for Later
 - Roadmap files review (`ROADMAP.md`, `ROADMAP_CHECKLIST.md`)
 - Deployment docs review (may have backend references)
-- See `NEXT-PHASE-CLEANUP-NOTES.md`
+- Container path updates (will happen on next deployment)
 
 ---
 
 ## Exact Next Command
-Repository is clean and ready. Next: Deploy to STANDBY when ready, or start new feature work.
+**Close Windsurf, then run:**
+```bash
+mv /Users/cory/Projects/ldc-construction-tools /Users/cory/Projects/ldc-tools
+```
