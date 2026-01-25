@@ -1,38 +1,38 @@
 # LDC Construction Tools - Development Guide
 
+## Architecture Overview
+
+**LDC Tools is a Next.js full-stack application** (migrated from FastAPI in v1.18.0):
+- **Frontend:** Next.js 14 with React, TypeScript, Tailwind CSS
+- **API:** Next.js API routes in `frontend/src/app/api/v1/`
+- **Database:** PostgreSQL with Prisma ORM
+- **Deployment:** Blue-green deployment on Proxmox containers
+
+See `ARCHITECTURE-HISTORY.md` for migration details.
+
 ## Quick Start
 
-### 1. Backend Setup
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-# Update .env with your database credentials
-python run_dev.py
-```
+### Development Setup
 
-### 2. Frontend Setup
 ```bash
 cd frontend
-npm install
+npm install --legacy-peer-deps
+cp .env.test.example .env.local
+# Update DATABASE_URL and other environment variables
+npx prisma migrate dev
+npx prisma generate
 npm run dev
 ```
 
 ## Application Structure
 
-### Backend (FastAPI)
-- **API Base URL**: `http://localhost:8000`
-- **Documentation**: `http://localhost:8000/docs`
-- **Database**: PostgreSQL with automatic initialization
-- **Seed Data**: Construction Group 01.12 organizational structure
-
-### Frontend (Next.js)
-- **Application URL**: `http://localhost:3000`
+### Next.js Full-Stack Application
+- **Application URL**: `http://localhost:3001`
 - **Framework**: Next.js 14 with TypeScript
 - **Styling**: Tailwind CSS
-- **API Proxy**: Configured to proxy `/api/*` to backend
+- **API Routes**: `frontend/src/app/api/v1/*`
+- **Database**: PostgreSQL with Prisma ORM
+- **Seed Data**: Construction Group 01.12 organizational structure
 
 ## Core Features
 
@@ -79,22 +79,28 @@ Trade Teams (8 teams)
 6. Finishes
 7. Construction Final Prep
 
-## API Endpoints
+## API Routes (Next.js)
+
+All API routes are located in `frontend/src/app/api/v1/` and use Prisma for database access.
 
 ### Trade Team Management
 - `GET /api/v1/trade-teams/` - List all trade teams
 - `GET /api/v1/trade-teams/{team_id}/crews` - List crews for team
-- `GET /api/v1/trade-teams/crews/{crew_id}/members` - List crew members
+- `GET /api/v1/trade-teams/{team_id}` - Get team details
+
+### Volunteer Management
+- `GET /api/v1/volunteers/` - List all volunteers
+- `POST /api/v1/volunteers/` - Create volunteer
+- `GET /api/v1/volunteers/{id}` - Get volunteer details
+- `PATCH /api/v1/volunteers/{id}` - Update volunteer
 
 ### Project Management
 - `GET /api/v1/projects/` - List all projects
-- `GET /api/v1/projects/{project_id}/assignments` - List project assignments
-- `POST /api/v1/projects/{project_id}/assignments` - Create assignment
+- `POST /api/v1/projects/` - Create project
+- `GET /api/v1/projects/{id}/assignments` - List project assignments
 
 ### Export Functionality
-- `GET /api/v1/export/trade-teams` - Export organizational structure
-- `GET /api/v1/export/projects/{project_id}` - Export project data
-- `GET /api/v1/export/contacts` - Export contact list
+- `GET /api/v1/export/` - Export data in various formats
 
 ## Excel Export Features
 
@@ -116,14 +122,16 @@ Trade Teams (8 teams)
 ## Development Workflow
 
 ### Adding New Features
-1. **Backend**: Add models in `app/models/`, schemas in `app/schemas/`, endpoints in `app/api/v1/endpoints/`
-2. **Frontend**: Add components in `src/components/`, pages in `src/app/`, update API client in `src/lib/api.ts`
-3. **Database**: Update `app/db/init_db.py` for seed data changes
+1. **Database Schema**: Update `frontend/prisma/schema.prisma`
+2. **API Routes**: Add routes in `frontend/src/app/api/v1/`
+3. **Frontend**: Add components in `frontend/src/components/`, pages in `frontend/src/app/`
+4. **Types**: Prisma generates types automatically from schema
 
 ### Testing
-- **Backend**: `pytest` (when tests are added)
-- **Frontend**: `npm test` (when tests are added)
-- **Manual**: Use API docs at `http://localhost:8000/docs`
+- **E2E Tests**: `npm run test:e2e` (Playwright)
+- **Smoke Tests**: `npm run test:smoke:quick`
+- **Type Check**: `npm run type-check`
+- **Build Test**: `npm run build`
 
 ## Deployment Considerations
 
@@ -142,16 +150,16 @@ Trade Teams (8 teams)
 ## Troubleshooting
 
 ### Common Issues
-1. **Database connection**: Ensure PostgreSQL is running and credentials are correct
-2. **CORS errors**: Check `ALLOWED_ORIGINS` in backend configuration
-3. **API proxy**: Verify Next.js proxy configuration in `next.config.js`
-4. **Excel exports**: Ensure `openpyxl` and `pandas` are installed in backend
+1. **Database connection**: Ensure PostgreSQL is running and `DATABASE_URL` is correct in `.env.local`
+2. **Prisma errors**: Run `npx prisma generate` to regenerate client
+3. **Build errors**: Run `npm run type-check` to identify TypeScript issues
+4. **Port conflicts**: Ensure port 3001 is available
 
 ### Development Tips
-- **Backend logs**: Check terminal running `python run_dev.py`
-- **Frontend logs**: Check browser console and terminal running `npm run dev`
-- **API testing**: Use the interactive docs at `http://localhost:8000/docs`
-- **Database reset**: Run `python -c "from app.db.init_db import reset_db; reset_db()"`
+- **Application logs**: Check terminal running `npm run dev`
+- **Browser logs**: Check browser console for client-side errors
+- **Database reset**: Run `npx prisma migrate reset` (WARNING: deletes all data)
+- **Prisma Studio**: Run `npx prisma studio` for visual database management
 
 ## Next Steps
 

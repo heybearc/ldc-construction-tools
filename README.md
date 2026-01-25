@@ -41,40 +41,19 @@ This application serves as a **tracker system** for Construction Group personnel
 - **Tailwind CSS** for responsive design
 - **Modern, secure, responsive** web application
 
+## Architecture
+
+**LDC Tools is a Next.js full-stack application:**
+- **Frontend:** Next.js 14 with React, TypeScript, Tailwind CSS
+- **API:** Next.js API routes (`/api/v1/*`)
+- **Database:** PostgreSQL with Prisma ORM
+- **Deployment:** Blue-green deployment on Proxmox containers
+
+See `ARCHITECTURE-HISTORY.md` for migration details from FastAPI backend.
+
 ## Quick Start
 
-### Backend Setup
-
-1. Navigate to the backend directory:
-```bash
-cd backend
-```
-
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Copy and configure environment:
-```bash
-cp .env.example .env
-# Update .env with your database credentials and secret key
-```
-
-5. Run the development server (includes database initialization):
-```bash
-python run_dev.py
-```
-
-The API will be available at `http://localhost:8000` with documentation at `http://localhost:8000/docs`.
-
-### Frontend Setup
+### Development Setup
 
 1. Navigate to the frontend directory:
 ```bash
@@ -83,15 +62,27 @@ cd frontend
 
 2. Install dependencies:
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
-3. Start the development server:
+3. Configure environment:
+```bash
+cp .env.test.example .env.local
+# Update DATABASE_URL and other environment variables
+```
+
+4. Run database migrations:
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`.
+The application will be available at `http://localhost:3001`.
 
 ## Database Structure
 
