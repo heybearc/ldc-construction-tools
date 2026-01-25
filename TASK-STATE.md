@@ -1,30 +1,30 @@
 # LDC Tools Task State
 
-**Last updated:** 2026-01-25 3:57pm  
+**Last updated:** 2026-01-25 4:44pm  
 **Current branch:** main  
-**Working on:** Ready for normal development - rename complete
+**Working on:** Ready for normal development
 
 ---
 
 ## Current Task
-**Repository Rename Complete** - ✅ ALL PHASES COMPLETE
+**v1.27.2 Deployed to Production** - ✅ COMPLETE
 
 ### What was accomplished today (2026-01-25)
-**Complete repository rename from "ldc-construction-tools" to "ldc-tools":**
-- ✅ **All 9 phases complete** (GitHub, app repo, local directory, containers, control plane, MCP, submodules, verification, documentation cleanup)
-- ✅ **GitHub repo:** Renamed to `ldc-tools`
-- ✅ **Local directory:** `/Users/cory/Projects/ldc-tools`
-- ✅ **Container paths:** `/opt/ldc-tools` on both ldc-staging (135) and ldc-prod (133)
-- ✅ **Database name:** Verified as `ldc_tools` (PostgreSQL standard)
-- ✅ **Documentation cleanup:** 7 files updated, 22 database name references fixed
-- ✅ **Verification:** 0 references to old name in active code/docs
-- ✅ **Zero technical debt:** No symlinks, clean rename across all systems
-- ✅ **Control plane updated:** 80 files, 344 references updated in Cloudy-Work
-- ✅ **All submodules synced:** TheoShift, QuantShift, LDC Tools all have latest governance
 
-**See `RENAME-COMPLETE.md` for full details.**
+**v1.27.2 Bug Fix Deployment:**
+- ✅ **Issue:** Personnel Contact Support staff couldn't submit crew requests on behalf of others
+- ✅ **Root cause:** Role code mismatch (`PC_SUPPORT` vs `PC-Support`) + whitespace from copy-paste
+- ✅ **Fix deployed:** Corrected role code + added `.trim()` to override fields
+- ✅ **Testing:** Confirmed working with affected user (Amber Williams)
+- ✅ **Deployed to production:** Both containers running v1.27.2
+- ✅ **Release notes:** Created `release-notes/v1.27.2.md`
+
+**Container Assignments Verified:**
+- Container 133 (ldctools-blue): 10.92.3.23 - STANDBY
+- Container 135 (ldctools-green): 10.92.3.25 - LIVE
 
 ### Recent completions
+- ✅ v1.27.2 bug fix deployment (crew request submission)
 - ✅ Complete repository rename (all 9 phases)
 - ✅ Database name verification and documentation updates
 - ✅ Comprehensive repository cleanup (100+ files removed/archived)
@@ -38,20 +38,20 @@
 ---
 
 ## Known Issues
-**Pre-existing (unrelated to rename):**
+**Pre-existing:**
 - TypeScript error in `ImportExportButtons.tsx` (lines 52, 184)
 - Smoke tests failing on STANDBY (authentication/environment issues)
+- SSH alias confusion: `ldc-staging` → Container 135 (GREEN), `ldc-prod` → Container 133 (BLUE)
 
 ---
 
 ## Next Steps
 
-**Rename work is complete. Ready for:**
+**Ready for:**
 1. Feature development
 2. Bug fixes (TypeScript errors, smoke test issues)
 3. Normal operations (deploy, test, release)
-
-**No rename-related work remaining.**
+4. Fix SSH alias configuration to match actual container assignments
 
 ---
 
