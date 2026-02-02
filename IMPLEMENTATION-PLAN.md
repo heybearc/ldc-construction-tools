@@ -83,13 +83,16 @@ None currently identified.
 
 **Items explicitly deferred with rationale:**
 
-- [ ] Roadmap files review (ROADMAP.md, ROADMAP_CHECKLIST.md) - **Deferred because:** Consolidated into IMPLEMENTATION-PLAN.md - **Revisit:** Archive old files after migration
-- [ ] Multiple backlog files consolidation - **Deferred because:** Now consolidated into IMPLEMENTATION-PLAN.md - **Revisit:** Archive BACKLOG_*.md files after migration
+None currently.
 
 ---
 
 ## ✅ Recently Completed (Last 30 Days)
 
+- [x] D-022 implementation plan standard migration - Date: 2026-02-02
+- [x] Archived 15 planning files (BACKLOG, ROADMAP, phase docs) - Date: 2026-02-02
+- [x] Created single IMPLEMENTATION-PLAN.md source of truth - Date: 2026-02-02
+- [x] Governance sync with control plane - Date: 2026-02-02
 - [x] v1.27.2 bug fix deployment (crew request submission) - Date: 2026-01-25
 - [x] Fixed role code mismatch (PC_SUPPORT vs PC-Support) - Date: 2026-01-25
 - [x] Added whitespace trimming for copy-paste from spreadsheets - Date: 2026-01-25
@@ -98,7 +101,6 @@ None currently identified.
 - [x] Complete repository rename (ldc-construction-tools → ldc-tools) - Date: 2026-01-25
 - [x] Phase 3: Admin Module Enhancement - Date: 2026-01-12
 - [x] Phase 2: CG Management & Audit Logging - Date: 2026-01-12
-- [x] Phase 1: Multi-Tenant Architecture - Date: 2024-12-29
 
 ---
 
