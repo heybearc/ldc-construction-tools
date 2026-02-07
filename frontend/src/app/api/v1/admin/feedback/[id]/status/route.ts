@@ -17,11 +17,19 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { status } = body;
+    const { status, resolutionComment } = body;
 
     const validStatuses = ['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
     if (!validStatuses.includes(status.toUpperCase())) {
       return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 });
+    }
+
+    // Require resolution comment when marking as RESOLVED (D-024 compliance)
+    if (status.toUpperCase() === 'RESOLVED' && !resolutionComment?.trim()) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Resolution comment is required when marking feedback as RESOLVED' 
+      }, { status: 400 });
     }
 
     // Get current feedback with submitter info
@@ -46,7 +54,10 @@ export async function PATCH(
 
     const feedback = await prisma.feedback.update({
       where: { id: params.id },
-      data: { status: newStatus }
+      data: { 
+        status: newStatus,
+        resolutionComment: resolutionComment?.trim() || null
+      }
     });
 
     // Send email notification if status changed
