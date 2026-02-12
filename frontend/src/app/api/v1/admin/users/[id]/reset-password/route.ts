@@ -43,12 +43,17 @@ export async function POST(
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Store reset token in database
-    await prisma.user.update({
-      where: { id: user.id },
+    // Delete any existing reset tokens for this user
+    await prisma.verificationToken.deleteMany({
+      where: { identifier: `password-reset:${user.email}` }
+    });
+
+    // Store reset token in database using VerificationToken model
+    await prisma.verificationToken.create({
       data: {
-        inviteToken: resetToken,
-        inviteExpires: resetExpires
+        identifier: `password-reset:${user.email}`,
+        token: resetToken,
+        expires: resetExpires
       }
     });
 
