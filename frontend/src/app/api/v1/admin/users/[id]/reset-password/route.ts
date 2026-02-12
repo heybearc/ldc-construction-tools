@@ -65,7 +65,7 @@ export async function POST(
     }
 
     // Decrypt password
-    const decryptedPassword = decryptPassword(emailConfig.smtpPassword);
+    const decryptedPassword = decryptPassword(emailConfig.appPasswordEncrypted);
 
     // Setup email transport
     const transportConfig: any = {
@@ -73,7 +73,7 @@ export async function POST(
       port: emailConfig.smtpPort,
       secure: emailConfig.encryption === 'ssl',
       auth: {
-        user: emailConfig.smtpUser,
+        user: emailConfig.username,
         pass: decryptedPassword
       }
     };

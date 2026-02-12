@@ -17,6 +17,7 @@
 ## 📋 Backlog (Prioritized)
 
 ### High Priority
+- [ ] D-024 Feedback Management Compliance (effort: M, ~50 min) - Add resolutionComment field, run migration, update API validation, test workflow. See `.cloudy-work/_cloudy-ops/policy/D-024-IMPLEMENTATION-LDCTOOLS.md` for detailed checklist
 - [ ] Fix TypeScript error in ImportExportButtons.tsx (lines 52, 184) (effort: S) - Pre-existing error, non-blocking but should be fixed
 - [ ] Debug smoke test failures on STANDBY (effort: M) - Authentication/environment issues preventing automated testing
 
@@ -35,7 +36,7 @@
 ## 🐛 Known Bugs
 
 ### Critical (Fix Immediately)
-None currently identified.
+- [ ] Password reset 500 error (effort: TBD) - Users getting 500 error when requesting password reset. Needs investigation on STANDBY.
 
 ### Non-Critical (Backlog)
 - [ ] TypeScript error in ImportExportButtons.tsx (lines 52, 184) (effort: S) - Pre-existing, non-blocking
