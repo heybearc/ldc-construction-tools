@@ -90,7 +90,7 @@ None currently.
 
 ## ✅ Recently Completed (Last 30 Days)
 
-- [x] Password reset 500 error fix - Date: 2026-02-12 - Fixed incorrect field names (smtpPassword→appPasswordEncrypted, smtpUser→username) in password reset API
+- [x] Password reset 500 error fix - Date: 2026-02-12 - Fixed incorrect field names (smtpPassword→appPasswordEncrypted, smtpUser→username) and changed to use VerificationToken model instead of non-existent inviteToken fields
 - [x] D-024 added to backlog - Date: 2026-02-12 - Feedback management compliance task added to high-priority backlog
 - [x] D-022 implementation plan standard migration - Date: 2026-02-02
 - [x] Archived 15 planning files (BACKLOG, ROADMAP, phase docs) - Date: 2026-02-02
