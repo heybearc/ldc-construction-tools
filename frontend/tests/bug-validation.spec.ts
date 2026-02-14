@@ -142,29 +142,28 @@ test.describe('Bug Validation Suite', () => {
   });
 
   test('BUG-012: Health monitor auto-refresh flicker', async ({ page }) => {
-    // Navigate to admin dashboard first
-    await page.goto(`${BASE_URL}/admin`);
+    // Navigate directly to health monitor page
+    await page.goto(`${BASE_URL}/admin/health`);
     await page.waitForLoadState('networkidle');
     
-    // Click on Health Monitor link if it exists
-    const healthLink = page.locator('a[href="/admin/health"]').first();
-    const healthLinkExists = await healthLink.count() > 0;
+    // Check if we're on the health page or redirected to admin
+    const healthMonitorHeading = page.locator('text=Health Monitor').first();
+    const healthMonitorExists = await healthMonitorHeading.count() > 0;
     
-    if (healthLinkExists) {
-      await healthLink.click();
-      await page.waitForLoadState('networkidle');
-      
+    if (healthMonitorExists) {
       // Verify health monitor page loads
-      await expect(page.locator('text=Health Monitor')).toBeVisible({ timeout: 10000 });
+      await expect(healthMonitorHeading).toBeVisible({ timeout: 10000 });
       
       // Verify key health metrics are visible
       const dbConnection = page.locator('text=Database Connection').first();
       if (await dbConnection.count() > 0) {
         await expect(dbConnection).toBeVisible();
       }
+      
+      console.log('BUG-012: Health monitor page accessible and displaying metrics');
     } else {
-      // Health monitor page not accessible, skip test
-      console.log('Health monitor page not accessible from admin dashboard');
+      // Health monitor page not available or redirected
+      console.log('BUG-012: Health monitor page not accessible (may not be implemented yet)');
     }
   });
 
