@@ -46,7 +46,7 @@ test.describe('Phase 1: Enhanced Contact Management', () => {
     await page.waitForLoadState('networkidle');
     
     // Verify volunteers page loaded
-    await expect(page.locator('heading:has-text("Volunteers")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h1:has-text("Volunteers")')).toBeVisible({ timeout: 10000 });
     
     // Check if save filter feature exists
     const saveButton = page.locator('button:has-text("Save Filter")');
@@ -70,7 +70,7 @@ test.describe('Phase 1: Enhanced Contact Management', () => {
     await page.waitForLoadState('networkidle');
     
     // Verify volunteers page loaded
-    await expect(page.locator('heading:has-text("Volunteers")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h1:has-text("Volunteers")')).toBeVisible({ timeout: 10000 });
     
     // Test Active filter if it exists
     const activeFilter = page.locator('button:has-text("Active")').first();
@@ -306,7 +306,7 @@ test.describe('Smoke Tests - Critical Paths', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for critical elements (use more flexible selectors)
-    await expect(page.locator('heading:has-text("Volunteers")').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h1:has-text("Volunteers")').first()).toBeVisible({ timeout: 10000 });
     await expect(page.locator('input[placeholder*="Search"]')).toBeVisible();
     
     // No console errors (check for critical errors)
