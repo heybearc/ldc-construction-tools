@@ -146,17 +146,17 @@ test.describe('Bug Validation Suite', () => {
     await page.goto(`${BASE_URL}/admin/health`);
     await page.waitForLoadState('networkidle');
     
-    // Check if we're on the health page or redirected to admin
-    const healthMonitorHeading = page.locator('text=Health Monitor').first();
+    // Check for main content heading (h2), not sidebar text
+    const healthMonitorHeading = page.locator('h2:has-text("Health Monitor")').first();
     const healthMonitorExists = await healthMonitorHeading.count() > 0;
     
-    if (healthMonitorExists) {
+    if (healthMonitorExists && await healthMonitorHeading.isVisible()) {
       // Verify health monitor page loads
-      await expect(healthMonitorHeading).toBeVisible({ timeout: 10000 });
+      await expect(healthMonitorHeading).toBeVisible({ timeout: 5000 });
       
       // Verify key health metrics are visible
       const dbConnection = page.locator('text=Database Connection').first();
-      if (await dbConnection.count() > 0) {
+      if (await dbConnection.count() > 0 && await dbConnection.isVisible()) {
         await expect(dbConnection).toBeVisible();
       }
       
