@@ -24,14 +24,6 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 });
     }
 
-    // Require resolution comment when marking as RESOLVED (D-024 compliance)
-    if (status.toUpperCase() === 'RESOLVED' && !resolutionComment?.trim()) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Resolution comment is required when marking feedback as RESOLVED' 
-      }, { status: 400 });
-    }
-
     // Get current feedback with submitter info
     const currentFeedback = await prisma.feedback.findUnique({
       where: { id: params.id },
@@ -49,6 +41,20 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Feedback not found' }, { status: 404 });
     }
 
+    // Require resolution comment when marking as RESOLVED (D-024 compliance)
+    // Allow existing resolution comment to satisfy requirement
+    if (status.toUpperCase() === 'RESOLVED') {
+      const hasExistingComment = currentFeedback.resolutionComment?.trim();
+      const hasNewComment = resolutionComment?.trim();
+      
+      if (!hasExistingComment && !hasNewComment) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Resolution comment is required when marking feedback as RESOLVED' 
+        }, { status: 400 });
+      }
+    }
+
     const oldStatus = currentFeedback.status;
     const newStatus = status.toUpperCase();
 
@@ -56,7 +62,8 @@ export async function PATCH(
       where: { id: params.id },
       data: { 
         status: newStatus,
-        resolutionComment: resolutionComment?.trim() || null
+        // Keep existing resolution comment if no new one provided
+        resolutionComment: resolutionComment?.trim() || currentFeedback.resolutionComment || null
       }
     });
 
