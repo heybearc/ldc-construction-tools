@@ -850,6 +850,7 @@ enum AnnouncementType {
 
 model Feedback {
   id                String             @id @default(cuid())
+  feedbackNumber    String             @unique
   type              FeedbackType
   title             String
   description       String
@@ -865,6 +866,7 @@ model Feedback {
 
   @@index([submittedBy])
   @@index([status])
+  @@index([type])
   @@map("feedback")
 }
 
