@@ -17,6 +17,7 @@
 ## 📋 Backlog (Prioritized)
 
 ### High Priority
+- [ ] Add resolution comments to 10 closed feedback items (effort: M) - D-024 compliance requires resolutionComment for all RESOLVED/CLOSED items. Items from Dec 2025 - Jan 2026 are missing this field.
 - [ ] Fix TypeScript error in ImportExportButtons.tsx (lines 52, 184) (effort: S) - Pre-existing error, non-blocking but should be fixed
 
 ### Medium Priority
@@ -44,6 +45,10 @@ None currently identified.
 ---
 
 ## 💡 User Feedback & Feature Requests
+
+### Active Feedback Items (From Production System)
+- [ ] "Ability to respond in feedback request" (IN_PROGRESS) - Submitted 2025-12-28, priority: MEDIUM - User wants ability to comment/respond in feedback system
+- [ ] "Using my name as requestor" (NEW) - Submitted 2026-01-08, priority: MEDIUM - Bug report about requestor name handling
 
 ### From Users
 - [ ] Role code mismatch handling improvement (effort: S) - v1.27.2 fixed PC_SUPPORT vs PC-Support, but could add better validation
