@@ -7,7 +7,7 @@ CREATE UNIQUE INDEX "feedback_feedbackNumber_key" ON "feedback"("feedbackNumber"
 -- CreateIndex
 CREATE INDEX "feedback_type_idx" ON "feedback"("type");
 
--- Backfill feedbackNumber with sequential numbers based on creation date
+-- Backfill feedbackNumber with sequential numbers based on creation date (FB-001 format)
 DO $$
 DECLARE
   feedback_record RECORD;
@@ -17,7 +17,7 @@ BEGIN
     SELECT id FROM feedback ORDER BY "createdAt" ASC
   LOOP
     UPDATE feedback 
-    SET "feedbackNumber" = LPAD(counter::TEXT, 3, '0')
+    SET "feedbackNumber" = 'FB-' || LPAD(counter::TEXT, 3, '0')
     WHERE id = feedback_record.id;
     counter := counter + 1;
   END LOOP;
