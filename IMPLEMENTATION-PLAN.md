@@ -1,6 +1,6 @@
 # Implementation Plan - LDC Tools
 
-**Last Updated:** 2026-02-12  
+**Last Updated:** 2026-02-15  
 **Current Phase:** Phase 3 Complete - Ready for Phase 4
 
 ---
@@ -17,9 +17,7 @@
 ## 📋 Backlog (Prioritized)
 
 ### High Priority
-- [ ] D-024 Feedback Management Compliance (effort: M, ~50 min) - Add resolutionComment field, run migration, update API validation, test workflow. See `.cloudy-work/_cloudy-ops/policy/D-024-IMPLEMENTATION-LDCTOOLS.md` for detailed checklist
 - [ ] Fix TypeScript error in ImportExportButtons.tsx (lines 52, 184) (effort: S) - Pre-existing error, non-blocking but should be fixed
-- [ ] Debug smoke test failures on STANDBY (effort: M) - Authentication/environment issues preventing automated testing
 
 ### Medium Priority
 - [ ] SSH alias configuration improvement (effort: S) - Consider renaming ldc-staging/ldc-prod to match color-based naming (documented in control plane)
@@ -90,8 +88,10 @@ None currently.
 
 ## ✅ Recently Completed (Last 30 Days)
 
+- [x] D-024 Feedback Management Compliance - Date: 2026-02-15 - Added resolutionComment field to Feedback model, deployed migration to both containers, API already validates required field when marking feedback as RESOLVED
+- [x] qa-01 testing infrastructure setup - Date: 2026-02-14 - Configured Playwright tests, fixed all test failures, achieved 100% pass rate (64/64 tests)
+- [x] Password reset page and API endpoints - Date: 2026-02-14 - Created /auth/reset-password page with token verification and password reset functionality
 - [x] Password reset 500 error fix - Date: 2026-02-12 - Fixed incorrect field names (smtpPassword→appPasswordEncrypted, smtpUser→username) and changed to use VerificationToken model instead of non-existent inviteToken fields
-- [x] D-024 added to backlog - Date: 2026-02-12 - Feedback management compliance task added to high-priority backlog
 - [x] D-022 implementation plan standard migration - Date: 2026-02-02
 - [x] Archived 15 planning files (BACKLOG, ROADMAP, phase docs) - Date: 2026-02-02
 - [x] Created single IMPLEMENTATION-PLAN.md source of truth - Date: 2026-02-02
