@@ -17,8 +17,10 @@ For shared architectural decisions that apply to all apps, see `.cloudy-work/_cl
 - **Decision:** Use blue-green containers for zero-downtime deployments
 - **Why:** Allows testing on STANDBY before switching traffic
 - **When:** Infrastructure established
-- **Containers:** ldc-staging (135), ldc-prod (133)
-- **Verify LIVE/STANDBY:** `.cloudy-work/_cloudy-ops/scripts/verify-live-standby.sh ldctools`
+- **Containers:** GREEN (135 - 10.92.3.25), BLUE (133 - 10.92.3.23)
+- **Workflow:** Deploy to STANDBY → Test → Release (switch traffic) → Sync STANDBY
+- **Critical:** ALWAYS use MCP server to identify current LIVE/STANDBY before deploying
+- **Reference:** `.cloudy-work/_cloudy-ops/runbooks/deployment.md` for full workflow
 
 ## D-LDC-003: FastAPI backend was intentionally removed
 - **Date:** 2026-01-25 (documented)
@@ -45,3 +47,18 @@ For shared architectural decisions that apply to all apps, see `.cloudy-work/_cl
   - Container paths: `/opt/ldc-tools/frontend`
   - Local directory rename pending (Phase 4)
 - **Reference:** See `rename-checklist.md` for complete rename plan
+
+## D-LDC-006: Feedback ID format matches TheoShift (FB-001)
+- **Date:** 2026-02-15
+- **Context:** D-024 policy requires user-facing feedback IDs; TheoShift uses FB-001 format
+- **Decision:** Use FB-001, FB-002, etc. format for feedbackNumber field (not plain 001)
+- **Consequences:** All 14 existing feedback items backfilled with FB-001 through FB-014; new feedback auto-increments
+- **Reference:** Migration `20260215_add_feedback_number`, D-024 compliance complete
+
+## D-LDC-007: Release notes redesigned with industry-standard UI
+- **Date:** 2026-02-15
+- **Context:** Original release notes page was huge scrolling wall of technical text; user feedback requested professional layout
+- **Decision:** Implement sidebar navigation with collapsible version groups, simplified user-facing content
+- **Pattern:** Sidebar groups (v1.20-1.27, v1.10-1.19, v1.0-1.9), single-version focus, removed technical details
+- **Consequences:** All 36 release notes accessible, matches industry standards (Stripe, GitHub, Notion)
+- **Reference:** Research documented in `docs/RELEASE-NOTES-RECOMMENDATIONS.md`
