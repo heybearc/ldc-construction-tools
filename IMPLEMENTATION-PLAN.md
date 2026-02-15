@@ -1,7 +1,7 @@
 # Implementation Plan - LDC Tools
 
 **Last Updated:** 2026-02-15  
-**Current Phase:** Phase 3 Complete - Ready for Phase 4
+**Current Phase:** Phase 3 Complete - Planning Phase 4
 
 ---
 
@@ -17,7 +17,8 @@
 ## 📋 Backlog (Prioritized)
 
 ### High Priority
-- [ ] Add resolution comments to 10 closed feedback items (effort: M) - D-024 compliance requires resolutionComment for all RESOLVED/CLOSED items. Items from Dec 2025 - Jan 2026 are missing this field.
+- [ ] Rework admin portal to match TheoShift approach (effort: XL) - Redesign admin interface to follow TheoShift's admin portal patterns for consistency across applications
+- [ ] Mobile optimization and PWA support (effort: L) - Optimize application for mobile devices and implement Progressive Web App capabilities for offline support and app-like experience
 - [ ] Fix TypeScript error in ImportExportButtons.tsx (lines 52, 184) (effort: S) - Pre-existing error, non-blocking but should be fixed
 
 ### Medium Priority
@@ -78,7 +79,6 @@ None currently identified.
 ### Future (No Timeline)
 - [ ] Enhanced bulk operations (import/export improvements)
 - [ ] Advanced reporting and analytics
-- [ ] Mobile app optimization
 - [ ] Integration with external construction management systems
 
 ---
