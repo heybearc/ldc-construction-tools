@@ -1,6 +1,6 @@
 # Implementation Plan - LDC Tools
 
-**Last Updated:** 2026-02-15  
+**Last Updated:** 2026-02-18  
 **Current Phase:** Phase 3 Complete - Planning Phase 4
 
 ---
@@ -93,6 +93,8 @@ None currently.
 
 ## ✅ Recently Completed (Last 30 Days)
 
+- [x] Governance sync - promoted 2 patterns to control plane - Date: 2026-02-16 - Release Notes UI/UX Best Practices and Feedback Status Transition Validation Pattern now available to all apps
+- [x] Fixed CLOSED → RESOLVED status transition bug - Date: 2026-02-15 - Allows existing resolution comment to satisfy requirement, improves UX for admin users
 - [x] D-024 Feedback Management Compliance - Date: 2026-02-15 - Added resolutionComment field to Feedback model, deployed migration to both containers, API already validates required field when marking feedback as RESOLVED
 - [x] qa-01 testing infrastructure setup - Date: 2026-02-14 - Configured Playwright tests, fixed all test failures, achieved 100% pass rate (64/64 tests)
 - [x] Password reset page and API endpoints - Date: 2026-02-14 - Created /auth/reset-password page with token verification and password reset functionality
